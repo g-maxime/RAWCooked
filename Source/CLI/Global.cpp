@@ -32,6 +32,14 @@ int global::SetBinName(const char* FileName)
 }
 
 //---------------------------------------------------------------------------
+int global::SetLicenseKey(const char* Key, bool StoreIt)
+{
+    LicenseKey = Key;
+    StoreLicenseKey = StoreIt;
+    return 0;
+}
+
+//---------------------------------------------------------------------------
 int global::SetDisplayCommand()
 {
     DisplayCommand = true;
@@ -56,15 +64,22 @@ int Error_NotTested(const char* Option1, const char* Option2 = NULL)
 }
 
 //---------------------------------------------------------------------------
-int global::SetOption(const char* argv[], int& i, int argc)
+int global::SetOption(const char* argv[], int& i, int argc, uint64_t& OptionClass)
 {
     if (strcmp(argv[i], "-c:a") == 0)
     {
         if (++i >= argc)
             return Error_NotTested(argv[i - 1]);
-        if (strcmp(argv[i], "copy") == 0 || strcmp(argv[i], "flac") == 0)
+        if (strcmp(argv[i], "copy") == 0)
         {
             OutputOptions["c:a"] = argv[i];
+            OptionClass |= (1 << license::Feature_PCM);
+            return 0;
+        }
+        if (strcmp(argv[i], "flac") == 0)
+        {
+            OutputOptions["c:a"] = argv[i];
+            OptionClass |= (1 << license::Feature_FLAC);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -76,6 +91,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
         if (!strcmp(argv[i], "ffv1"))
         {
             OutputOptions["c:v"] = argv[i];
+            OptionClass |= (1 << license::Feature_FFV1);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -89,6 +105,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
          || !strcmp(argv[i], "2"))
         {
             OutputOptions["coder"] = argv[i];
+            OptionClass |= (1 << license::Feature_EncodingOptions);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -101,6 +118,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
          || !strcmp(argv[i], "1"))
         {
             OutputOptions["context"] = argv[i];
+            OptionClass |= (1 << license::Feature_EncodingOptions);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -123,6 +141,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
         if (atof(argv[i]))
         {
             VideoInputOptions["framerate"] = argv[i];
+            OptionClass |= (1 << license::Feature_InputOptions);
             return 0;
         }
         return 0;
@@ -134,6 +153,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
         if (atoi(argv[i]))
         {
             OutputOptions["g"] = argv[i];
+            OptionClass |= (1 << license::Feature_EncodingOptions);
             return 0;
         }
         cerr << "Invalid \"" << argv[i - 1] << " " << argv[i] << "\" value, it must be a number\n";
@@ -148,6 +168,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
          || !strcmp(argv[i], "3"))
         {
             OutputOptions["level"] = argv[i];
+            OptionClass |= (1 << license::Feature_EncodingOptions);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -160,6 +181,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
          || !strcmp(argv[i], "warning"))
         {
             OutputOptions["loglevel"] = argv[i];
+            OptionClass |= (1 << license::Feature_GeneralOptions);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -173,6 +195,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
          || !strcmp(argv[i], "1"))
         {
             OutputOptions["slicecrc"] = argv[i];
+            OptionClass |= (1 << license::Feature_EncodingOptions);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -185,6 +208,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
         if (SliceCount) //TODO: not all slice counts are accepted by FFmpeg, we should filter
         {
             OutputOptions["slices"] = argv[i];
+            OptionClass |= (1 << license::Feature_EncodingOptions);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -194,6 +218,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
         if (++i >= argc)
             return Error_NotTested(argv[i - 1]);
         OutputOptions["threads"] = argv[i];
+        OptionClass |= (1 << license::Feature_GeneralOptions);
         return 0;
     }
 
@@ -207,9 +232,12 @@ int global::ManageCommandLine(const char* argv[], int argc)
         return Usage(argv[0]);
 
     AttachmentMaxSize = (size_t)-1;
+    StoreLicenseKey = false;
+    IgnoreLicenseKey = true; // Not enforcing license right now
     DisplayCommand = false;
     AcceptFiles = false;
     Quiet = false;
+    uint64_t OptionClass = 0;
 
     for (int i = 1; i < argc; i++)
     {
@@ -234,18 +262,21 @@ int global::ManageCommandLine(const char* argv[], int argc)
         else if ((strcmp(argv[i], "--attachment-max-size") == 0 || strcmp(argv[i], "-s") == 0) && i + 1 < argc)
         {
             AttachmentMaxSize = atoi(argv[++i]);
+            OptionClass |= (1 << license::Feature_GeneralOptions);
         }
         else if ((strcmp(argv[i], "--bin-name") == 0 || strcmp(argv[i], "-b") == 0) && i + 1 < argc)
         {
             int Value = SetBinName(argv[++i]);
             if (Value)
                 return Value;
+            OptionClass |= (1 << license::Feature_GeneralOptions);
         }
         else if ((strcmp(argv[i], "--display-command") == 0 || strcmp(argv[i], "-d") == 0))
         {
             int Value = SetDisplayCommand();
             if (Value)
                 return Value;
+            OptionClass |= (1 << license::Feature_GeneralOptions);
         }
         else if (strcmp(argv[i], "--file") == 0)
         {
@@ -256,6 +287,16 @@ int global::ManageCommandLine(const char* argv[], int argc)
         else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
         {
             int Value = Help(argv[0]);
+            if (Value)
+                return Value;
+        }
+        else if ((strcmp(argv[i], "--ignore-license") == 0 || strcmp(argv[i], "--ignore-licence") == 0) && i + 1 < argc)
+        {
+            IgnoreLicenseKey = true;
+        }
+        else if ((strcmp(argv[i], "--license") == 0 || strcmp(argv[i], "--licence") == 0) && i + 1 < argc)
+        {
+            int Value = SetLicenseKey(argv[++i], false);
             if (Value)
                 return Value;
         }
@@ -270,21 +311,44 @@ int global::ManageCommandLine(const char* argv[], int argc)
             int Value = SetOutputFileName(argv[++i]);
             if (Value)
                 return Value;
+            OptionClass |= (1 << license::Feature_GeneralOptions);
         }
         else if (strcmp(argv[i], "--quiet") == 0)
         {
             Quiet = true;
+            OptionClass |= (1 << license::Feature_GeneralOptions);
         }
         else if ((strcmp(argv[i], "--rawcooked-file-name") == 0 || strcmp(argv[i], "-r") == 0) && i + 1 < argc)
             rawcooked_reversibility_data_FileName = argv[++i];
+        else if ((strcmp(argv[i], "--store-license") == 0 || strcmp(argv[i], "--store-licence") == 0) && i + 1 < argc)
+        {
+            int Value = SetLicenseKey(argv[++i], true);
+            if (Value)
+                return Value;
+        }
         else if (argv[i][0] == '-' && argv[i][1] != '\0')
         {
-            int Value = SetOption(argv, i, argc);
+            int Value = SetOption(argv, i, argc, OptionClass);
             if (Value)
                 return Value;
         }
         else
             Inputs.push_back(argv[i]);
+    }
+
+    // License
+    License.LoadLicense(LicenseKey, StoreLicenseKey);
+    License.ShowLicense(true);
+    bool Problem = false;
+    for (size_t i=0; i<license::Feature_Max; i++)
+        if ((OptionClass&((uint64_t)1 << i)) && !License.IsSupported_Feature((license::feature)i))
+            Problem = true;
+    if (Problem)
+    {
+        cerr << "One or more requested options are not supported with the current license key." << endl;
+        cerr << "Please contact info@mediaarea.net for a quote or a temporary key." << endl;
+        if (!IgnoreLicenseKey)
+            return 1;
     }
 
     return 0;

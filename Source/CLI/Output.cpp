@@ -73,6 +73,9 @@ int output::FFmpeg_Command(const char* FileName, global& Global)
     else
         Command += Global.BinName;
 
+    // Info
+    bool Problem = false;
+
     // Input
     for (size_t i = 0; i < Streams.size(); i++)
     {
@@ -82,15 +85,19 @@ int output::FFmpeg_Command(const char* FileName, global& Global)
             cerr << "Track " << i + 1 << ':' << endl;
             if (Streams[i].FileName_Template.empty())
             {
-                cerr << "  " << Streams[i].FileName.substr(((Global.Inputs.size() == 1 && Global.Inputs[0].size() < Streams[i].FileName.size()) ? Global.Inputs[0].size() : Streams[i].FileName.find_last_of("/\\")) + 1) << endl;
+                cerr << "  " << Streams[i].FileName.substr(Global.Inputs.size() == 1 ? (Global.Inputs[0].size() + 1) : 0) << endl;
             }
             else
             {
-                cerr << "  " << Streams[i].FileName_Template.substr(((Global.Inputs.size() == 1 && Global.Inputs[0].size() < Streams[i].FileName.size()) ? Global.Inputs[0].size() : Streams[i].FileName.find_last_of("/\\")) + 1) << endl;
+                cerr << "  " << Streams[i].FileName_Template.substr(Global.Inputs.size() == 1 ? (Global.Inputs[0].size()+1) : 0);
                 cerr << " (" << Streams[i].FileName_StartNumber << " --> " << Streams[i].FileName_EndNumber << ')' << endl;
             }
             cerr << "  " << Streams[i].Flavor << endl;
+            if (Streams[i].Problem)
+                cerr << "  *** This input format flavor is not supported by the current licence key. ***" << endl;
         }
+        if (Streams[i].Problem)
+            Problem = true;
 
         if (!Streams[i].Slices.empty())
         {
@@ -162,7 +169,14 @@ int output::FFmpeg_Command(const char* FileName, global& Global)
     }
 
     // Info
-    if (!Global.Quiet)
+    if (Problem)
+    {
+        cerr << "One or more requested features are not supported with the current license key." << endl;
+        cerr << "Please contact info@mediaarea.net for a quote or a temporary key." << endl;
+        if (!Global.IgnoreLicenseKey)
+            return 1;
+    }
+    if (!Global.Quiet || Problem)
     {
         cerr << endl;
     }

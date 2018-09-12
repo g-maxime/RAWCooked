@@ -27,6 +27,7 @@ struct stream
     string                      Flavor;
     string                      Slices;
     string                      FrameRate;
+    bool                        Problem;
 };
 struct attachment
 {

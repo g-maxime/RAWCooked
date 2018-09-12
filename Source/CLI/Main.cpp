@@ -63,6 +63,7 @@ int ParseFile(size_t Files_Pos)
     string Flavor;
     string Slices;
     string FrameRate;
+    bool Problem;
 
     map<string, string>::iterator FrameRateFromOptions = Global.VideoInputOptions.find("framerate");
     if (FrameRateFromOptions != Global.VideoInputOptions.end())
@@ -87,6 +88,7 @@ int ParseFile(size_t Files_Pos)
         {
             RemovedFiles.push_back(Name);
             Flavor = RIFF.Flavor_String((riff::style)RIFF.Style);
+            Problem = !Global.License.IsSupported_WAV(RIFF.Style);
         }
     }
 
@@ -129,6 +131,7 @@ int ParseFile(size_t Files_Pos)
         if (DPX.IsDetected)
         {
             Flavor = DPX.Flavor_String((dpx::style)DPX.Style);
+            Problem = !Global.License.IsSupported_DPX(DPX.Style);
         }
     }
 
@@ -143,12 +146,6 @@ int ParseFile(size_t Files_Pos)
     // Processing DPX to MKV/FFV1
     if (!M.IsDetected)
     {
-        if (Global.HasAtLeastOneFile && !Global.AcceptFiles)
-        {
-            cerr << "Input is a file so directory will not be handled as a whole.\nConfirm that this is what you want to do by adding \" --file\" to the command.\n";
-            return 1;
-        }
-        
         if (!M.IsDetected && !RIFF.IsDetected && !DPX.IsDetected)
         {
             size_t AttachmentSizeFinal = (Global.AttachmentMaxSize != (size_t)-1) ? Global.AttachmentMaxSize : (1024 * 1024); // Default value arbitrary choosen
@@ -178,6 +175,7 @@ int ParseFile(size_t Files_Pos)
                 Stream.FileName_EndNumber = FileName_EndNumber;
             }
             Stream.Flavor = Flavor;
+            Stream.Problem = Problem;
 
             Stream.Slices = Slices;
             if (!Slices.empty() && FrameRateFromOptions == Global.VideoInputOptions.end())
@@ -187,7 +185,7 @@ int ParseFile(size_t Files_Pos)
         }
 
     }
-    else if (!Global.Quiet)
+    else
         cout << "Files are in " << M.OutputDirectoryName << endl;
 
     FileMap.Close();
@@ -199,13 +197,13 @@ int ParseFile(size_t Files_Pos)
 int main(int argc, const char* argv[])
 {
     // Manage command line
-    if (int Value = Global.ManageCommandLine(argv, argc))
+    if (int Value = Global.ManageCommandLine(argv, argc)) 
         return Value;
 
     // Analyze input
     if (int Value = Input.AnalyzeInputs(Global))
         return Value;
-    sort(Input.Files.begin(), Input.Files.end());
+    sort(Input.Files.begin(), Input.Files.end()); 
 
     // Parse files
     RAWcooked.FileName = Global.rawcooked_reversibility_data_FileName;
@@ -213,7 +211,7 @@ int main(int argc, const char* argv[])
         if (int Value = ParseFile(i))
             return Value;
     RAWcooked.Close();
-
+    
     // FFmpeg
     if (int Value = Output.Process(Global))
         return Value;
