@@ -67,6 +67,7 @@ user_mode Ask_Callback(user_mode* Mode, const string& FileName, const string& Ex
 struct parse_info
 {
     string* Name;
+    string  Name2; // TODO: simplify code related to file names
     filemap FileMap;
     vector<string> RemovedFiles;
     string FileName_Template;
@@ -144,7 +145,7 @@ bool parse_info::ParseFile_Input(input_base_uncompressed& SingleFile, input& Inp
         for (size_t i = 1; i < SingleFile.InputInfo->FrameCount; i++)
         {
             Name = &RemovedFiles[i];
-            if (input::OpenInput(FileMap, *Name, &Global.Errors))
+            if (input::OpenInput(FileMap, *Name, Global.Actions[Action_Fix], &Global.Errors))
                 return true;
             RAWcooked.OutputFileName = Name->substr(Global.Path_Pos_Global);
             FormatPath(RAWcooked.OutputFileName);
@@ -321,6 +322,13 @@ int ParseFile_Compressed(parse_info& ParseInfo)
         {
             ReturnValue = 1;
         }
+        if (ParseInfo.IsDetected && Global.Actions[Action_Ecc])
+        {
+            ParseInfo.FileMap.Close();
+            const string* Name = ParseInfo.Name2.empty() ? ParseInfo.Name : &ParseInfo.Name2 ;
+            if (Name)
+                M.Erasure_Write(Name->c_str());
+        }
     }
 
     // End
@@ -345,7 +353,7 @@ int ParseFile(size_t Files_Pos)
     ParseInfo.Name = &Input.Files[Files_Pos];
 
     // Open file
-    if (input::OpenInput(ParseInfo.FileMap, *ParseInfo.Name, &Global.Errors))
+    if (input::OpenInput(ParseInfo.FileMap, *ParseInfo.Name, Global.Actions[Action_Fix], &Global.Errors))
         return 1;
 
     // Compressed content
@@ -353,7 +361,6 @@ int ParseFile(size_t Files_Pos)
         return Value;
     if (ParseInfo.IsDetected)
         return 0;
-
     // Uncompressed content
     if (int Value = ParseFile_Uncompressed(ParseInfo, Files_Pos))
         return Value;
@@ -380,15 +387,17 @@ int ParseFile(size_t Files_Pos)
 //---------------------------------------------------------------------------
 int main(int argc, const char* argv[])
 {
+    __TIME__; 
+ 
     // Manage command line
     if (int Value = Global.ManageCommandLine(argv, argc))
         return Value;
-
+    
     // Analyze input
     if (int Value = Input.AnalyzeInputs(Global))
         return Value;
     sort(Input.Files.begin(), Input.Files.end());
-
+    
     // Parse files
     RAWcooked.FileName = Global.rawcooked_reversibility_data_FileName;
     int Value = 0;
@@ -418,30 +427,35 @@ int main(int argc, const char* argv[])
     if (!Value && Global.Errors.HasWarnings())
     {
         cerr << Global.Errors.ErrorMessage() << endl;
-        cerr << "Do you want to continue despite warnings ? [y/N] ";
-        string Result;
-        getline(cin, Result);
-        if (!(!Result.empty() && (Result[0] == 'Y' || Result[0] == 'y')))
-            Value = 1;
+        if ((!Value && Global.Actions[Action_Encode] && !Output.Streams.empty())
+         || ((Global.Check || Global.Actions[Action_Ecc]) && !Global.Errors.HasErrors() && !Global.OutputFileName.empty() && !Output.Streams.empty()))
+        {
+            cerr << "Do you want to continue despite warnings ? [y/N] ";
+            string Result;
+            getline(cin, Result);
+            if (!(!Result.empty() && (Result[0] == 'Y' || Result[0] == 'y')))
+                Value = 1;
+        }
     }
 
-    // FFmpeg
+    // FFmpeg  
     if (!Value && Global.Actions[Action_Encode])
-        Value = Output.Process(Global);
+        Value = Output.Process (Global);
 
     // RAWcooked file
     if (!Global.DisplayCommand)
         RAWcooked.Delete();
 
     // Check result
-    if (Global.Check && !Global.Errors.HasErrors() && !Global.OutputFileName.empty() && !Output.Streams.empty())
+    if ((Global.Check || Global.Actions[Action_Ecc]) && !Global.Errors.HasErrors() && !Global.OutputFileName.empty() && !Output.Streams.empty())
     {
         parse_info ParseInfo;
-        Value = ParseInfo.FileMap.Open_ReadMode(Global.OutputFileName);
+        Value = ParseInfo.FileMap.Open(Global.OutputFileName, Global.Actions[Action_Fix]);
         if (!Value)
         {
             // Configure for a 2nd pass
             ParseInfo.Name = NULL;
+            ParseInfo.Name2 = Global.OutputFileName;
             Global.OutputFileName = Global.Inputs[0];
             if (!Global.Actions[Action_Hash])
                 Global.OutputFileName_IsProvided = true;
