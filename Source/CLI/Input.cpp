@@ -159,7 +159,10 @@ void input::DetectSequence(bool CheckIfFilesExist, size_t AllFiles_Pos, vector<s
                 }
                 FN[i] = '0';
                 if (!i)
+                {
+                    FN.insert(0, 1, '1');
                     break;
+                }
                 i--;
             }
             string FullPath = Path + Before + FN + After;
@@ -200,7 +203,7 @@ void input::DetectSequence(bool CheckIfFilesExist, size_t AllFiles_Pos, vector<s
     }
     else
     {
-        char Size = '0' + (char)FN.size();
+        char Size = '0' + (char)FileName_StartNumber.size();
         FileName_Template = Path + Before + "%0" + Size + "d" + After;
     }
 
