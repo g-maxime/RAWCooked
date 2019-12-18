@@ -15,7 +15,7 @@ while read line ; do
     fi
 
     if [ "${file}" == "." ] ; then
-        file="../$(basename $(pwd))"
+        file="../$(basename ${path})"
     fi
 
     if [ -z "${file}" ] ; then
