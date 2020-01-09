@@ -240,7 +240,7 @@ int output::FFmpeg_Command(const char* FileName, global& Global)
             FileList_File->Close();
             FilesToRemove.push_back(FileList_File);
 
-            Command += " -i \"";
+            Command += " -probesize 42M -i \"";
             Command += FileList_File->FileName;
             Command += '\"';
         }
