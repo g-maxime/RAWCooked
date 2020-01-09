@@ -23,6 +23,7 @@ rawcooked_SOURCES = \
     ../../../Source/Lib/Input_Base.cpp \
     ../../../Source/Lib/License.cpp \
     ../../../Source/Lib/Matroska/Matroska_Common.cpp \
+    ../../../Source/Lib/RAWcooked/IntermediateWrite.cpp \
     ../../../Source/Lib/RAWcooked/RAWcooked.cpp \
     ../../../Source/Lib/RawFrame/RawFrame.cpp \
     ../../../Source/Lib/TIFF/TIFF.cpp \
