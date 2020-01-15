@@ -9,6 +9,7 @@
 #include "Lib/RAWcooked/IntermediateWrite.h"
 #include <iostream>
 #include <sstream>
+#include <tgmath.h>
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
