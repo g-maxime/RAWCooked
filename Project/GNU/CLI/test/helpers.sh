@@ -14,7 +14,7 @@ if grep -q Microsoft /proc/version; then
 fi
 
 case "${OSTYPE}" in
-    linux*)
+    linux*|cygwin*)
         fsize="stat -c %s"
         ;;
     darwin*|bsd*)
