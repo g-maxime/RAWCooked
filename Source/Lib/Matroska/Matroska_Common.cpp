@@ -92,6 +92,7 @@ namespace undecodable
 static const char* MessageText[] =
 {
     "files are not same",
+<<<<<<< HEAD
     "missing attachments in compressed file",
     "extra attachments in compressed file",
     "missing attachments in source (extra attachments in compressed file)",
@@ -100,11 +101,18 @@ static const char* MessageText[] =
     "extra frame in compressed file",
     "missing frame in source (extra frames in compressed file)",
     "extra frame in source (missing frames in compressed file)",
+=======
+    "attachments count, ",
+    "extra attachments (were not listed in reversibility data)",
+    "missing frames corresponding to these files",
+    "missing reversibility data",
+>>>>>>> Add checks
 };
 
 enum code : uint8_t
 {
     FileComparison,
+<<<<<<< HEAD
     Attachment_Compressed_Missing,
     Attachment_Compressed_Extra,
     Attachment_Source_Missing,
@@ -113,6 +121,12 @@ enum code : uint8_t
     Frame_Compressed_Extra,
     Frame_Source_Missing,
     Frame_Source_Extra,
+=======
+    Attachment_Missing,
+    Attachment_Extra,
+    Frame_Missing,
+    Frame_Extra,
+>>>>>>> Add checks
     Max
 };
 
@@ -811,36 +825,30 @@ void matroska::Shutdown()
             TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = false;
             TrackInfo_Current->FrameWriter.FrameCall(TrackInfo_Current->Frame.RawFrame, OutputFileName);
         }
-
-        // Checks
-        if (Errors)
+        else
         {
-            if (!TrackInfo_Current->Unique && TrackInfo_Current->DPX_Buffer_Pos > TrackInfo_Current->DPX_Buffer_Count)
+            // Checks
+            if (Errors)
             {
-                string OutputInfo = "Track " + to_string(i) + ", " + to_string(TrackInfo_Current->DPX_Buffer_Pos - TrackInfo_Current->DPX_Buffer_Count) + " frames";
-                if (TrackInfo_Current->DPX_Buffer_Count)
+                if (!TrackInfo_Current->DPX_Buffer_Count)
                 {
-                    string OutputFileName = string((const char*)TrackInfo_Current->DPX_FileName[TrackInfo_Current->DPX_Buffer_Count - 1], TrackInfo_Current->DPX_FileName_Size[TrackInfo_Current->DPX_Buffer_Count - 1]);
-                    FormatPath(OutputFileName);
-                    OutputInfo += " after ";
-                    OutputInfo += OutputFileName;
+                    Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Extra, "Track "+to_string(i));
                 }
-                Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Extra, OutputInfo);
-            }
-            if (TrackInfo_Current->DPX_Buffer_Pos < TrackInfo_Current->DPX_Buffer_Count)
-            {
-                string OutputFileName = string((const char*)TrackInfo_Current->DPX_FileName[TrackInfo_Current->DPX_Buffer_Pos], TrackInfo_Current->DPX_FileName_Size[TrackInfo_Current->DPX_Buffer_Pos]);
-                FormatPath(OutputFileName);
-                Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, OutputFileName);
-                 if (TrackInfo_Current->DPX_Buffer_Count - TrackInfo_Current->DPX_Buffer_Pos > 1)
+                if (TrackInfo_Current->DPX_Buffer_Pos < TrackInfo_Current->DPX_Buffer_Count)
                 {
-                    if (TrackInfo_Current->DPX_Buffer_Count - TrackInfo_Current->DPX_Buffer_Pos > 2)
+                    string OutputFileName = string((const char*)TrackInfo_Current->DPX_FileName[TrackInfo_Current->DPX_Buffer_Pos], TrackInfo_Current->DPX_FileName_Size[TrackInfo_Current->DPX_Buffer_Pos]);
+                    FormatPath(OutputFileName);
+                    Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Missing, OutputFileName);
+                    if (TrackInfo_Current->DPX_Buffer_Count - TrackInfo_Current->DPX_Buffer_Pos > 1)
                     {
-                        Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, "...");
+                        if (TrackInfo_Current->DPX_Buffer_Count - TrackInfo_Current->DPX_Buffer_Pos > 2)
+                        {
+                            Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Missing, "...");
+                        }
+                        string OutputFileName2 = string((const char*)TrackInfo_Current->DPX_FileName[TrackInfo_Current->DPX_Buffer_Count - 1], TrackInfo_Current->DPX_FileName_Size[TrackInfo_Current->DPX_Buffer_Count - 1]);
+                        FormatPath(OutputFileName2);
+                        Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Missing, OutputFileName2);
                     }
-                    string OutputFileName2 = string((const char*)TrackInfo_Current->DPX_FileName[TrackInfo_Current->DPX_Buffer_Count - 1], TrackInfo_Current->DPX_FileName_Size[TrackInfo_Current->DPX_Buffer_Count - 1]);
-                    FormatPath(OutputFileName2);
-                    Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, OutputFileName2);
                 }
             }
         }
@@ -862,9 +870,15 @@ void matroska::Shutdown()
     if (Errors)
     {
         for (const auto& Name : AttachedFile_FileNames[0]) // From RAWcooked
+<<<<<<< HEAD
             Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)(filechecker_issue::undecodable::Attachment_Compressed_Missing), Name);
         for (const auto& Name : AttachedFile_FileNames[1]) // From attachments
             Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)(filechecker_issue::undecodable::Attachment_Compressed_Extra), Name);
+=======
+            Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)(filechecker_issue::undecodable::Attachment_Missing), Name);
+        for (const auto& Name : AttachedFile_FileNames[1]) // From attachments
+            Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)(filechecker_issue::undecodable::Attachment_Extra), Name);
+>>>>>>> Add checks
     }
 }
 
