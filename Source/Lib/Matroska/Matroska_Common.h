@@ -14,6 +14,7 @@
 #include "Lib/Input_Base.h"
 #include "Lib/FileIO.h"
 #include <cstdint>
+#include <set>
 #include <string>
 #include <vector>
 using namespace std;
@@ -246,6 +247,8 @@ private:
     size_t                      TrackInfo_Pos;
     vector<uint8_t>             ID_to_TrackOrder;
     string                      AttachedFile_FileName;
+    set<string>                 AttachedFile_FileNames[2]; // From RAWcooked and from attachments
+    size_t                      AttachedFile_FileNames_Count = 0;
     ThreadPool*                 FramesPool;
     frame_writer                FrameWriter_Template;
     condition_variable          ProgressIndicator_IsEnd;
@@ -260,6 +263,7 @@ private:
     void ParseDecodedFrame(trackinfo* TrackInfo);
     void Uncompress(uint8_t*& Output, size_t& Output_Size);
     void SanitizeFileName(uint8_t* &FileName, size_t &FileName_Size);
+    void AttachedFile_FileNames_Insert(const string& FileName, size_t Pos);
     void RejectIncompatibleVersions();
     void ProcessCodecPrivate_FFV1();
     void ProcessCodecPrivate_FLAC();
