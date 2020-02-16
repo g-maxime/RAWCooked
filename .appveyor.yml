@@ -57,6 +57,7 @@ test_script:
     Run-Test test3
     Run-Test version
     Run-Test notfound
+    Run-Test check
     Run-Test multiple
     Run-Test gaps
     Run-Test increasingdigitcount

@@ -91,14 +91,28 @@ namespace undecodable
 
 static const char* MessageText[] =
 {
-    "cannot open file for reading",
     "files are not same",
+    "missing attachments in compressed file",
+    "extra attachments in compressed file",
+    "missing attachments in source (extra attachments in compressed file)",
+    "extra attachments in source (missing attachments in compressed file)",
+    "missing frame in compressed file",
+    "extra frame in compressed file",
+    "missing frame in source (extra frames in compressed file)",
+    "extra frame in source (missing frames in compressed file)",
 };
 
 enum code : uint8_t
 {
-    FileOpen,
     FileComparison,
+    Attachment_Compressed_Missing,
+    Attachment_Compressed_Extra,
+    Attachment_Source_Missing,
+    Attachment_Source_Extra,
+    Frame_Compressed_Missing,
+    Frame_Compressed_Extra,
+    Frame_Source_Missing,
+    Frame_Source_Extra,
     Max
 };
 
@@ -166,7 +180,7 @@ void frame_writer::FrameCall(raw_frame* RawFrame, const string& OutputFileName)
                 Offset = (size_t)-1;
                 SizeOnDisk = (size_t)-1;
                 if (Errors)
-                    Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::FileOpen, OutputFileName);
+                    Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Source_Missing, OutputFileName);
                 return;
             }
             SizeOnDisk = File_Read.Buffer_Size;
@@ -768,14 +782,11 @@ matroska::~matroska()
 //---------------------------------------------------------------------------
 void matroska::Shutdown()
 {
-    if (!FramesPool)
-        return;
-
     for (size_t i = 0; i < TrackInfo.size(); i++)
     {
         trackinfo* TrackInfo_Current = TrackInfo[i];
 
-        if (TrackInfo_Current->Unique)
+        if (TrackInfo_Current->Unique && TrackInfo_Current->Frame.RawFrame)
         {
             TrackInfo_Current->Frame.RawFrame->Buffer = Buffer + Buffer_Offset;
             TrackInfo_Current->Frame.RawFrame->Buffer_Size = 0;
@@ -800,6 +811,39 @@ void matroska::Shutdown()
             TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = false;
             TrackInfo_Current->FrameWriter.FrameCall(TrackInfo_Current->Frame.RawFrame, OutputFileName);
         }
+
+        // Checks
+        if (Errors)
+        {
+            if (!TrackInfo_Current->Unique && TrackInfo_Current->DPX_Buffer_Pos > TrackInfo_Current->DPX_Buffer_Count)
+            {
+                string OutputInfo = "Track " + to_string(i) + ", " + to_string(TrackInfo_Current->DPX_Buffer_Pos - TrackInfo_Current->DPX_Buffer_Count) + " frames";
+                if (TrackInfo_Current->DPX_Buffer_Count)
+                {
+                    string OutputFileName = string((const char*)TrackInfo_Current->DPX_FileName[TrackInfo_Current->DPX_Buffer_Count - 1], TrackInfo_Current->DPX_FileName_Size[TrackInfo_Current->DPX_Buffer_Count - 1]);
+                    FormatPath(OutputFileName);
+                    OutputInfo += " after ";
+                    OutputInfo += OutputFileName;
+                }
+                Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Extra, OutputInfo);
+            }
+            if (TrackInfo_Current->DPX_Buffer_Pos < TrackInfo_Current->DPX_Buffer_Count)
+            {
+                string OutputFileName = string((const char*)TrackInfo_Current->DPX_FileName[TrackInfo_Current->DPX_Buffer_Pos], TrackInfo_Current->DPX_FileName_Size[TrackInfo_Current->DPX_Buffer_Pos]);
+                FormatPath(OutputFileName);
+                Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, OutputFileName);
+                 if (TrackInfo_Current->DPX_Buffer_Count - TrackInfo_Current->DPX_Buffer_Pos > 1)
+                {
+                    if (TrackInfo_Current->DPX_Buffer_Count - TrackInfo_Current->DPX_Buffer_Pos > 2)
+                    {
+                        Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, "...");
+                    }
+                    string OutputFileName2 = string((const char*)TrackInfo_Current->DPX_FileName[TrackInfo_Current->DPX_Buffer_Count - 1], TrackInfo_Current->DPX_FileName_Size[TrackInfo_Current->DPX_Buffer_Count - 1]);
+                    FormatPath(OutputFileName2);
+                    Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, OutputFileName2);
+                }
+            }
+        }
     }
 
     if (Hashes_FromRAWcooked)
@@ -807,9 +851,21 @@ void matroska::Shutdown()
     if (Hashes_FromAttachments)
         Hashes_FromAttachments->Finish();
 
-    FramesPool->shutdown();
-    delete FramesPool;
-    FramesPool = nullptr;
+    if (FramesPool)
+    {
+        FramesPool->shutdown();
+        delete FramesPool;
+        FramesPool = nullptr;
+    }
+
+    // Check
+    if (Errors)
+    {
+        for (const auto& Name : AttachedFile_FileNames[0]) // From RAWcooked
+            Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)(filechecker_issue::undecodable::Attachment_Compressed_Missing), Name);
+        for (const auto& Name : AttachedFile_FileNames[1]) // From attachments
+            Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)(filechecker_issue::undecodable::Attachment_Compressed_Extra), Name);
+    }
 }
 
 //---------------------------------------------------------------------------
@@ -970,6 +1026,8 @@ void matroska::Segment_Attachments_AttachedFile_FileData()
         frame_writer FrameWriter(FrameWriter_Template);
         FrameWriter.FrameCall(&RawFrame, AttachedFile_FileName);
     }
+
+    AttachedFile_FileNames_Insert(AttachedFile_FileName, 1);
 }
 
 //---------------------------------------------------------------------------
@@ -1003,6 +1061,8 @@ void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedAttachment_Fil
     delete[] Output; // TODO: avoid new/delete
 
     RAWcooked_FileNameIsValid = true;
+
+    AttachedFile_FileNames_Insert(AttachedFile_FileName, 0);
 }
 
 //---------------------------------------------------------------------------
@@ -1519,10 +1579,9 @@ void matroska::Segment_Cluster_SimpleBlock()
                                     //FramesPool->submit(WriteFrameCall, Buffer[Buffer_Offset] & 0x7F, TrackInfo_Current->Frame.RawFrame, WriteFrameCall_Opaque); //TODO: looks like there is some issues with threads and small tasks
                                     TrackInfo_Current->FrameWriter.FrameCall(TrackInfo_Current->Frame.RawFrame, OutputFileName);
                                 }
-                                else
+                                else if (TrackInfo_Current->DPX_Buffer_Count)
                                     Undecodable(undecodable::ReversibilityData_FrameCount);
                             }
-                            TrackInfo_Current->DPX_Buffer_Pos++;
                             break;
             case Format_FLAC:
                             if (!TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin])
@@ -1625,6 +1684,7 @@ void matroska::Segment_Cluster_SimpleBlock()
                             break;
                 default:;
         }
+        TrackInfo_Current->DPX_Buffer_Pos++;
     }
 }
 
@@ -1985,6 +2045,27 @@ void matroska::SanitizeFileName(uint8_t* &FileName, size_t &FileName_Size)
             memmove(FileName + i, FileName + i + Count, FileName_Size - i);
             i--;
         }
+}
+
+void matroska::AttachedFile_FileNames_Insert(const string& FileName, size_t Pos)
+{
+    if (Pos>1)
+        return;
+
+    auto& Opposite = AttachedFile_FileNames[~Pos & 1];
+    auto Found = Opposite.find(FileName);
+    if (Found != Opposite.end())
+    {
+        // Found, removing it from the other list
+        Opposite.erase(Found);
+        AttachedFile_FileNames_Count++;
+    }
+    else
+    {
+        // Not found, adding it to the list
+        auto& Actual = AttachedFile_FileNames[Pos];
+        Actual.insert(FileName);
+    }
 }
 
 //---------------------------------------------------------------------------
