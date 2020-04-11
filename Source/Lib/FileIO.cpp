@@ -39,11 +39,11 @@ int filemap::Open_ReadMode(const char* FileName)
         if (File != INVALID_HANDLE_VALUE)
         {
             DWORD FileSizeHigh;
-            Buffer_Size = GetFileSize(File, &FileSizeHigh);
-            if (Buffer_Size != INVALID_FILE_SIZE || GetLastError() == NO_ERROR)
+            Size = GetFileSize(File, &FileSizeHigh);
+            if (Size != INVALID_FILE_SIZE || GetLastError() == NO_ERROR)
             {
-                Buffer_Size |= ((size_t)FileSizeHigh) << 32;
-                if (Buffer_Size)
+                Size |= ((size_t)FileSizeHigh) << 32;
+                if (Size)
                 {
                     HANDLE& Mapping = (HANDLE&)Private2;
                     Mapping = CreateFileMapping(File, 0, PAGE_READONLY, 0, 0, 0);
@@ -74,7 +74,7 @@ int filemap::Open_ReadMode(const char* FileName)
             struct stat Fstat;
             if (!stat(FileName, &Fstat))
             {
-                Buffer_Size = Fstat.st_size;
+                Size = Fstat.st_size;
                 FileIsOpen = true;
             }
             else
@@ -100,38 +100,38 @@ int filemap::Open_ReadMode(const char* FileName)
 //---------------------------------------------------------------------------
 int filemap::Remap()
 {
-    if (Buffer)
+    if (Data)
     {
         #if defined(_WIN32) || defined(_WINDOWS)
-            UnmapViewOfFile(Buffer);
+            UnmapViewOfFile(Data);
         #else
-            munmap(Buffer, Buffer_Size);
+            munmap(Data, Size);
         #endif
-        Buffer = NULL;
+        Data = NULL;
     }
 
-    if (!Buffer_Size)
+    if (!Size)
       return 0;
 
     #if defined(_WIN32) || defined(_WINDOWS)
         HANDLE& Mapping = (HANDLE&)Private2;
-        Buffer = (unsigned char*)MapViewOfFile(Mapping, FILE_MAP_READ, 0, 0, 0);
-        if (!Buffer)
+        Data = (const uint8_t*)MapViewOfFile(Mapping, FILE_MAP_READ, 0, 0, 0);
+        if (!Data)
         {
             CloseHandle(Mapping);
             HANDLE& File = (HANDLE&)Private;
             CloseHandle(File);
             Mapping = NULL;
             File = INVALID_HANDLE_VALUE;
-            Buffer_Size = 0;
+            Size = 0;
             return 1;
         }
     #else
         int& P = (int&)Private;
-        Buffer = (unsigned char*)mmap(NULL, Buffer_Size, PROT_READ, MAP_FILE | MAP_PRIVATE, P, 0);
-        if (Buffer == MAP_FAILED)
+        Data = (const uint8_t*)mmap(NULL, Size, PROT_READ, MAP_FILE | MAP_PRIVATE, P, 0);
+        if (Data == MAP_FAILED)
         {
-            Buffer = NULL;
+            Data = NULL;
             Close();
             return 1;
         }
@@ -144,14 +144,14 @@ int filemap::Remap()
 int filemap::Close()
 {
     #if defined(_WIN32) || defined(_WINDOWS)
-        if (Buffer)
+        if (Data)
         {
-            UnmapViewOfFile(Buffer);
+            UnmapViewOfFile(Data);
             HANDLE& Mapping = (HANDLE&)Private2;
             CloseHandle(Mapping);
             Private2 = (void*)-1;
-            Buffer = NULL;
-            Buffer_Size = 0;
+            Data = NULL;
+            Size = 0;
         }
         HANDLE& File = (HANDLE&)Private;
         if (File != INVALID_HANDLE_VALUE)
@@ -163,11 +163,11 @@ int filemap::Close()
             }
         }
     #else
-        if (Buffer)
+        if (Data)
         {
-            munmap(Buffer, Buffer_Size);
-            Buffer = NULL;
-            Buffer_Size = 0;
+            munmap(Data, Size);
+            Data = NULL;
+            Size = 0;
         }
         int& P = (int&)Private;
         if (P != -1)
@@ -246,7 +246,7 @@ file::return_value file::Open_WriteMode(const string& BaseDirectory, const strin
 //---------------------------------------------------------------------------
 // file
 
-file::return_value file::Write(const uint8_t* Buffer, size_t Size)
+file::return_value file::Write(const uint8_t* Data, size_t Size)
 {
     // Handle size of 0
     if (!Size)
@@ -265,7 +265,7 @@ file::return_value file::Write(const uint8_t* Buffer, size_t Size)
             Size_Temp = (DWORD)-1;
         else
             Size_Temp = (DWORD)(Size - Offset);
-        Result = WriteFile(P, Buffer + Offset, Size_Temp, &BytesWritten, NULL);
+        Result = WriteFile(P, Data + Offset, Size_Temp, &BytesWritten, NULL);
         if (BytesWritten == 0 || Result == FALSE)
             break;
         Offset += BytesWritten;
@@ -277,7 +277,7 @@ file::return_value file::Write(const uint8_t* Buffer, size_t Size)
     while (Offset < Size)
     {
         size_t Size_Temp = Size - Offset;
-        BytesWritten = write(P, Buffer, Size_Temp);
+        BytesWritten = write(P, Data, Size_Temp);
         if (BytesWritten == 0 || BytesWritten == -1)
             break;
         Offset += (size_t)BytesWritten;

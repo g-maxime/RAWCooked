@@ -28,7 +28,7 @@ public:
     ~slice();
 
     // Content
-    void                        Init(uint8_t* Buffer, size_t Buffer_Size, bool keyframe, bool IsFirstSlice, raw_frame* RawFrame);
+    void                        Init(const uint8_t* Buffer, size_t Buffer_Size, bool keyframe, bool IsFirstSlice, raw_frame* RawFrame);
     void                        Parse();
 
     // Metadata (no impact on decoding)
@@ -52,7 +52,7 @@ private:
     raw_frame*                  RawFrame;
 
     // Cache (useful only for splitiing init from parsing)
-    uint8_t*                    Buffer;
+    const uint8_t*              Buffer;
     size_t                      Buffer_Size;
     bool                        keyframe;
     bool                        IsFirstSlice;

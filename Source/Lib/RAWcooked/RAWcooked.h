@@ -26,13 +26,13 @@ public:
 
     bool                        Unique; // If set, data is for the whole stream (unique file)
 
-    uint8_t*                    BeforeData;
+    const uint8_t*              BeforeData;
     uint64_t                    BeforeData_Size;
 
-    uint8_t*                    AfterData;
+    const uint8_t*              AfterData;
     uint64_t                    AfterData_Size;
 
-    uint8_t*                    InData;
+    const uint8_t*              InData;
     uint64_t                    InData_Size;
 
     md5*                        HashValue = nullptr;

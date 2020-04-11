@@ -362,7 +362,7 @@ uint32_t tiff::Get_Element(std::vector<uint32_t>* List)
 //---------------------------------------------------------------------------
 void tiff::ParseBuffer()
 {
-    if (Buffer_Size < 8)
+    if (Buffer.GetSize() < 8)
         return;
 
     Buffer_Offset = 0;
@@ -380,7 +380,7 @@ void tiff::ParseBuffer()
     }
     SetDetected();
     uint32_t FirstIFDOffset = Get_X4();
-    if (FirstIFDOffset > Buffer_Size)
+    if (FirstIFDOffset > Buffer.GetSize())
     {
         Undecodable(undecodable::FirstIFDOffset);
         return;
@@ -415,7 +415,7 @@ void tiff::ParseBuffer()
         case _ELEMENT: Get_Element(&_VALUE); break;
 
     uint32_t NrOfDirectories = Get_X2();
-    if (Buffer_Offset + 12 * NrOfDirectories + 4 > Buffer_Size) // 12 per directory + 4 for next IFD offset
+    if (Buffer_Offset + 12 * NrOfDirectories + 4 > Buffer.GetSize()) // 12 per directory + 4 for next IFD offset
     {
         Undecodable(undecodable::NrOfDirectories);
         return;
@@ -611,7 +611,7 @@ void tiff::ParseBuffer()
     if (OffsetAfterImage != StripOffsets_Last)
         Unsupported(unsupported::StripOffsets_Incoherent);
     size_t EndOfImagePadding;
-    if (OffsetAfterImage > Buffer_Size)
+    if (OffsetAfterImage > Buffer.GetSize())
     {
         if (!Actions[Action_AcceptTruncated])
         {
@@ -621,7 +621,7 @@ void tiff::ParseBuffer()
         EndOfImagePadding = 0;
     }
     else
-        EndOfImagePadding = Buffer_Size - OffsetAfterImage;
+        EndOfImagePadding = Buffer.GetSize() - OffsetAfterImage;
 
     // Can we compress?
     if (!HasErrors())
@@ -631,13 +631,13 @@ void tiff::ParseBuffer()
     if (IsSupported() && RAWcooked)
     {
         RAWcooked->Unique = false;
-        RAWcooked->BeforeData = Buffer;
+        RAWcooked->BeforeData = Buffer.GetData();
         RAWcooked->BeforeData_Size = StripOffsets[0];
-        RAWcooked->AfterData = Buffer + Buffer_Size - EndOfImagePadding;
+        RAWcooked->AfterData = Buffer.GetData() + Buffer.GetSize() - EndOfImagePadding;
         RAWcooked->AfterData_Size = EndOfImagePadding;
         RAWcooked->InData = nullptr;
         RAWcooked->InData_Size = 0;
-        RAWcooked->FileSize = Buffer_Size;
+        RAWcooked->FileSize = Buffer.GetSize();
         if (Actions[Action_Hash])
         {
             Hash();

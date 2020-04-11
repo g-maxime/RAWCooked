@@ -100,7 +100,7 @@ void frame::SetHeight(uint32_t height)
 //***************************************************************************
 
 //---------------------------------------------------------------------------
-void frame::Read_Buffer_OutOfBand(uint8_t* Buffer, size_t Buffer_Size)
+void frame::Read_Buffer_OutOfBand(const uint8_t* Buffer, size_t Buffer_Size)
 {
     P.ConfigurationRecord_IsPresent = true;
     Clear();
@@ -127,7 +127,7 @@ void frame::Read_Buffer_OutOfBand(uint8_t* Buffer, size_t Buffer_Size)
 }
 
 //---------------------------------------------------------------------------
-void frame::Read_Buffer_Continue(uint8_t* Buffer, size_t Buffer_Size)
+void frame::Read_Buffer_Continue(const uint8_t* Buffer, size_t Buffer_Size)
 {
     if (!Slices)
     {

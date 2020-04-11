@@ -47,6 +47,18 @@ public:
         MD5(nullptr)
     {
     }
+    frame_writer(const frame_writer& Source) :
+        Mode(Source.Mode),
+        BaseDirectory(Source.BaseDirectory),
+        UserMode(Source.UserMode),
+        Ask_Callback(Source.Ask_Callback),
+        M(Source.M),
+        Errors(Source.Errors),
+        Offset(Source.Offset),
+        SizeOnDisk(Source.SizeOnDisk),
+        MD5(Source.MD5)
+    {
+    }
 
     ~frame_writer();
 
@@ -79,6 +91,8 @@ private:
     size_t                      SizeOnDisk;
     void*                       MD5;
 };
+
+void SanitizeFileName(buffer& FileName);
 
 class matroska : public input_base
 {
@@ -125,7 +139,11 @@ private:
     #define MATROSKA_ELEMENT(_NAME) \
         void _NAME(); \
         call SubElements_##_NAME(uint64_t Name);
-    
+
+    #define MATROSKA_ELEM_XY(_NAME, _X, _Y) \
+        void _NAME##_X##_Y() { Segment_Attachments_AttachedFile_FileData_RawCookedxxx_yyy(Element_##_Y, Type_##_X); } \
+        call SubElements_##_NAME##_X##_Y(uint64_t Name);
+
     MATROSKA_ELEMENT(_);
     MATROSKA_ELEMENT(Segment);
     MATROSKA_ELEMENT(Segment_Attachments);
@@ -137,32 +155,32 @@ private:
     MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedAttachment_FileName);
     MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedAttachment_FileSize);
     MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedBlock);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedBlock_AfterData);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedBlock_BeforeData);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedBlock_InData);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Block_, FileName);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Block_, AfterData);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Block_, BeforeData);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Block_, InData);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Block_MaskAddition, FileName);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Block_MaskAddition, AfterData);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Block_MaskAddition, BeforeData);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Block_MaskAddition, InData);
     MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedBlock_FileHash);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedBlock_FileName);
     MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedBlock_FileSize);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedBlock_MaskAdditionAfterData);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedBlock_MaskAdditionBeforeData);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedBlock_MaskAdditionFileName);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedBlock_MaskAdditionInData);
     MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedSegment);
     MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedSegment_LibraryName);
     MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedSegment_LibraryVersion);
     MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedSegment_PathSeparator);
     MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedTrack);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedTrack_AfterData);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedTrack_BeforeData);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Track_, FileName);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Track_, AfterData);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Track_, BeforeData);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Track_, InData);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Track_MaskBase, AfterData);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Track_MaskBase, BeforeData);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Track_MaskBase, FileName);
+    MATROSKA_ELEM_XY(Segment_Attachments_AttachedFile_FileData_RawCooked, Track_MaskBase, InData);
     MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedTrack_FileHash);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedTrack_FileName);
     MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedTrack_LibraryName);
     MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedTrack_LibraryVersion);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedTrack_InData);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedTrack_MaskBaseAfterData);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedTrack_MaskBaseBeforeData);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedTrack_MaskBaseFileName);
-    MATROSKA_ELEMENT(Segment_Attachments_AttachedFile_FileData_RawCookedTrack_MaskBaseInData);
     MATROSKA_ELEMENT(Segment_Cluster);
     MATROSKA_ELEMENT(Segment_Cluster_SimpleBlock);
     MATROSKA_ELEMENT(Segment_Cluster_Timestamp);
@@ -186,41 +204,160 @@ private:
 
     string                      RAWcooked_LibraryName;
     string                      RAWcooked_LibraryVersion;
-    struct reversibilitydata
+    enum element
     {
-        uint8_t*                Mask = nullptr;
-        uint8_t**               DPX = nullptr;
-        size_t                  Mask_Size = 0;
-        size_t*                 DPX_Size = 0;
+        Element_FileName,
+        Element_BeforeData,
+        Element_AfterData,
+        Element_InData,
+        Element_Max,
+    };
+    enum type
+    {
+        Type_Block_,
+        Type_Block_MaskAddition,
+        Type_Track_,
+        Type_Track_MaskBase,
+    };
+    struct reversibility_data
+    {
+        struct content_per_element
+        {
+            buffer              Mask;
+            buffer*             Content = nullptr;
+
+            void Check(size_t Size = 1000000)
+            {
+                if (Content)
+                    return;
+                Content = new buffer[Size];
+                memset(Content, 0x00, Size * sizeof(buffer*));
+            }
+
+            ~content_per_element()
+            {
+                delete[] Content;
+            }
+        };
+        struct filesize_per_element
+        {
+            uint64_t*           Value = nullptr;
+
+            void Check(size_t Size)
+            {
+                if (Value)
+                    return;
+                Value = new uint64_t[Size];
+                memset(Value, -1, Size * sizeof(uint64_t));
+            }
+
+            ~filesize_per_element()
+            {
+                delete[] Value;
+            }
+        };
+
+        void AddFrame()
+        {
+            Pos = Count;
+            Count++;
+        }
+
+        void StartParsing()
+        {
+            Pos = 0;
+            if (!Count && Unique)
+                Count++;
+        }
+
+        void NextFrame()
+        {
+            Pos++;
+        }
+
+        void SetUnique()
+        {
+            if (Unique)
+                return;
+            Unique = true;
+        }
+
+        void MoveToDataMask(element Element, buffer& Buffer)
+        {
+            Data[Element].Mask = move(Buffer);
+        }
+
+        void MoveToDataContent(element Element, buffer& Buffer, bool AddMask)
+        {
+            Data[Element].Check(Unique ? 1 : 1000000);
+            Data[Element].Content[Pos] = move(Buffer);
+
+            if (AddMask)
+            {
+                auto& Mask = Data[Element].Mask;
+                auto Mask_Size = Mask.GetSize();
+                auto Mask_Data = Mask.GetData();
+                if (!Mask_Size)
+                    return;
+
+                auto& Content = Data[Element].Content[Pos];
+                auto Content_Size = Content.GetSizeForModification();
+                auto Content_Data = Content.GetDataForModification();
+                for (size_t i = 0; i < Content_Size && i < Mask_Size; i++)
+                    Content_Data[i] += Mask_Data[i];
+            }
+
+            if (Element == Element_FileName)
+            {
+                auto& Content = Data[Element_FileName].Content[Pos];
+                ::SanitizeFileName(Content);
+            }
+        }
+
+        buffer_view GetDataContent(element Element)
+        {
+            if (Pos >= Count || !Data[Element].Content || !Data[Element].Content[Pos].GetSize())
+                return buffer_view();
+            return buffer_view(Data[Element].Content[Pos]);
+        }
+
+        void SetFileSize(uint64_t Value)
+        {
+            FileSize.Check(Unique ? 1 : 1000000);
+            FileSize.Value[Pos] = Value;
+        }
+
+        uint64_t GetFileSize()
+        {
+            if (!FileSize.Value)
+                return (uint64_t)-1;
+            return FileSize.Value[Pos];
+        }
+
+        size_t                  Pos = 0;
+        size_t                  Count = 0;
+        bool                    Unique = false;
+        content_per_element     Data[Element_Max];
+    private:
+        filesize_per_element    FileSize;
     };
     struct trackinfo
     {
         frame_writer            FrameWriter;
-        reversibilitydata       FileName;
-        reversibilitydata       Before;
-        reversibilitydata       After;
-        reversibilitydata       In;
-        uint64_t*               DPX_FileSize;
-        size_t                  DPX_Buffer_Pos;
-        size_t                  DPX_Buffer_Count;
+        reversibility_data      ReversibilityData;
         raw_frame*              R_A;
         raw_frame*              R_B;
         input_base_uncompressed* DecodedFrameParser;
         flac_info*              FlacInfo;
         frame                   Frame;
-        bool                    Unique;
         format                  Format;
 
         trackinfo(frame_writer& FrameWriter_Source) :
             FrameWriter(FrameWriter_Source),
-            DPX_FileSize(nullptr),
-            DPX_Buffer_Pos(0),
-            DPX_Buffer_Count(0),
             R_A(nullptr),
             R_B(nullptr),
             DecodedFrameParser(nullptr),
             FlacInfo(nullptr),
-            Unique(false),
             Format(Format_None)
             {
             }
@@ -260,11 +397,12 @@ private:
     friend class                frame_writer;  
 
     //Utils
+    bool ConfigureVideoFormatAndFlavor(trackinfo* TrackInfo);
     bool GetFormatAndFlavor(trackinfo* TrackInfo, input_base_uncompressed* PotentialParser, raw_frame::flavor Flavor);
-    void ParseDecodedFrame(trackinfo* TrackInfo);
-    void Uncompress(uint8_t*& Output, size_t& Output_Size);
-    void StoreFromCurrentToEndOfElement(uint8_t*& Output, size_t& Output_Size);
-    void SanitizeFileName(uint8_t* &FileName, size_t &FileName_Size);
+    bool ParseDecodedFrame(trackinfo* TrackInfo, input_base_uncompressed* Parser = nullptr); // If Parser is not provided, TrackInfo decoder and frame size is used
+    void Uncompress(buffer& Buffer);
+    void Segment_Attachments_AttachedFile_FileData_RawCookedxxx_yyy(element Element, type Type);
+    void StoreFromCurrentToEndOfElement(buffer& Output);
     void RejectIncompatibleVersions();
     void ProcessCodecPrivate_FFV1();
     void ProcessCodecPrivate_FLAC();

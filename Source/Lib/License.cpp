@@ -179,7 +179,7 @@ bool DecodeLicense(const string& FromUser, license_internal* License)
     // Parse
     license_input Input;
     Input.License = License;
-    if (Input.Parse(Buffer, Buffer_Offset))
+    if (Input.Parse(buffer_view(Buffer, Buffer_Offset)))
     {
         if (License && !Input.Supported)
         {

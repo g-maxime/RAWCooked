@@ -196,7 +196,7 @@ void coder_golombrice::GOP_Init(quant_table_set_indexes_struct& quant_table_set_
 }
 
 //---------------------------------------------------------------------------
-void coder_golombrice::Frame_Init(uint8_t* Buffer, size_t Buffer_Size)
+void coder_golombrice::Frame_Init(const uint8_t* Buffer, size_t Buffer_Size)
 {
     BS.Attach(Buffer, Buffer_Size);
 }

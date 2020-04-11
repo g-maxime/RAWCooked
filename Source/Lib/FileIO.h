@@ -17,15 +17,12 @@
 using namespace std;
 //---------------------------------------------------------------------------
 
-class filemap
+class filemap : public buffer_base
 {
 public:
     // Constructor/Destructor
+                                filemap() : buffer_base(0, nullptr) {}
                                 ~filemap() { Close(); }
-
-    // Direct access to file map data
-    unsigned char*              Buffer = NULL;
-    size_t                      Buffer_Size = 0;
 
     // Actions
     int                         Open_ReadMode(const char* FileName);
@@ -60,6 +57,7 @@ public:
     return_value                Open_WriteMode(const string& BaseDirectory_Source, const string& OutputFileName_Source, bool RejectIfExists = false, bool Truncate = false);
     bool                        IsOpen() { return Private == (void*)-1 ? false : true; }
     return_value                Write(const uint8_t* Buffer, size_t Size);
+    return_value                Write(const buffer_base& Buffer) { return Write(Buffer.GetData(), Buffer.GetSize()); }
     enum seek_value
     {
         Begin,

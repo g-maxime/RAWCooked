@@ -197,7 +197,7 @@ void slice::GOP_Init()
 }
 
 //---------------------------------------------------------------------------
-void slice::Init(uint8_t* Buffer_, size_t Buffer_Size_, bool keyframe_, bool IsFirstSlice_, raw_frame* RawFrame_)
+void slice::Init(const uint8_t* Buffer_, size_t Buffer_Size_, bool keyframe_, bool IsFirstSlice_, raw_frame* RawFrame_)
 {
     RawFrame = RawFrame_;
     Buffer = Buffer_;

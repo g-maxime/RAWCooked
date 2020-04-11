@@ -23,7 +23,7 @@ public:
     ~coder_golombrice();
 
     void                        GOP_Init(quant_table_set_indexes_struct& quant_table_set_indexes);
-    void                        Frame_Init(uint8_t* Buffer, size_t Buffer_Size);
+    void                        Frame_Init(const uint8_t* Buffer, size_t Buffer_Size);
     void                        Plane_Init();
     void                        Line_Init(size_t quant_table_set_index);
     pixel_t                     Sample_Delta(int32_t context_idx);

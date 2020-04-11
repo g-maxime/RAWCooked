@@ -8,6 +8,7 @@
 #include "Lib/RawFrame/RawFrame.h"
 #include "Lib/DPX/DPX.h"
 #include "Lib/TIFF/TIFF.h"
+#include <algorithm>
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
@@ -81,13 +82,10 @@ void raw_frame::TIFF_Create(size_t colorspace_type, size_t width, size_t height,
 //---------------------------------------------------------------------------
 size_t raw_frame::GetFrameSize()
 {
-    size_t FrameSize = 0;
+    auto FrameSize = Buffer.GetSize();
 
-    if (Buffer)
-        FrameSize += Buffer_Size;
-
-    for (size_t i = 0; i < Planes.size(); i++)
-        FrameSize += Planes[i]->Buffer_Size;
+    for (auto&& Plane : Planes)
+        FrameSize += Plane->Buffer.GetSize();
 
     return FrameSize;
 }
@@ -95,16 +93,5 @@ size_t raw_frame::GetFrameSize()
 //---------------------------------------------------------------------------
 size_t raw_frame::GetTotalSize()
 {
-    size_t TotalSize = GetFrameSize();
-
-    if (In && In_Size > TotalSize)
-        TotalSize = In_Size; // Get max of GetFrameSize() and In_Size
-
-    if (Pre)
-        TotalSize += Pre_Size;
-
-    if (Post)
-        TotalSize += Post_Size;
-
-    return TotalSize;
+    return Pre.GetSize() + max(In.GetSize(), GetFrameSize()) + Post.GetSize();
 }

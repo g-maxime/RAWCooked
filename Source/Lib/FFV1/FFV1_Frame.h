@@ -32,8 +32,8 @@ public:
     void SetHeight(uint32_t width);
 
     // Before - Global
-    void Read_Buffer_OutOfBand(uint8_t* Buffer, size_t Buffer_Size);
-    void Read_Buffer_Continue(uint8_t* Buffer, size_t Buffer_Size);
+    void Read_Buffer_OutOfBand(const uint8_t* Buffer, size_t Buffer_Size);
+    void Read_Buffer_Continue(const uint8_t* Buffer, size_t Buffer_Size);
 
     // Decoded frame
     raw_frame*                  RawFrame;

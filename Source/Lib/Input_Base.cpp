@@ -35,13 +35,12 @@ input_base::~input_base()
 }
 
 //---------------------------------------------------------------------------
-bool input_base::Parse(filemap* FileMap_Source, uint8_t* Buffer_Source, size_t Buffer_Size_Source, size_t FileSize_Source)
+bool input_base::Parse(filemap* FileMap_Source, const buffer_view& Buffer_Source, size_t FileSize_Source)
 {
     ClearInfo();
     FileMap = FileMap_Source;
-    FileSize = FileSize_Source == (size_t)-1 ? Buffer_Size_Source : FileSize_Source;
+    FileSize = FileSize_Source == (size_t)-1 ? Buffer_Source.GetSize() : FileSize_Source;
     Buffer = Buffer_Source;
-    Buffer_Size = Buffer_Size_Source;
     HashComputed = false;
 
     ParseBuffer();
@@ -63,14 +62,14 @@ void input_base::Hash()
         MD5_Init(&MD5);
 
         size_t Offset = 0;
-        while (Offset < Buffer_Size)
+        while (Offset < Buffer.GetSize())
         {
             unsigned long Size_Temp;
-            if (Buffer_Size - Offset >= (unsigned long)-1) // MD5_Update() accepts only unsigned longs
+            if (Buffer.GetSize() - Offset >= (unsigned long)-1) // MD5_Update() accepts only unsigned longs
                 Size_Temp = (unsigned long)-1;
             else
-                Size_Temp = (unsigned long)(Buffer_Size - Offset);
-            MD5_Update(&MD5, Buffer, Size_Temp);
+                Size_Temp = (unsigned long)(Buffer.GetSize() - Offset);
+            MD5_Update(&MD5, Buffer.GetData(), Size_Temp);
             Offset += Size_Temp;
         }
 
@@ -84,7 +83,7 @@ void input_base::Hash()
 //---------------------------------------------------------------------------
 // Common
 #define TEST_BUFFEROVERFLOW(_SIZE) \
-    if (Buffer_Offset + _SIZE - 1 >= Buffer_Size) \
+    if (Buffer_Offset + _SIZE - 1 >= Buffer.GetSize()) \
     { \
         SetBufferOverflow(); \
         return 0; \

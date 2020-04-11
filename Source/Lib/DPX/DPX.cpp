@@ -193,22 +193,22 @@ void dpx::ParseBuffer()
 
         // Adapt previous frame content from new frame content
         uint32_t* HeaderCopy32 = (uint32_t*)HeaderCopy;
-        uint32_t* Buffer32 = (uint32_t*)Buffer;
-        memmove(HeaderCopy + 36, Buffer + 36, 160 - 36); // Image filename + Creation date/time: yyyy:mm:dd:hh:mm:ssLTZ
+        uint32_t* Buffer32 = (uint32_t*)Buffer.GetData();
+        memmove(HeaderCopy + 36, Buffer.GetData() + 36, 160 - 36); // Image filename + Creation date/time: yyyy:mm:dd:hh:mm:ssLTZ
         HeaderCopy32[1676 / 4] = Buffer32[1676 / 4]; // Count
         HeaderCopy32[1712 / 4] = Buffer32[1712 / 4]; // Frame position in sequence
         HeaderCopy32[1920 / 4] = Buffer32[1920 / 4]; // SMPTE time code
         HeaderCopy[1929] = Buffer[1929]; // Field number
 
         // Compare
-        if (memcmp(HeaderCopy, Buffer, Buffer_Size >= 2048 ? 2048 : Buffer_Size))
+        if (memcmp(HeaderCopy, Buffer.GetData(), Buffer.GetSize() >= 2048 ? 2048 : Buffer.GetSize()))
             Invalid(invalid::DittoKey_NotSame);
 
         //TODO: no need to check again if the file is supported
     }
 
     // Test that it is a DPX
-    if (Buffer_Size < 4)
+    if (Buffer.GetSize() < 4)
         return;
     Buffer_Offset = 0;
     uint32_t MagicNumber = Get_B4();
@@ -260,7 +260,7 @@ void dpx::ParseBuffer()
     uint32_t OffsetToData = Get_X4();
     if (OffsetToData)
     {
-        if (OffsetToData < 1664 || OffsetToData > Buffer_Size)
+        if (OffsetToData < 1664 || OffsetToData > Buffer.GetSize())
             Undecodable(undecodable::OffsetToData);
         if (OffsetToImageData != OffsetToData)
             Unsupported(unsupported::OffsetToImageData); // FFmpeg specific, it prioritizes OffsetToImageData over OffsetToData. TODO: remove this limitation when future internal encoder is used
@@ -354,7 +354,7 @@ void dpx::ParseBuffer()
         return;
     }
     size_t OffsetAfterData = OffsetToData + ContentSize_Multiplier * Width * Height / Slice_Multiplier / 8;
-    if (OffsetAfterData > Buffer_Size)
+    if (OffsetAfterData > Buffer.GetSize())
     {
         if (!Actions[Action_AcceptTruncated])
             Undecodable(undecodable::DataSize);
@@ -391,10 +391,10 @@ void dpx::ParseBuffer()
     if (IsSupported() && RAWcooked)
     {
         RAWcooked->Unique = false;
-        RAWcooked->BeforeData = Buffer;
+        RAWcooked->BeforeData = Buffer.GetData();
         RAWcooked->BeforeData_Size = OffsetToData;
-        RAWcooked->AfterData = Buffer + OffsetAfterData;
-        RAWcooked->AfterData_Size = Buffer_Size - OffsetAfterData;
+        RAWcooked->AfterData = Buffer.GetData() + OffsetAfterData;
+        RAWcooked->AfterData_Size = Buffer.GetSize() - OffsetAfterData;
         RAWcooked->InData = In;
         RAWcooked->InData_Size = In_Size;
         RAWcooked->FileSize = (uint64_t)-1;
@@ -682,7 +682,7 @@ void dpx::ConformanceCheck()
 {
     Buffer_Offset = 4;
     uint32_t OffsetToImageData = Get_X4();
-    if (OffsetToImageData < 1664 || OffsetToImageData > Buffer_Size)
+    if (OffsetToImageData < 1664 || OffsetToImageData > Buffer.GetSize())
         Invalid(invalid::OffsetToImageData);
     Buffer_Offset = 16;
     uint32_t TotalImageFileSize = Get_X4();
@@ -699,8 +699,8 @@ void dpx::ConformanceCheck()
         if (NumberOfElements)
             NumberOfElements = 8; // File has an issue, testing only the first 8 elements
     }
-    if (Buffer_Offset + 72 * NumberOfElements > Buffer_Size)
-        NumberOfElements = (uint16_t) ((Buffer_Size - Buffer_Offset) / 72); // File has an issue, testing element which can fit in file size
+    if (Buffer_Offset + 72 * NumberOfElements > Buffer.GetSize())
+        NumberOfElements = (uint16_t) ((Buffer.GetSize() - Buffer_Offset) / 72); // File has an issue, testing element which can fit in file size
     Buffer_Offset = 804;
     bool HasEncoding = false;
     for (uint16_t i = 0; i < NumberOfElements; i++)
@@ -709,7 +709,7 @@ void dpx::ConformanceCheck()
         if (!HasEncoding && Encoding)
             HasEncoding = true;
         uint32_t OffsetToData = Get_X4();
-        if (OffsetToData < 1664 || OffsetToData > Buffer_Size)
+        if (OffsetToData < 1664 || OffsetToData > Buffer.GetSize())
         {
             if (i) // if i == 0, already signaled in the common parsing
                 Undecodable(undecodable::OffsetToData);
@@ -719,7 +719,7 @@ void dpx::ConformanceCheck()
         Buffer_Offset += 68; // Next element
     }
 
-    if (DittoKey == 0 && Buffer_Size >= 1664)
+    if (DittoKey == 0 && Buffer.GetSize() >= 1664)
     {
         // Copy header content so we compare content in next frames
         HeaderCopy_Info = OffsetToImageData;
@@ -728,7 +728,7 @@ void dpx::ConformanceCheck()
         if (HeaderCopy_Info > 2048)
             HeaderCopy_Info = 2048; // Do not compare user data
         HeaderCopy = new uint8_t[2048];
-        memmove(HeaderCopy, Buffer, HeaderCopy_Info >= 2048 ? 2048 : HeaderCopy_Info);
+        memmove(HeaderCopy, Buffer.GetData(), HeaderCopy_Info >= 2048 ? 2048 : HeaderCopy_Info);
         HeaderCopy_Info--;
         HeaderCopy_Info |= (HasEncoding ? 1 : 0) << 12;
     }

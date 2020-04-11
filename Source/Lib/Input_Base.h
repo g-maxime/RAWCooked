@@ -68,8 +68,8 @@ public:
     string*                     FileName = nullptr;
 
     // Parse
-    bool                        Parse(uint8_t* Buffer, size_t Buffer_Size, size_t FileSize = (size_t)-1) { return Parse(nullptr, Buffer, Buffer_Size, FileSize); }
-    bool                        Parse(filemap& FileMap) { return Parse(&FileMap, FileMap.Buffer, FileMap.Buffer_Size); }
+    bool                        Parse(const buffer_view& Buffer, size_t FileSize = (size_t)-1) { return Parse(nullptr, Buffer, FileSize); }
+    bool                        Parse(filemap& FileMap) { return Parse(&FileMap, FileMap); }
 
     // Info
     bool                        IsDetected() { return Info[Info_IsDetected]; }
@@ -85,8 +85,7 @@ protected:
     virtual void                BufferOverflow() = 0;
     filemap*                    FileMap;
     size_t                      FileSize;
-    unsigned char*              Buffer;
-    size_t                      Buffer_Size;
+    buffer_view                 Buffer;
     size_t                      Buffer_Offset;
     bool                        IsBigEndian;
     uint8_t                     Get_L1() { return Get_X1(); }
@@ -118,7 +117,7 @@ protected:
 
 protected:
     // Actions
-    bool                        Parse(filemap* FileMap, uint8_t* Buffer, size_t Buffer_Size, size_t FileSize = (size_t)-1);
+    bool                        Parse(filemap* FileMap, const buffer_view& Buffer, size_t FileSize = (size_t)-1);
     void                        Hash();
 
     // Errors

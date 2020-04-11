@@ -282,9 +282,9 @@ void rawcooked::Parse()
     uint8_t* FileName = (uint8_t*)OutputFileName.c_str();
     size_t FileName_Size = OutputFileName.size();
     uint8_t* ToStore_FileName = FileName;
-    uint8_t* ToStore_Before = BeforeData;
-    uint8_t* ToStore_After = AfterData;
-    uint8_t* ToStore_In = InData;
+    const uint8_t* ToStore_Before = BeforeData;
+    const uint8_t* ToStore_After = AfterData;
+    const uint8_t* ToStore_In = InData;
     bool IsUsingMask_FileName = false;
     bool IsUsingMask_BeforeData = false;
     bool IsUsingMask_AfterData = false;
@@ -328,26 +328,29 @@ void rawcooked::Parse()
         }
         if (FileName && FirstFrame_FileName)
         {
-            ToStore_FileName = new uint8_t[FileName_Size];
-            memcpy(ToStore_FileName, FileName, FileName_Size);
+            uint8_t* Temp = new uint8_t[FileName_Size];
+            memcpy(Temp, FileName, FileName_Size);
             for (size_t i = 0; i < FileName_Size && i < FirstFrame_FileName_Size; i++)
-                ToStore_FileName[i] -= FirstFrame_FileName[i];
+                Temp[i] -= FirstFrame_FileName[i];
+            ToStore_FileName = Temp;
             IsUsingMask_FileName = true;
         }
         if (BeforeData && FirstFrame_Before)
         {
-            ToStore_Before = new uint8_t[BeforeData_Size];
-            memcpy(ToStore_Before, BeforeData, BeforeData_Size);
+            uint8_t* Temp = new uint8_t[BeforeData_Size];
+            memcpy(Temp, BeforeData, BeforeData_Size);
             for (size_t i = 0; i < BeforeData_Size && i < FirstFrame_Before_Size; i++)
-                ToStore_Before[i] -= FirstFrame_Before[i];
+                Temp[i] -= FirstFrame_Before[i];
+            ToStore_Before = Temp;
             IsUsingMask_BeforeData = true;
         }
         if (AfterData && FirstFrame_After)
         {
-            ToStore_After = new uint8_t[AfterData_Size];
-            memcpy(ToStore_After, AfterData, AfterData_Size);
+            uint8_t* Temp = new uint8_t[AfterData_Size];
+            memcpy(Temp, AfterData, AfterData_Size);
             for (size_t i = 0; i < AfterData_Size && i < FirstFrame_After_Size; i++)
-                ToStore_After[i] -= FirstFrame_After[i];
+                Temp[i] -= FirstFrame_After[i];
+            ToStore_After = Temp;
             IsUsingMask_AfterData = true;
         }
     }
@@ -384,14 +387,14 @@ void rawcooked::Parse()
             Compressed_MaskBeforeData_Size = 0;
         }
     }
-    uint8_t* Compressed_BeforeData = new uint8_t[BeforeData_Size];
+    const uint8_t* Compressed_BeforeData = new uint8_t[BeforeData_Size];
     uLongf Compressed_BeforeData_Size = (uLongf)BeforeData_Size;
     if (compress((Bytef*)Compressed_BeforeData, &Compressed_BeforeData_Size, (const Bytef*)ToStore_Before, (uLong)BeforeData_Size) < 0)
     {
         Compressed_BeforeData = ToStore_Before;
         Compressed_BeforeData_Size = 0;
     }
-    uint8_t* Compressed_MaskAfterData = NULL;
+    const uint8_t* Compressed_MaskAfterData = NULL;
     uLongf Compressed_MaskAfterData_Size = 0;
     if (!Unique && FirstFrame_After)
     {
@@ -403,14 +406,14 @@ void rawcooked::Parse()
             Compressed_MaskAfterData_Size = 0;
         }
     }
-    uint8_t* Compressed_AfterData = new uint8_t[AfterData_Size];
+    const uint8_t* Compressed_AfterData = new uint8_t[AfterData_Size];
     uLongf Compressed_AfterData_Size = (uLongf)AfterData_Size;
     if (compress((Bytef*)Compressed_AfterData, &Compressed_AfterData_Size, (const Bytef*)ToStore_After, (uLong)AfterData_Size) < 0)
     {
         Compressed_AfterData = ToStore_After;
         Compressed_AfterData_Size = 0;
     }
-    uint8_t* Compressed_InData = new uint8_t[InData_Size];
+    const uint8_t* Compressed_InData = new uint8_t[InData_Size];
     uLongf Compressed_InData_Size = (uLongf)InData_Size;
     if (compress((Bytef*)Compressed_InData, &Compressed_InData_Size, (const Bytef*)ToStore_In, (uLong)InData_Size) < 0)
     {
