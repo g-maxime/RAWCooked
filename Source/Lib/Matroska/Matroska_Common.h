@@ -186,26 +186,21 @@ private:
 
     string                      RAWcooked_LibraryName;
     string                      RAWcooked_LibraryVersion;
+    struct reversibilitydata
+    {
+        uint8_t*                Mask = nullptr;
+        uint8_t**               DPX = nullptr;
+        size_t                  Mask_Size = 0;
+        size_t*                 DPX_Size = 0;
+    };
     struct trackinfo
     {
         frame_writer            FrameWriter;
-        uint8_t*                Mask_FileName;
-        uint8_t*                Mask_Before;
-        uint8_t*                Mask_After;
-        uint8_t*                Mask_In;
-        uint8_t**               DPX_FileName;
+        reversibilitydata       FileName;
+        reversibilitydata       Before;
+        reversibilitydata       After;
+        reversibilitydata       In;
         uint64_t*               DPX_FileSize;
-        uint8_t**               DPX_Before;
-        uint8_t**               DPX_After;
-        uint8_t**               DPX_In;
-        size_t                  Mask_FileName_Size;
-        size_t                  Mask_Before_Size;
-        size_t                  Mask_After_Size;
-        size_t                  Mask_In_Size;
-        size_t*                 DPX_FileName_Size;
-        size_t*                 DPX_Before_Size;
-        size_t*                 DPX_After_Size;
-        size_t*                 DPX_In_Size;
         size_t                  DPX_Buffer_Pos;
         size_t                  DPX_Buffer_Count;
         raw_frame*              R_A;
@@ -218,23 +213,7 @@ private:
 
         trackinfo(frame_writer& FrameWriter_Source) :
             FrameWriter(FrameWriter_Source),
-            Mask_FileName(nullptr),
-            Mask_Before(nullptr),
-            Mask_After(nullptr),
-            Mask_In(nullptr),
-            DPX_FileName(nullptr),
             DPX_FileSize(nullptr),
-            DPX_Before(nullptr),
-            DPX_After(nullptr),
-            DPX_In(nullptr),
-            Mask_FileName_Size(0),
-            Mask_Before_Size(0),
-            Mask_After_Size(0),
-            Mask_In_Size(0),
-            DPX_FileName_Size(0),
-            DPX_Before_Size(0),
-            DPX_After_Size(0),
-            DPX_In_Size(0),
             DPX_Buffer_Pos(0),
             DPX_Buffer_Count(0),
             R_A(nullptr),
@@ -284,6 +263,7 @@ private:
     bool GetFormatAndFlavor(trackinfo* TrackInfo, input_base_uncompressed* PotentialParser, raw_frame::flavor Flavor);
     void ParseDecodedFrame(trackinfo* TrackInfo);
     void Uncompress(uint8_t*& Output, size_t& Output_Size);
+    void StoreFromCurrentToEndOfElement(uint8_t*& Output, size_t& Output_Size);
     void SanitizeFileName(uint8_t* &FileName, size_t &FileName_Size);
     void RejectIncompatibleVersions();
     void ProcessCodecPrivate_FFV1();
