@@ -1363,10 +1363,10 @@ void matroska::Segment_Cluster_SimpleBlock()
         switch (TrackInfo_Current->Format)
         {
             case Format_FFV1:
+                            TrackInfo_Current->Frame.Read_Buffer_Continue(Buffer.Data() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
                             RawFrame->SetPre(ReversibilityData.GetDataContent(Element_BeforeData));
                             RawFrame->SetPost(ReversibilityData.GetDataContent(Element_AfterData));
                             RawFrame->SetIn(ReversibilityData.GetDataContent(Element_InData));
-                            TrackInfo_Current->Frame.Read_Buffer_Continue(Buffer.Data() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
                             if (Actions[Action_Conch] || Actions[Action_Coherency])
                                 ParseDecodedFrame(TrackInfo_Current);
                             if (ReversibilityData.Data[Element_FileName].Content && ReversibilityData.Pos < ReversibilityData.Count)
@@ -1375,8 +1375,12 @@ void matroska::Segment_Cluster_SimpleBlock()
                                 FormatPath(TrackInfo_Current->FrameWriter.OutputFileName);
                                 TrackInfo_Current->FrameWriter.FrameCall(RawFrame);
                             }
-                            else if (ReversibilityData.Count)
-                                Undecodable(undecodable::ReversibilityData_FrameCount);
+                            else
+                            {
+                                TrackInfo_Current->FrameWriter.OutputFileName.clear();
+                                if (ReversibilityData.Count)
+                                    Undecodable(undecodable::ReversibilityData_FrameCount);
+                            }
                             break;
             case Format_FLAC:
                             TrackInfo_Current->FlacInfo->Buffer_Offset_Temp = Buffer_Offset + 4;
