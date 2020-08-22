@@ -339,14 +339,14 @@ bool WriteFile_Write(size_t& Offset, file& File_Write, const buffer_base& Buffer
 }
 bool frame_writer::WriteFile(raw_frame* RawFrame)
 {
-    if (WriteFile_Write(Offset, File_Write, RawFrame->Pre))
+    if (WriteFile_Write(Offset, File_Write, RawFrame->Pre()))
         return true;
     if (WriteFile_Write(Offset, File_Write, RawFrame->Buffer()))
         return true;
     for (const auto& Plane : RawFrame->Planes())
         if (Plane && WriteFile_Write(Offset, File_Write, Plane->Buffer()))
             return true;
-    if (WriteFile_Write(Offset, File_Write, RawFrame->Post))
+    if (WriteFile_Write(Offset, File_Write, RawFrame->Post()))
         return true;
     return false;
 }
@@ -372,14 +372,14 @@ bool frame_writer::CheckFile(raw_frame* RawFrame)
 {
     size_t Offset_Current = Offset;
 
-    if (CheckFile_Compare(Offset_Current, File_Read, RawFrame->Pre))
+    if (CheckFile_Compare(Offset_Current, File_Read, RawFrame->Pre()))
         return true;
     if (CheckFile_Compare(Offset_Current, File_Read, RawFrame->Buffer()))
         return true;
     for (const auto& Plane : RawFrame->Planes())
         if (Plane && CheckFile_Compare(Offset_Current, File_Read, Plane->Buffer()))
             return true;
-    if (CheckFile_Compare(Offset_Current, File_Read, RawFrame->Post))
+    if (CheckFile_Compare(Offset_Current, File_Read, RawFrame->Post()))
         return true;
 
     Offset = Offset_Current;
@@ -389,15 +389,22 @@ bool frame_writer::CheckFile(raw_frame* RawFrame)
 //---------------------------------------------------------------------------
 bool frame_writer::CheckMD5(raw_frame* RawFrame)
 {
-    if (RawFrame->Pre.Size())
-        MD5_Update((MD5_CTX*)MD5, RawFrame->Pre.Data(), (unsigned long)RawFrame->Pre.Size());
-    if (RawFrame->Buffer().Size())
-        MD5_Update((MD5_CTX*)MD5, RawFrame->Buffer().Data(), (unsigned long)RawFrame->Buffer().Size());
+    const auto Pre = RawFrame->Pre();
+    if (Pre.Size())
+        MD5_Update((MD5_CTX*)MD5, Pre.Data(), (unsigned long)Pre.Size());
+    const auto Buffer = RawFrame->Buffer();
+    if (Buffer.Size())
+        MD5_Update((MD5_CTX*)MD5, Buffer.Data(), (unsigned long)Buffer.Size());
     for (const auto& Plane : RawFrame->Planes())
-        if (Plane && Plane->Buffer().Size())
-            MD5_Update((MD5_CTX*)MD5, Plane->Buffer().Data(), (unsigned long)Plane->Buffer().Size());
-    if (RawFrame->Post.Size())
-        MD5_Update((MD5_CTX*)MD5, RawFrame->Post.Data(), (unsigned long)RawFrame->Post.Size());
+        if (Plane)
+        {
+            const auto& Buffer = Plane->Buffer();
+            if (Buffer.Size())
+                MD5_Update((MD5_CTX*)MD5, Buffer.Data(), (unsigned long)Buffer.Size());
+        }
+    const auto Post = RawFrame->Post();
+    if (Post.Size())
+        MD5_Update((MD5_CTX*)MD5, Post.Data(), (unsigned long)Post.Size());
 
     return false;
 }
@@ -809,15 +816,15 @@ void matroska::Shutdown()
 
         if (TrackInfo_Current->ReversibilityData.Unique && TrackInfo_Current->Frame.RawFrame)
         {
+            TrackInfo_Current->Frame.RawFrame->ClearPre();
             TrackInfo_Current->Frame.RawFrame->Buffer().Clear();
-            TrackInfo_Current->Frame.RawFrame->Pre.Clear();
             if (TrackInfo_Current->ReversibilityData.Data[Element_AfterData].Content && !TrackInfo_Current->ReversibilityData.Data[Element_AfterData].Content[0].Empty())
             {
-                TrackInfo_Current->Frame.RawFrame->Post = TrackInfo_Current->ReversibilityData.Data[Element_AfterData].Content[0];
+                TrackInfo_Current->Frame.RawFrame->SetPost(TrackInfo_Current->ReversibilityData.Data[Element_AfterData].Content[0]);
             }
             else
             {
-                TrackInfo_Current->Frame.RawFrame->Post.Clear();
+                TrackInfo_Current->Frame.RawFrame->ClearPost();
             }
 
             string OutputFileName = TrackInfo_Current->ReversibilityData.Data[Element_FileName].Content[0].ToString();
@@ -1089,9 +1096,8 @@ void matroska::Segment_Attachments_AttachedFile_FileData()
     // Output file
     {
         raw_frame RawFrame;
-        RawFrame.Pre = buffer_view(Buffer.Data() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
+        RawFrame.SetPre(buffer_view(Buffer.Data() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset));
 
-        //FramesPool->submit(WriteFrameCall, Buffer[Buffer_Offset] & 0x7F, TrackInfo_Current->Frame.RawFrame, WriteFrameCall_Opaque); //TODO: looks like there is some issues with threads and small tasks
         frame_writer FrameWriter(FrameWriter_Template);
         FrameWriter.FrameCall(&RawFrame, AttachedFile_FileName);
     }
@@ -1316,7 +1322,7 @@ void matroska::Segment_Cluster_SimpleBlock()
         if (!TrackID || TrackID > TrackInfo.size())
             return; // Problem
         TrackInfo_Pos = TrackID - 1;
-        trackinfo* TrackInfo_Current = TrackInfo[TrackID - 1];
+        trackinfo* TrackInfo_Current = TrackInfo[TrackInfo_Pos];
 
         // Timestamp
         Block_Timestamp = (Buffer[Buffer_Offset + 1] << 8 || Buffer[Buffer_Offset + 2]);
@@ -1339,9 +1345,9 @@ void matroska::Segment_Cluster_SimpleBlock()
         switch (TrackInfo_Current->Format)
         {
             case Format_FFV1:
-                            RawFrame->Pre = ReversibilityData.GetDataContent(Element_BeforeData);
-                            RawFrame->Post = ReversibilityData.GetDataContent(Element_AfterData);
-                            RawFrame->In = ReversibilityData.GetDataContent(Element_InData);
+                            RawFrame->SetPre(ReversibilityData.GetDataContent(Element_BeforeData));
+                            RawFrame->SetPost(ReversibilityData.GetDataContent(Element_AfterData));
+                            RawFrame->SetIn(ReversibilityData.GetDataContent(Element_InData));
                             if (!ReversibilityData.Pos && ConfigureVideoFormatAndFlavor(TrackInfo_Current))
                                 return;
                             TrackInfo_Current->Frame.Read_Buffer_Continue(Buffer.Data() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
@@ -1358,17 +1364,17 @@ void matroska::Segment_Cluster_SimpleBlock()
                                 Undecodable(undecodable::ReversibilityData_FrameCount);
                             break;
             case Format_FLAC:
-                            if (!TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin])
+                            if (ReversibilityData.Unique && !TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin])
                             {
                                 TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = true;
-                                RawFrame->Pre = ReversibilityData.GetDataContent(Element_BeforeData);
+                                RawFrame->SetPre(ReversibilityData.GetDataContent(Element_BeforeData));
 
-                                if (!RawFrame->Pre.Empty())
+                                if (!RawFrame->Pre().Empty())
                                 {
                                     wav WAV;
                                     WAV.Actions.set(Action_Encode);
                                     WAV.Actions.set(Action_AcceptTruncated);
-                                    if (!WAV.Parse(RawFrame->Pre))
+                                    if (!WAV.Parse(RawFrame->Pre()))
                                     {
                                         if (!WAV.IsSupported())
                                         {
@@ -1384,7 +1390,7 @@ void matroska::Segment_Cluster_SimpleBlock()
                                         aiff AIFF;
                                         AIFF.Actions.set(Action_Encode);
                                         AIFF.Actions.set(Action_AcceptTruncated);
-                                        if (!AIFF.Parse(RawFrame->Pre))
+                                        if (!AIFF.Parse(RawFrame->Pre()))
                                         {
                                             if (!AIFF.IsSupported())
                                             {
@@ -1401,35 +1407,37 @@ void matroska::Segment_Cluster_SimpleBlock()
 
                             TrackInfo_Current->FlacInfo->Buffer_Offset_Temp = Buffer_Offset + 4;
                             ProcessFrame_FLAC();
+
                             if (ReversibilityData.Unique && !TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin])
                             {
                                 TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin] = true;
-                                RawFrame->Pre.Clear();
+                                RawFrame->ClearPre();
                             }
                             break;
             case Format_PCM:
-                            if (!TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin])
+                            if (ReversibilityData.Unique && !TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin])
                             {
                                 TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = true;
-                                RawFrame->Pre = ReversibilityData.GetDataContent(Element_BeforeData);
+                                RawFrame->SetPre(ReversibilityData.GetDataContent(Element_BeforeData));
                             }
-                            RawFrame->AssignBufferView(Buffer.Data() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
 
+                            RawFrame->AssignBufferView(Buffer.Data() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
                             {
                                 string OutputFileName = ReversibilityData.Data[Element_FileName].Content[0].ToString();
                                 FormatPath(OutputFileName);
 
-                                //FramesPool->submit(WriteFrameCall, Buffer[Buffer_Offset] & 0x7F, RawFrame, WriteFrameCall_Opaque); //TODO: looks like there is some issues with threads and small tasks
                                 TrackInfo_Current->FrameWriter.FrameCall(RawFrame, OutputFileName);
-                                if (ReversibilityData.Unique && !TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin])
-                                {
-                                    TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin] = true;
-                                    RawFrame->Pre.Clear();
-                                }
+                            }
+
+                            if (ReversibilityData.Unique && !TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin])
+                            {
+                                TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin] = true;
+                                RawFrame->ClearPre();
                             }
                             break;
                 default:;
         }
+
         TrackInfo_Current->ReversibilityData.NextFrame();
     }
 }
@@ -1689,21 +1697,21 @@ bool matroska::ParseDecodedFrame(trackinfo* TrackInfo_Current, input_base_uncomp
     auto FileSize = TrackInfo_Current->ReversibilityData.GetFileSize();
     if (FileSize && FileSize != (uint64_t)-1)
     {
-        auto Pre_Size = RawFrame->Pre.Size();
-        auto Post_Size = RawFrame->Post.Size();
+        auto Pre_Size = RawFrame->Pre().Size();
+        auto Post_Size = RawFrame->Post().Size();
         auto Post_Offset = FileSize - Post_Size;
         if (Pre_Size >= FileSize || Post_Size >= FileSize || Pre_Size >= Post_Offset)
             return true; // Overlaps detected
         buffer Frame_Buffer;
         Frame_Buffer.Create(FileSize); // TODO: more optimal method without allocation of the full file size and without new/delete
-        Frame_Buffer.CopyCut(RawFrame->Pre);
+        Frame_Buffer.CopyCut(RawFrame->Pre());
         Frame_Buffer.SetZero(Pre_Size, Post_Offset - Pre_Size);
-        Frame_Buffer.CopyCut(FileSize - Post_Offset, RawFrame->Post);
+        Frame_Buffer.CopyCut(FileSize - Post_Offset, RawFrame->Post());
         ParseResult = FrameParser->Parse(Frame_Buffer);
     }
     else
     {
-        ParseResult = FrameParser->Parse(RawFrame->Pre, Parser ? (decltype(RawFrame->TotalSize()))-1 : RawFrame->TotalSize());
+        ParseResult = FrameParser->Parse(RawFrame->Pre(), Parser ? (decltype(RawFrame->TotalSize()))-1 : RawFrame->TotalSize());
     }
     return ParseResult;
 }
