@@ -82,10 +82,10 @@ void raw_frame::TIFF_Create(size_t colorspace_type, size_t width, size_t height,
 //---------------------------------------------------------------------------
 size_t raw_frame::GetFrameSize()
 {
-    auto FrameSize = Buffer.GetSize();
+    auto FrameSize = Buffer.Size();
 
     for (auto&& Plane : Planes)
-        FrameSize += Plane->Buffer.GetSize();
+        FrameSize += Plane->Buffer.Size();
 
     return FrameSize;
 }
@@ -93,5 +93,5 @@ size_t raw_frame::GetFrameSize()
 //---------------------------------------------------------------------------
 size_t raw_frame::GetTotalSize()
 {
-    return Pre.GetSize() + max(In.GetSize(), GetFrameSize()) + Post.GetSize();
+    return Pre.Size() + max(In.Size(), GetFrameSize()) + Post.Size();
 }

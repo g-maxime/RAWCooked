@@ -369,7 +369,7 @@ int ParseFile(size_t Files_Pos)
 
     // Attachments
     size_t AttachmentSizeFinal = (Global.AttachmentMaxSize != (size_t)-1) ? Global.AttachmentMaxSize : (1024 * 1024); // Default value arbitrary choosen
-    if (ParseInfo.FileMap.GetSize() >= AttachmentSizeFinal)
+    if (ParseInfo.FileMap.Size() >= AttachmentSizeFinal)
     {
         cout << "Error: " << *ParseInfo.Name << " is not small, expected to be an attachment?\nPlease contact info@mediaarea.net if you want support of such file." << endl;
         return 1;

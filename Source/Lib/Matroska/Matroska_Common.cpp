@@ -142,11 +142,11 @@ frame_writer::~frame_writer()
 void FrameCall_MergeIn(buffer_or_view& Buffer, const buffer_base& In)
 {
     auto Buffer_Size = Buffer.GetSizeForModification();
-    if (Buffer_Size || Buffer_Size != In.GetSize())
+    if (Buffer_Size || Buffer_Size != In.Size())
         return;
 
     auto Buffer_Data = Buffer.GetDataForModification();
-    auto In_Data = In.GetData();
+    auto In_Data = In.Data();
     for (size_t i = 0; i < Buffer_Size; i++)
         Buffer_Data[i] ^= In_Data[i];
 }
@@ -195,7 +195,7 @@ void frame_writer::FrameCall(raw_frame* RawFrame, const string& OutputFileName)
                     Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Source_Missing, OutputFileName);
                 return;
             }
-            SizeOnDisk = File_Read.GetSize();
+            SizeOnDisk = File_Read.Size();
         }
         else
             SizeOnDisk = (size_t)-1;
@@ -237,7 +237,7 @@ void frame_writer::FrameCall(raw_frame* RawFrame, const string& OutputFileName)
     {
         if (!CheckFile(RawFrame))
         {
-            if (Mode[IsNotEnd] || Offset == File_Read.GetSize())
+            if (Mode[IsNotEnd] || Offset == File_Read.Size())
             {
                 File_Read.Close();
                 return; // All is OK
@@ -343,12 +343,12 @@ void frame_writer::FrameCall(raw_frame* RawFrame, const string& OutputFileName)
 //---------------------------------------------------------------------------
 bool WriteFile_Write(size_t& Offset, file& File_Write, const buffer_base& Buffer)
 {
-    auto Buffer_Size = Buffer.GetSize();
+    auto Buffer_Size = Buffer.Size();
     if (!Buffer_Size)
         return false;
 
-    auto Buffer_Data = Buffer.GetData();
-    if (File_Write.Write(Buffer.GetData(), Buffer_Size))
+    auto Buffer_Data = Buffer.Data();
+    if (File_Write.Write(Buffer.Data(), Buffer_Size))
         return true;
 
     Offset += Buffer_Size;
@@ -371,15 +371,15 @@ bool frame_writer::WriteFile(raw_frame* RawFrame)
 //---------------------------------------------------------------------------
 bool CheckFile_Compare(size_t& Offset, const filemap& File, const buffer_base& Buffer)
 {
-    auto Buffer_Size = Buffer.GetSize();
+    auto Buffer_Size = Buffer.Size();
     if (!Buffer_Size)
         return false;
 
-    auto Buffer_Data = Buffer.GetData();
+    auto Buffer_Data = Buffer.Data();
     auto Offset_After = Offset + Buffer_Size;
-    if (Offset_After > File.GetSize())
+    if (Offset_After > File.Size())
         return true;
-    if (memcmp(File.GetData() + Offset, Buffer_Data, Buffer_Size))
+    if (memcmp(File.Data() + Offset, Buffer_Data, Buffer_Size))
         return true;
     Offset = Offset_After;
 
@@ -406,15 +406,15 @@ bool frame_writer::CheckFile(raw_frame* RawFrame)
 //---------------------------------------------------------------------------
 bool frame_writer::CheckMD5(raw_frame* RawFrame)
 {
-    if (RawFrame->Pre.GetSize())
-        MD5_Update((MD5_CTX*)MD5, RawFrame->Pre.GetData(), (unsigned long)RawFrame->Pre.GetSize());
-    if (RawFrame->Buffer.GetSize())
-        MD5_Update((MD5_CTX*)MD5, RawFrame->Buffer.GetData(), (unsigned long)RawFrame->Buffer.GetSize());
+    if (RawFrame->Pre.Size())
+        MD5_Update((MD5_CTX*)MD5, RawFrame->Pre.Data(), (unsigned long)RawFrame->Pre.Size());
+    if (RawFrame->Buffer.Size())
+        MD5_Update((MD5_CTX*)MD5, RawFrame->Buffer.Data(), (unsigned long)RawFrame->Buffer.Size());
     for (size_t p = 0; p < RawFrame->Planes.size(); p++)
-        if (RawFrame->Planes[p] && RawFrame->Planes[p]->Buffer.GetSize())
-            MD5_Update((MD5_CTX*)MD5, RawFrame->Planes[p]->Buffer.GetData(), (unsigned long)RawFrame->Planes[p]->Buffer.GetSize());
-    if (RawFrame->Post.GetSize())
-        MD5_Update((MD5_CTX*)MD5, RawFrame->Post.GetData(), (unsigned long)RawFrame->Post.GetSize());
+        if (RawFrame->Planes[p] && RawFrame->Planes[p]->Buffer.Size())
+            MD5_Update((MD5_CTX*)MD5, RawFrame->Planes[p]->Buffer.Data(), (unsigned long)RawFrame->Planes[p]->Buffer.Size());
+    if (RawFrame->Post.Size())
+        MD5_Update((MD5_CTX*)MD5, RawFrame->Post.Data(), (unsigned long)RawFrame->Post.Size());
 
     return false;
 }
@@ -466,7 +466,7 @@ void matroska::FLAC_Read(uint8_t buffer[], size_t *bytes)
     size_t SizeMax = Levels[Level].Offset_End - TrackInfo_Current->FlacInfo->Buffer_Offset_Temp;
     if (SizeMax < *bytes)
         *bytes = SizeMax;
-    memcpy(buffer, Buffer.GetData() + TrackInfo_Current->FlacInfo->Buffer_Offset_Temp, *bytes);
+    memcpy(buffer, Buffer.Data() + TrackInfo_Current->FlacInfo->Buffer_Offset_Temp, *bytes);
     TrackInfo_Current->FlacInfo->Buffer_Offset_Temp += *bytes;
     TrackInfo_Current->FlacInfo->Pos_Current += *bytes;
 }
@@ -583,7 +583,7 @@ void matroska::FLAC_Write(const uint32_t* buffer[], size_t blocksize)
             break;
     }
 
-    TrackInfo_Current->Frame.RawFrame->Buffer.Resize(Buffer_Current - TrackInfo_Current->Frame.RawFrame->Buffer.GetData());
+    TrackInfo_Current->Frame.RawFrame->Buffer.Resize(Buffer_Current - TrackInfo_Current->Frame.RawFrame->Buffer.Data());
 
     string OutputFileName = TrackInfo_Current->ReversibilityData.Data[Element_FileName].Content[0].ToString();
     FormatPath(OutputFileName);
@@ -639,8 +639,8 @@ using namespace matroska_issue;
 // https://snyk.io/research/zip-slip-vulnerability
 void SanitizeFileName(buffer& FileName)
 {
-    auto FileName_Size = FileName.GetSize();
-    auto FileName_Data = FileName.GetData();
+    auto FileName_Size = FileName.Size();
+    auto FileName_Data = FileName.Data();
 
     // Replace illegal characters (on the target platform) by underscore
     // Note: the output is not exactly as the source content and information about the exact source file name is lost, this is a limitation of the target platform impossible to bypass
@@ -870,7 +870,7 @@ void matroska::Shutdown()
                     {
                         Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, "...");
                     }
-                    string OutputFileName2 = string((const char*)TrackInfo_Current->ReversibilityData.Data[Element_FileName].Content[TrackInfo_Current->ReversibilityData.Count - 1].GetData(), TrackInfo_Current->ReversibilityData.Data[Element_FileName].Content[TrackInfo_Current->ReversibilityData.Count - 1].GetSize());
+                    string OutputFileName2 = string((const char*)TrackInfo_Current->ReversibilityData.Data[Element_FileName].Content[TrackInfo_Current->ReversibilityData.Count - 1].Data(), TrackInfo_Current->ReversibilityData.Data[Element_FileName].Content[TrackInfo_Current->ReversibilityData.Count - 1].Size());
                     FormatPath(OutputFileName2);
                     Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, OutputFileName2);
                 }
@@ -959,7 +959,7 @@ matroska::call matroska::SubElements_Void(uint64_t Name)
 //---------------------------------------------------------------------------
 void matroska::ParseBuffer()
 {
-    if (Buffer.GetSize() < 4 || Buffer[0] != 0x1A || Buffer[1] != 0x45 || Buffer[2] != 0xDF || Buffer[3] != 0xA3)
+    if (Buffer.Size() < 4 || Buffer[0] != 0x1A || Buffer[1] != 0x45 || Buffer[2] != 0xDF || Buffer[3] != 0xA3)
         return;
                                                                                                     
     Buffer_Offset = 0;
@@ -978,13 +978,13 @@ void matroska::ParseBuffer()
     if (NoOutputCheck)
         FrameWriter_Template.Mode.set(frame_writer::NoOutputCheck);
 
-    Levels[Level].Offset_End = Buffer.GetSize();
+    Levels[Level].Offset_End = Buffer.Size();
     Levels[Level].SubElements = &matroska::SubElements__;
     Level++;
 
     size_t Buffer_Offset_LowerLimit = 0; // Used for indicating the system that we'll not need anymore memory below this value 
 
-    while (Buffer_Offset < Buffer.GetSize())
+    while (Buffer_Offset < Buffer.Size())
     {
         uint64_t Name = Get_EB();
         uint64_t Size = Get_EB();
@@ -1018,7 +1018,7 @@ void matroska::ParseBuffer()
     }
 
     // Progress indicator
-    Buffer_Offset = Buffer.GetSize();
+    Buffer_Offset = Buffer.Size();
     if (!Quiet)
     {
         ProgressIndicator_IsEnd.notify_one();
@@ -1062,7 +1062,7 @@ void matroska::Segment_Attachments_AttachedFile()
 //---------------------------------------------------------------------------
 void matroska::Segment_Attachments_AttachedFile_FileName()
 {
-    AttachedFile_FileName.assign((const char*)Buffer.GetData() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
+    AttachedFile_FileName.assign((const char*)Buffer.Data() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
     FormatPath(AttachedFile_FileName);
 }
 
@@ -1093,7 +1093,7 @@ void matroska::Segment_Attachments_AttachedFile_FileData()
         hashsum HashSum;
         HashSum.HomePath = AttachedFile_FileName;
         HashSum.List = Hashes_FromAttachments;
-        HashSum.Parse(buffer_view(Buffer.GetData() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset));
+        HashSum.Parse(buffer_view(Buffer.Data() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset));
         if (HashSum.IsDetected())
         {
             if (Hashes_FromAttachments)
@@ -1105,7 +1105,7 @@ void matroska::Segment_Attachments_AttachedFile_FileData()
     // Output file
     {
         raw_frame RawFrame;
-        RawFrame.Pre = buffer_view(Buffer.GetData() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
+        RawFrame.Pre = buffer_view(Buffer.Data() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
 
         //FramesPool->submit(WriteFrameCall, Buffer[Buffer_Offset] & 0x7F, TrackInfo_Current->Frame.RawFrame, WriteFrameCall_Opaque); //TODO: looks like there is some issues with threads and small tasks
         frame_writer FrameWriter(FrameWriter_Template);
@@ -1134,7 +1134,7 @@ void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedAttachment_Fil
     Buffer_Offset++;
 
     array<uint8_t, 16> Hash;
-    memcpy(Hash.data(), Buffer.GetData() + Buffer_Offset, Hash.size());
+    memcpy(Hash.data(), Buffer.Data() + Buffer_Offset, Hash.size());
     Hashes_FromRAWcooked->FromHashFile(AttachedFile_FileName, Hash);
 }
 
@@ -1143,7 +1143,7 @@ void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedAttachment_Fil
 {
     buffer Output;
     Uncompress(Output); // TODO: avoid new/delete
-    AttachedFile_FileName.assign((char*)Output.GetData(), Output.GetSize());
+    AttachedFile_FileName.assign((char*)Output.Data(), Output.Size());
     if (AttachedFile_FileName.empty())
         return; // Not valid, ignoring
 
@@ -1201,7 +1201,7 @@ void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedBlock_FileHash
     trackinfo* TrackInfo_Current = TrackInfo[TrackInfo_Pos];
 
     array<uint8_t, 16> Hash;
-    memcpy(Hash.data(), Buffer.GetData() + Buffer_Offset, Hash.size());
+    memcpy(Hash.data(), Buffer.Data() + Buffer_Offset, Hash.size());
     Hashes_FromRAWcooked->FromHashFile(TrackInfo_Current->ReversibilityData.Data[Element_FileName].Content[TrackInfo_Current->ReversibilityData.Count], Hash);
 }
 
@@ -1227,21 +1227,21 @@ void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedSegment()
 //---------------------------------------------------------------------------
 void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedSegment_LibraryName()
 {
-    RAWcooked_LibraryName = string((const char*)Buffer.GetData() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
+    RAWcooked_LibraryName = string((const char*)Buffer.Data() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
     RejectIncompatibleVersions();
 }
 
 //---------------------------------------------------------------------------
 void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedSegment_LibraryVersion()
 {
-    RAWcooked_LibraryVersion = string((const char*)Buffer.GetData() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
+    RAWcooked_LibraryVersion = string((const char*)Buffer.Data() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
     RejectIncompatibleVersions();
 }
 
 //---------------------------------------------------------------------------
 void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedSegment_PathSeparator()
 {
-    string RAWcooked_PathSeparator = string((const char*)Buffer.GetData() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
+    string RAWcooked_PathSeparator = string((const char*)Buffer.Data() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
     if (RAWcooked_PathSeparator != "/")
     {
         std::cerr << "Path separator not / is not supported, exiting" << std::endl;
@@ -1278,7 +1278,7 @@ void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedTrack_FileHash
     trackinfo* TrackInfo_Current = TrackInfo[TrackInfo_Pos];
 
     array<uint8_t, 16> Hash;
-    memcpy(Hash.data(), Buffer.GetData() + Buffer_Offset, Hash.size());
+    memcpy(Hash.data(), Buffer.Data() + Buffer_Offset, Hash.size());
     Hashes_FromRAWcooked->FromHashFile(TrackInfo_Current->ReversibilityData.Data[Element_FileName].Content[0], Hash);
 }
 
@@ -1286,7 +1286,7 @@ void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedTrack_FileHash
 void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedTrack_LibraryName()
 {
     // Note: LibraryName in RawCookedTrack is out of spec (alpha 1&2)
-    RAWcooked_LibraryName = string((const char*)Buffer.GetData() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
+    RAWcooked_LibraryName = string((const char*)Buffer.Data() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
     RejectIncompatibleVersions();
 }
 
@@ -1294,7 +1294,7 @@ void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedTrack_LibraryN
 void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedTrack_LibraryVersion()
 {
     // Note: LibraryVersion in RawCookedTrack is out of spec (alpha 1&2)
-    RAWcooked_LibraryVersion = string((const char*)Buffer.GetData() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
+    RAWcooked_LibraryVersion = string((const char*)Buffer.Data() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
     RejectIncompatibleVersions();
 }
 
@@ -1360,7 +1360,7 @@ void matroska::Segment_Cluster_SimpleBlock()
                             RawFrame->In = ReversibilityData.GetDataContent(Element_InData);
                             if (!ReversibilityData.Pos && ConfigureVideoFormatAndFlavor(TrackInfo_Current))
                                 return;
-                            TrackInfo_Current->Frame.Read_Buffer_Continue(Buffer.GetData() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
+                            TrackInfo_Current->Frame.Read_Buffer_Continue(Buffer.Data() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
                             if (Actions[Action_Conch] || Actions[Action_Coherency])
                                 ParseDecodedFrame(TrackInfo_Current);
                             if (ReversibilityData.Data[Element_FileName].Content && ReversibilityData.Pos < ReversibilityData.Count)
@@ -1429,7 +1429,7 @@ void matroska::Segment_Cluster_SimpleBlock()
                                 TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = true;
                                 RawFrame->Pre = ReversibilityData.GetDataContent(Element_BeforeData);
                             }
-                            RawFrame->Buffer = buffer_or_view(Buffer.GetData() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
+                            RawFrame->Buffer = buffer_or_view(Buffer.Data() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
 
                             {
                                 string OutputFileName = ReversibilityData.Data[Element_FileName].Content[0].ToString();
@@ -1491,7 +1491,7 @@ void matroska::Segment_Tracks_TrackEntry_CodecID()
 {
     trackinfo* TrackInfo_Current = TrackInfo[TrackInfo_Pos];
 
-    string FileSize((const char*)Buffer.GetData() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
+    string FileSize((const char*)Buffer.Data() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
     if (FileSize == "V_MS/VFW/FOURCC")
         TrackInfo_Current->Format = Format_FFV1; // TODO: check CodecPrivate
     if (FileSize == "A_FLAC")
@@ -1585,7 +1585,7 @@ void matroska::ProgressIndicator_Show()
         if (ProgressIndicator_IsPaused)
             continue;
 
-        size_t ProgressIndicator_New = (size_t)(((float)Buffer_Offset) * ProgressIndicator_Frequency / Buffer.GetSize());
+        size_t ProgressIndicator_New = (size_t)(((float)Buffer_Offset) * ProgressIndicator_Frequency / Buffer.Size());
         if (ProgressIndicator_New == ProgressIndicator_Value)
         {
             StallDetection++;
@@ -1596,7 +1596,7 @@ void matroska::ProgressIndicator_Show()
                     ProgressIndicator_Frequency *= 10;
                     ProgressIndicator_Value *= 10;
                     Precision++;
-                    ProgressIndicator_New = (size_t)(((float)Buffer_Offset) * ProgressIndicator_Frequency / Buffer.GetSize());
+                    ProgressIndicator_New = (size_t)(((float)Buffer_Offset) * ProgressIndicator_Frequency / Buffer.Size());
                 }
             }
         }
@@ -1635,12 +1635,12 @@ void matroska::ProgressIndicator_Show()
             ProgressIndicator_Value = ProgressIndicator_New;
         }
     }
-    while (ProgressIndicator_IsEnd.wait_for(Lock, Frequency) == cv_status::timeout, Buffer_Offset != Buffer.GetSize());
+    while (ProgressIndicator_IsEnd.wait_for(Lock, Frequency) == cv_status::timeout, Buffer_Offset != Buffer.Size());
 
     // Show summary
     steady_clock::time_point Clock_Current = steady_clock::now();
     steady_clock::duration Duration = Clock_Current - Clock_Init;
-    float ByteRate = (float)(Buffer.GetSize()) * 1000 / duration_cast<milliseconds>(Duration).count();
+    float ByteRate = (float)(Buffer.Size()) * 1000 / duration_cast<milliseconds>(Duration).count();
     uint64_t Timestamp = (Cluster_Timestamp + Block_Timestamp);
     float RealTime = (float)(Timestamp) / duration_cast<milliseconds>(Duration).count();
     cerr << '\r';
@@ -1705,8 +1705,8 @@ bool matroska::ParseDecodedFrame(trackinfo* TrackInfo_Current, input_base_uncomp
     auto FileSize = TrackInfo_Current->ReversibilityData.GetFileSize();
     if (FileSize && FileSize != (uint64_t)-1)
     {
-        auto Pre_Size = RawFrame->Pre.GetSize();
-        auto Post_Size = RawFrame->Post.GetSize();
+        auto Pre_Size = RawFrame->Pre.Size();
+        auto Post_Size = RawFrame->Post.Size();
         auto Post_Offset = FileSize - Post_Size;
         if (Pre_Size >= FileSize || Post_Size >= FileSize || Pre_Size >= Post_Offset)
             return true; // Overlaps detected
@@ -1733,7 +1733,7 @@ void matroska::Uncompress(buffer& Output)
         Output.Create(RealBuffer_Size);
 
         uLongf t = (uLongf)RealBuffer_Size;
-        if (uncompress((Bytef*)Output.GetData(), &t, (const Bytef*)Buffer.GetData() + Buffer_Offset, (uLong)(Levels[Level].Offset_End - Buffer_Offset))<0)
+        if (uncompress((Bytef*)Output.Data(), &t, (const Bytef*)Buffer.Data() + Buffer_Offset, (uLong)(Levels[Level].Offset_End - Buffer_Offset))<0)
         {
             Output.Clear();
         }
@@ -1775,7 +1775,7 @@ void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedxxx_yyy(elemen
 //---------------------------------------------------------------------------
 void matroska::StoreFromCurrentToEndOfElement(buffer &Output)
 {
-    Output.CopyExpand(Buffer.GetData() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
+    Output.CopyExpand(Buffer.Data() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
 }
 
 //---------------------------------------------------------------------------
@@ -1808,7 +1808,7 @@ void matroska::ProcessCodecPrivate_FFV1()
 
         trackinfo* TrackInfo_Current = TrackInfo[TrackInfo_Pos];
 
-        TrackInfo_Current->Frame.Read_Buffer_OutOfBand(Buffer.GetData() + Buffer_Offset + 0x28, Size - 0x28);
+        TrackInfo_Current->Frame.Read_Buffer_OutOfBand(Buffer.Data() + Buffer_Offset + 0x28, Size - 0x28);
     }
 }
 

@@ -218,7 +218,7 @@ void hashsum::ParseBuffer()
     if (PathSeparatorPos != (size_t)-1 && PathSeparatorPos + 1 != HomePath.size())
         HomePath.resize(PathSeparatorPos + 1);
 
-    while (Buffer_Offset + 32 + 1 <= Buffer.GetSize())
+    while (Buffer_Offset + 32 + 1 <= Buffer.Size())
     {
         string Name;
         md5 MD5;
@@ -227,19 +227,19 @@ void hashsum::ParseBuffer()
         bool IsBsd;
         array<uint8_t, 5> BsdStringBegin_Md5 = { 'M', 'D', '5', ' ', '(' };
         array<uint8_t, 4> BsdStringEnd = { ')', ' ', '=', ' ' };
-        if (!memcmp(Buffer.GetData()+Buffer_Offset, BsdStringBegin_Md5.data(), BsdStringBegin_Md5.size()))
+        if (!memcmp(Buffer.Data()+Buffer_Offset, BsdStringBegin_Md5.data(), BsdStringBegin_Md5.size()))
         {
             // Name
             Buffer_Offset += BsdStringBegin_Md5.size();
             size_t Begin = Buffer_Offset;
-            while (Buffer_Offset < Buffer.GetSize() && Buffer[Buffer_Offset] != '\r' && Buffer[Buffer_Offset] != '\n')
+            while (Buffer_Offset < Buffer.Size() && Buffer[Buffer_Offset] != '\r' && Buffer[Buffer_Offset] != '\n')
                 Buffer_Offset++;
             if (Buffer_Offset - Begin < BsdStringEnd.size() + 32)
                 break; // Not enough place for ") = " + MD5
             Buffer_Offset -= 32;
-            if (memcmp(Buffer.GetData() + Buffer_Offset - BsdStringEnd.size(), BsdStringEnd.data(), BsdStringEnd.size()))
+            if (memcmp(Buffer.Data() + Buffer_Offset - BsdStringEnd.size(), BsdStringEnd.data(), BsdStringEnd.size()))
                 break;
-            Name.assign((const char*)Buffer.GetData() + Begin, Buffer_Offset - BsdStringEnd.size() - Begin);
+            Name.assign((const char*)Buffer.Data() + Begin, Buffer_Offset - BsdStringEnd.size() - Begin);
             IsBsd = true;
         }
         else
@@ -284,11 +284,11 @@ void hashsum::ParseBuffer()
         if (!IsBsd)
         {
             // Separator(s)
-            if (Buffer_Offset >= Buffer.GetSize())
+            if (Buffer_Offset >= Buffer.Size())
                 break;
             if (Buffer[Buffer_Offset++] != ' ')
                 break;
-            if (Buffer_Offset >= Buffer.GetSize())
+            if (Buffer_Offset >= Buffer.Size())
                 break;
             uint8_t c = Buffer[Buffer_Offset];
             if (c == ' ' || c == '*' || c == '?') // "?" is found in shasum --portable
@@ -296,9 +296,9 @@ void hashsum::ParseBuffer()
 
             // Name
             size_t Begin = Buffer_Offset;
-            while (Buffer_Offset < Buffer.GetSize() && Buffer[Buffer_Offset] != '\r' && Buffer[Buffer_Offset] != '\n')
+            while (Buffer_Offset < Buffer.Size() && Buffer[Buffer_Offset] != '\r' && Buffer[Buffer_Offset] != '\n')
                 Buffer_Offset++;
-            Name.assign((const char*)Buffer.GetData() + Begin, Buffer_Offset - Begin);
+            Name.assign((const char*)Buffer.Data() + Begin, Buffer_Offset - Begin);
         }
         
         // Add
@@ -308,13 +308,13 @@ void hashsum::ParseBuffer()
         // End of line
         if (Buffer[Buffer_Offset++] == '\r')
         {
-            if (Buffer_Offset < Buffer.GetSize() && Buffer[Buffer_Offset++] != '\n')
+            if (Buffer_Offset < Buffer.Size() && Buffer[Buffer_Offset++] != '\n')
                 break;
         }
     }
 
     // Integrity test
-    if (Buffer_Offset != Buffer.GetSize())
+    if (Buffer_Offset != Buffer.Size())
     {
         if (List)
             List->ResetHashFile(OldSize);

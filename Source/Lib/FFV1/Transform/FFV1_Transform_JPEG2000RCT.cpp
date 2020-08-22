@@ -22,7 +22,7 @@ transform_jpeg2000rct::transform_jpeg2000rct(raw_frame* RawFrame_, size_t Bits_,
     size_t FrameBuffer_Temp_Size = RawFrame->Planes.size();
     for (size_t p = 0; p<FrameBuffer_Temp_Size; p++)
     {
-        FrameBuffer_Temp[p] = RawFrame->Planes[p]->Buffer.GetData();
+        FrameBuffer_Temp[p] = RawFrame->Planes[p]->Buffer.Data();
         FrameBuffer_Temp[p] += y_offset*RawFrame->Planes[p]->AllBytesPerLine();
         FrameBuffer_Temp[p] += x_offset*RawFrame->Planes[p]->BitsPerBlock/RawFrame->Planes[p]->PixelsPerBlock/8; //TODO: check when not byte boundary
     }

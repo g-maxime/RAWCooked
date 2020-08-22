@@ -84,12 +84,12 @@ int filemap::Open_ReadMode(const char* FileName)
 int filemap::Remap(size_t NewSize)
 {
     // Close previous map
-    if (GetData())
+    if (Data())
     {
         #if defined(_WIN32) || defined(_WINDOWS)
-            UnmapViewOfFile(GetData());
+            UnmapViewOfFile(Data());
         #else
-            munmap(GetData(), NewSize());
+            munmap(Data(), NewSize());
         #endif
         ClearBase();
     }
@@ -123,12 +123,12 @@ int filemap::Remap(size_t NewSize)
 int filemap::Close()
 {
     // Close map
-    if (GetData())
+    if (Data())
     {
         #if defined(_WIN32) || defined(_WINDOWS)
-            UnmapViewOfFile(GetData());
+            UnmapViewOfFile(Data());
         #else
-            munmap(GetData(), GetSize());
+            munmap(Data(), Size());
         #endif
         ClearBase();
     }
@@ -229,10 +229,10 @@ file::return_value file::Open_WriteMode(const string& BaseDirectory, const strin
 //---------------------------------------------------------------------------
 // file
 
-file::return_value file::Write(const uint8_t* GetData, size_t GetSize)
+file::return_value file::Write(const uint8_t* Data, size_t Size)
 {
     // Handle size of 0
-    if (!GetSize)
+    if (!Size)
         return OK;
 
     // Check that a file is open
@@ -240,32 +240,32 @@ file::return_value file::Write(const uint8_t* GetData, size_t GetSize)
     #if defined(_WIN32) || defined(_WINDOWS)
     HANDLE& P = (HANDLE&)Private;
     BOOL Result;
-    while (Offset < GetSize)
+    while (Offset < Size)
     {
         DWORD BytesWritten;
         DWORD Size_Temp;
-        if (GetSize - Offset >= (DWORD)-1) // WriteFile() accepts only DWORDs
+        if (Size - Offset >= (DWORD)-1) // WriteFile() accepts only DWORDs
             Size_Temp = (DWORD)-1;
         else
-            Size_Temp = (DWORD)(GetSize - Offset);
-        Result = WriteFile(P, GetData + Offset, Size_Temp, &BytesWritten, NULL);
+            Size_Temp = (DWORD)(Size - Offset);
+        Result = WriteFile(P, Data + Offset, Size_Temp, &BytesWritten, NULL);
         if (BytesWritten == 0 || Result == FALSE)
             break;
         Offset += BytesWritten;
     }
-    if (Result == FALSE || Offset < GetSize)
+    if (Result == FALSE || Offset < Size)
     #else
     int& P = (int&)Private;
     ssize_t BytesWritten;
-    while (Offset < GetSize)
+    while (Offset < Size)
     {
-        size_t Size_Temp = GetSize - Offset;
-        BytesWritten = write(P, GetData, Size_Temp);
+        size_t Size_Temp = Size - Offset;
+        BytesWritten = write(P, Data, Size_Temp);
         if (BytesWritten == 0 || BytesWritten == -1)
             break;
         Offset += (size_t)BytesWritten;
     }
-    if (BytesWritten == -1 || Offset < GetSize)
+    if (BytesWritten == -1 || Offset < Size)
     #endif
     {
         return Error_FileWrite;

@@ -295,14 +295,14 @@ private:
             if (AddMask)
             {
                 auto& Mask = Data[Element].Mask;
-                auto Mask_Size = Mask.GetSize();
-                auto Mask_Data = Mask.GetData();
+                auto Mask_Size = Mask.Size();
+                auto Mask_Data = Mask.Data();
                 if (!Mask_Size)
                     return;
 
                 auto& Content = Data[Element].Content[Pos];
-                auto Content_Size = Content.GetSize();
-                auto Content_Data = Content.GetData();
+                auto Content_Size = Content.Size();
+                auto Content_Data = Content.Data();
                 for (size_t i = 0; i < Content_Size && i < Mask_Size; i++)
                     Content_Data[i] += Mask_Data[i];
             }
@@ -316,7 +316,7 @@ private:
 
         buffer_view GetDataContent(element Element)
         {
-            if (Pos >= Count || !Data[Element].Content || !Data[Element].Content[Pos].GetSize())
+            if (Pos >= Count || !Data[Element].Content || !Data[Element].Content[Pos].Size())
                 return buffer_view();
             return buffer_view(Data[Element].Content[Pos]);
         }

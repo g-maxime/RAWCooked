@@ -186,7 +186,7 @@ aiff::aiff(errors* Errors_Source) :
 //---------------------------------------------------------------------------
 void aiff::ParseBuffer()
 {
-    if (Buffer.GetSize() < 12)
+    if (Buffer.Size() < 12)
         return;
     if (Buffer[0] != 'F' || Buffer[1] != 'O' || Buffer[2] != 'R' || Buffer[3] != 'M'
      || Buffer[8] != 'A' || Buffer[9] != 'I' || Buffer[10] != 'F' || (Buffer[11] != 'F' && Buffer[11] != 'C'))
@@ -195,11 +195,11 @@ void aiff::ParseBuffer()
 
     Flavor = Flavor_Max; // Used for detected if COMM chunk is parsed
     Buffer_Offset = 0;
-    Levels[0].Offset_End = Buffer.GetSize();
+    Levels[0].Offset_End = Buffer.Size();
     Levels[0].SubElements = &aiff::SubElements__;
     Level=1;
 
-    while (Buffer_Offset < Buffer.GetSize())
+    while (Buffer_Offset < Buffer.Size())
     {
         // Find the current nesting level
         while (Buffer_Offset >= Levels[Level - 1].Offset_End)
@@ -250,7 +250,7 @@ void aiff::ParseBuffer()
             Buffer_Offset = Levels[Level].Offset_End;
 
             // Padding byte
-            if (Buffer_Offset % 2 && Buffer_Offset < Buffer.GetSize() && !Buffer[Buffer_Offset])
+            if (Buffer_Offset % 2 && Buffer_Offset < Buffer.Size() && !Buffer[Buffer_Offset])
             {
                 Buffer_Offset++;
                 Levels[Level].Offset_End = Buffer_Offset;
@@ -381,10 +381,10 @@ void aiff::AIFF_SSND()
     if (IsSupported() && RAWcooked)
     {
         RAWcooked->Unique = true;
-        RAWcooked->BeforeData = Buffer.GetData();
+        RAWcooked->BeforeData = Buffer.Data();
         RAWcooked->BeforeData_Size = Buffer_Offset + 8;
-        RAWcooked->AfterData = Buffer.GetData() + Levels[Level].Offset_End;
-        RAWcooked->AfterData_Size = Buffer.GetSize() - Levels[Level].Offset_End;
+        RAWcooked->AfterData = Buffer.Data() + Levels[Level].Offset_End;
+        RAWcooked->AfterData_Size = Buffer.Size() - Levels[Level].Offset_End;
         RAWcooked->InData = nullptr;
         RAWcooked->InData_Size = 0;
         RAWcooked->FileSize = (uint64_t)-1;

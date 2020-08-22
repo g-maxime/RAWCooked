@@ -56,7 +56,7 @@ public:
     size_t                      NewHashFile(); // Indicate that a new hash file is tentatively parsed
     void                        ResetHashFile(size_t OldSize); // Indicate that the new hash file is buggy, discard its content, use value from NewHashFile()
     void                        FromHashFile(string const& FileName, md5 const& MD5);
-    void                        FromHashFile(buffer_base const& FileName, md5 const& MD5) { FromHashFile(string((const char*)FileName.GetData(), FileName.GetSize()), MD5); }
+    void                        FromHashFile(buffer_base const& FileName, md5 const& MD5) { FromHashFile(string((const char*)FileName.Data(), FileName.Size()), MD5); }
     void                        Ignore(string const& FileName);
     void                        RemoveEmptyFiles();
     bool                        NoMoreHashFiles() { if (!IsSorted) NoMoreHashFiles_Internal(); return !List_FromHashFiles.empty(); } // Return true if Hashes are useful

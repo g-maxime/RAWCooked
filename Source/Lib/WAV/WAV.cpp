@@ -186,7 +186,7 @@ wav::wav(errors* Errors_Source) :
 //---------------------------------------------------------------------------
 void wav::ParseBuffer()
 {
-    if (Buffer.GetSize() < 12)
+    if (Buffer.Size() < 12)
         return;
     if (Buffer[8] != 'W' || Buffer[9] != 'A' || Buffer[10] != 'V' || Buffer[11] != 'E')
         return;
@@ -201,11 +201,11 @@ void wav::ParseBuffer()
 
     Flavor = Flavor_Max; // Used for detected if fmt chunk is parsed
     Buffer_Offset = 0;
-    Levels[0].Offset_End = Buffer.GetSize();
+    Levels[0].Offset_End = Buffer.Size();
     Levels[0].SubElements = &wav::SubElements__;
     Level=1;
 
-    while (Buffer_Offset < Buffer.GetSize())
+    while (Buffer_Offset < Buffer.Size())
     {
         // Find the current nesting level
         while (Buffer_Offset >= Levels[Level - 1].Offset_End)
@@ -256,7 +256,7 @@ void wav::ParseBuffer()
             Buffer_Offset = Levels[Level].Offset_End;
 
             // Padding byte
-            if (Buffer_Offset % 2 && Buffer_Offset < Buffer.GetSize() && !Buffer[Buffer_Offset])
+            if (Buffer_Offset % 2 && Buffer_Offset < Buffer.Size() && !Buffer[Buffer_Offset])
             {
                 Buffer_Offset++;
                 Levels[Level].Offset_End = Buffer_Offset;
@@ -330,10 +330,10 @@ void wav::WAVE_data()
     if (IsSupported() && RAWcooked)
     {
         RAWcooked->Unique = true;
-        RAWcooked->BeforeData = Buffer.GetData();
+        RAWcooked->BeforeData = Buffer.Data();
         RAWcooked->BeforeData_Size = Buffer_Offset;
-        RAWcooked->AfterData = Buffer.GetData() + Levels[Level].Offset_End;
-        RAWcooked->AfterData_Size = Buffer.GetSize() - Levels[Level].Offset_End;
+        RAWcooked->AfterData = Buffer.Data() + Levels[Level].Offset_End;
+        RAWcooked->AfterData_Size = Buffer.Size() - Levels[Level].Offset_End;
         RAWcooked->InData = nullptr;
         RAWcooked->InData_Size = 0;
         RAWcooked->FileSize = (uint64_t)-1;

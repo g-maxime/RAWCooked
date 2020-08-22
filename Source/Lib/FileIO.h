@@ -28,7 +28,7 @@ public:
     int                         Open_ReadMode(const char* FileName);
     int                         Open_ReadMode(const string& FileName) { return Open_ReadMode(FileName.c_str()); }
     bool                        IsOpen() { return Private ? true : false; }
-    int                         Remap() { return Remap(GetSize()); }
+    int                         Remap() { return Remap(Size()); }
     int                         Close();
 
 private:
@@ -59,7 +59,7 @@ public:
     return_value                Open_WriteMode(const string& BaseDirectory_Source, const string& OutputFileName_Source, bool RejectIfExists = false, bool Truncate = false);
     bool                        IsOpen() { return Private == (void*)-1 ? false : true; }
     return_value                Write(const uint8_t* Buffer, size_t Size);
-    return_value                Write(const buffer_base& Buffer) { return Write(Buffer.GetData(), Buffer.GetSize()); }
+    return_value                Write(const buffer_base& Buffer) { return Write(Buffer.Data(), Buffer.Size()); }
     enum seek_value
     {
         Begin,
