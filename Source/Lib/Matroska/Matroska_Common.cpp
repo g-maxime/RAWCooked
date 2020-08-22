@@ -156,7 +156,7 @@ void frame_writer::FrameCall(raw_frame* RawFrame, const string& OutputFileName)
     // Post-processing
     FrameCall_MergeIn(RawFrame->Buffer, RawFrame->In);
     if (RawFrame->Planes.size() == 1 && RawFrame->Planes[0])
-        FrameCall_MergeIn(buffer_or_view(RawFrame->Planes[0]->Buffer), RawFrame->In);
+        FrameCall_MergeIn(buffer_or_view(RawFrame->Planes[0]->Buffer()), RawFrame->In);
 
     if (!Mode[IsNotBegin])
     {
@@ -358,7 +358,7 @@ bool frame_writer::WriteFile(raw_frame* RawFrame)
     if (WriteFile_Write(Offset, File_Write, RawFrame->Buffer))
         return true;
     for (size_t p = 0; p < RawFrame->Planes.size(); p++)
-        if (RawFrame->Planes[p] && WriteFile_Write(Offset, File_Write, RawFrame->Planes[p]->Buffer))
+        if (RawFrame->Planes[p] && WriteFile_Write(Offset, File_Write, RawFrame->Planes[p]->Buffer()))
             return true;
     if (WriteFile_Write(Offset, File_Write, RawFrame->Post))
         return true;
@@ -391,7 +391,7 @@ bool frame_writer::CheckFile(raw_frame* RawFrame)
     if (CheckFile_Compare(Offset_Current, File_Read, RawFrame->Buffer))
         return true;
     for (size_t p = 0; p < RawFrame->Planes.size(); p++)
-        if (RawFrame->Planes[p] && CheckFile_Compare(Offset_Current, File_Read, RawFrame->Planes[p]->Buffer))
+        if (RawFrame->Planes[p] && CheckFile_Compare(Offset_Current, File_Read, RawFrame->Planes[p]->Buffer()))
             return true;
     if (CheckFile_Compare(Offset_Current, File_Read, RawFrame->Post))
         return true;
@@ -408,8 +408,8 @@ bool frame_writer::CheckMD5(raw_frame* RawFrame)
     if (RawFrame->Buffer.Size())
         MD5_Update((MD5_CTX*)MD5, RawFrame->Buffer.Data(), (unsigned long)RawFrame->Buffer.Size());
     for (size_t p = 0; p < RawFrame->Planes.size(); p++)
-        if (RawFrame->Planes[p] && RawFrame->Planes[p]->Buffer.Size())
-            MD5_Update((MD5_CTX*)MD5, RawFrame->Planes[p]->Buffer.Data(), (unsigned long)RawFrame->Planes[p]->Buffer.Size());
+        if (RawFrame->Planes[p] && RawFrame->Planes[p]->Buffer().Size())
+            MD5_Update((MD5_CTX*)MD5, RawFrame->Planes[p]->Buffer().Data(), (unsigned long)RawFrame->Planes[p]->Buffer().Size());
     if (RawFrame->Post.Size())
         MD5_Update((MD5_CTX*)MD5, RawFrame->Post.Data(), (unsigned long)RawFrame->Post.Size());
 

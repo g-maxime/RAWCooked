@@ -352,8 +352,6 @@ public:
 
     struct plane
     {
-        buffer                  Buffer;
-
         plane(size_t NewWidth, size_t NewHeight, size_t NewBitsPerBlock, size_t NewPixelsPerBlock = 1)
             :
             Width_(NewWidth),
@@ -365,30 +363,36 @@ public:
             if (Width_Padding_)
                 Width_Padding_ -= Width_ % Width_Padding_;
 
-            Buffer.Create((Width_ + Width_Padding_) * Height_ * BitsPerBlock_ / PixelsPerBlock_ / 8);
+            Buffer_.Create((Width_ + Width_Padding_) * Height_ * BitsPerBlock_ / PixelsPerBlock_ / 8);
         }
 
-        size_t ValidBytesPerLine()
+        const buffer& Buffer() const
+        {
+            return Buffer_;
+        }
+
+        size_t ValidBytesPerLine() const
         {
             return Width_ * BitsPerBlock_ / PixelsPerBlock_ / 8;
         }
 
-        size_t AllBytesPerLine()
+        size_t AllBytesPerLine() const
         {
             return (Width_ + Width_Padding_) * BitsPerBlock_ / PixelsPerBlock_ / 8;
         }
 
-        size_t BitsPerBlock()
+        size_t BitsPerBlock() const
         {
             return BitsPerBlock_;
         }
 
-        size_t PixelsPerBlock()
+        size_t PixelsPerBlock() const
         {
             return PixelsPerBlock_;
         }
 
     private:
+        buffer                  Buffer_;
         size_t                  Width_;
         size_t                  Width_Padding_;
         size_t                  Height_;
