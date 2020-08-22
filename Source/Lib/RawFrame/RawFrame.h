@@ -356,34 +356,44 @@ public:
 
         plane(size_t NewWidth, size_t NewHeight, size_t NewBitsPerBlock, size_t NewPixelsPerBlock = 1)
             :
-            Width(NewWidth),
-            Height(NewHeight),
-            BitsPerBlock(NewBitsPerBlock),
-            PixelsPerBlock(NewPixelsPerBlock)
+            Width_(NewWidth),
+            Height_(NewHeight),
+            BitsPerBlock_(NewBitsPerBlock),
+            PixelsPerBlock_(NewPixelsPerBlock)
         {
-            Width_Padding=0; //TODO: option for padding size
-            if (Width_Padding)
-                Width_Padding-=Width%Width_Padding;
-                
-            Buffer.Create((Width+Width_Padding)*Height*BitsPerBlock/PixelsPerBlock/8);
+            Width_Padding_ = 0; //TODO: option for padding size
+            if (Width_Padding_)
+                Width_Padding_ -= Width_ % Width_Padding_;
+
+            Buffer.Create((Width_ + Width_Padding_) * Height_ * BitsPerBlock_ / PixelsPerBlock_ / 8);
         }
 
         size_t ValidBytesPerLine()
         {
-            return Width*BitsPerBlock/PixelsPerBlock/8;
+            return Width_ * BitsPerBlock_ / PixelsPerBlock_ / 8;
         }
 
         size_t AllBytesPerLine()
         {
-            return (Width+Width_Padding)*BitsPerBlock/PixelsPerBlock/8;
+            return (Width_ + Width_Padding_) * BitsPerBlock_ / PixelsPerBlock_ / 8;
+        }
+
+        size_t BitsPerBlock()
+        {
+            return BitsPerBlock_;
+        }
+
+        size_t PixelsPerBlock()
+        {
+            return PixelsPerBlock_;
         }
 
     private:
-        size_t                  Width;
-        size_t                  Width_Padding;
-        size_t                  Height;
-        size_t                  BitsPerBlock;
-        size_t                  PixelsPerBlock;
+        size_t                  Width_;
+        size_t                  Width_Padding_;
+        size_t                  Height_;
+        size_t                  BitsPerBlock_;
+        size_t                  PixelsPerBlock_;
     };
     std::vector<plane*> Planes;
 
@@ -401,7 +411,7 @@ public:
         Flavor(Flavor_Max)
     {
     }
-    
+
     ~raw_frame()
     {
         for (size_t i = 0; i < Planes.size(); i++)
