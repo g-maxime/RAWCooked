@@ -141,25 +141,22 @@ frame_writer::~frame_writer()
 //---------------------------------------------------------------------------
 void FrameCall_MergeIn(buffer_or_view& Buffer, const buffer_base& In)
 {
-    auto Buffer_Size = Buffer.GetSizeForModification();
+    auto Buffer_Size = Buffer.Size();
     if (Buffer_Size || Buffer_Size != In.Size())
         return;
 
-    auto Buffer_Data = Buffer.GetDataForModification();
+    auto Buffer_Data = Buffer.DataForModification();
     auto In_Data = In.Data();
     for (size_t i = 0; i < Buffer_Size; i++)
         Buffer_Data[i] ^= In_Data[i];
 }
-void FrameCall_MergeIn(buffer& Buffer, const buffer_base& In)
-{
-    FrameCall_MergeIn(buffer_or_view(Buffer), In);
-}
+
 void frame_writer::FrameCall(raw_frame* RawFrame, const string& OutputFileName)
 {
     // Post-processing
     FrameCall_MergeIn(RawFrame->Buffer, RawFrame->In);
     if (RawFrame->Planes.size() == 1 && RawFrame->Planes[0])
-        FrameCall_MergeIn(RawFrame->Planes[0]->Buffer, RawFrame->In);
+        FrameCall_MergeIn(buffer_or_view(RawFrame->Planes[0]->Buffer), RawFrame->In);
 
     if (!Mode[IsNotBegin])
     {
@@ -486,9 +483,9 @@ void matroska::FLAC_Write(const uint32_t* buffer[], size_t blocksize)
 {
     trackinfo* TrackInfo_Current = TrackInfo[TrackInfo_Pos];
 
-    if (!TrackInfo_Current->Frame.RawFrame->Buffer.GetDataForModification())
+    if (!TrackInfo_Current->Frame.RawFrame->Buffer.Data())
         TrackInfo_Current->Frame.RawFrame->Buffer.Create(16384 / 8 * TrackInfo_Current->FlacInfo->bits_per_sample*TrackInfo_Current->FlacInfo->channels); // 16384 is the max blocksize in spec
-    uint8_t* Buffer_Current = TrackInfo_Current->Frame.RawFrame->Buffer.GetDataForModification();
+    auto Buffer_Current = TrackInfo_Current->Frame.RawFrame->Buffer.DataForModification();
 
     // Converting libFLAC output to WAV style
     uint8_t channels = TrackInfo_Current->FlacInfo->channels;

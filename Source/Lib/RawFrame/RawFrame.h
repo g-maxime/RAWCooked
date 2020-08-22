@@ -259,10 +259,10 @@ struct buffer_or_view : buffer_base
     {}
     buffer_or_view(buffer_or_view&& Buffer) :
         buffer_base(Buffer.Data(), Buffer.Size()),
-        IsOwned(Buffer.IsOwned)
+        IsOwned_(Buffer.IsOwned_)
     {
         Buffer.ClearBase();
-        Buffer.IsOwned = false;
+        Buffer.IsOwned_ = false;
     }
 
     buffer_or_view& operator = (buffer_or_view&& Buffer)
@@ -271,44 +271,47 @@ struct buffer_or_view : buffer_base
             return *this;
         AssignBase(Buffer);
         Buffer.ClearBase();
-        if (Buffer.IsOwned)
+        if (Buffer.IsOwned_)
         {
-            IsOwned = true;
-            Buffer.IsOwned = false;
+            IsOwned_ = true;
+            Buffer.IsOwned_ = false;
         }
         return *this;
     }
 
     ~buffer_or_view()
     {
-        if (!IsOwned)
+        if (!IsOwned_)
             return;
         delete[] Data();
     }
 
-    size_t GetSizeForModification() const
+    uint8_t* DataForModification()
     {
-        return IsOwned ? Size() : 0;
-    }
+        if (!IsOwned_)
+        {
+            auto NewBuffer = new uint8_t[Size()];
+            memcpy(NewBuffer, Data(), Size());
+            AssignKeepSizeBase(NewBuffer);
+            IsOwned_ = true;
+        }
 
-    uint8_t* GetDataForModification() const
-    {
-        return IsOwned ? (uint8_t*)Data() : nullptr;
+        return (uint8_t*)Data(); // It is owned so modification is possible
     }
 
     void Create(size_t NewSize)
     {
-        if (IsOwned)
+        if (IsOwned_)
             delete[] Data();
         else
-            IsOwned = true;
+            IsOwned_ = true;
         AssignBase(new uint8_t[NewSize], NewSize);
     }
 
-    void Copy(const uint8_t* NewData, size_t NewSize)
+    void CopyCut(const uint8_t* NewData, size_t NewSize)
     {
-        Create(NewSize);
-        memcpy(GetDataForModification(), NewData, Size());
+        Resize(NewSize);
+        memcpy(DataForModification(), NewData, NewSize);
     }
 
     void Resize(size_t NewSize)
@@ -322,20 +325,20 @@ struct buffer_or_view : buffer_base
         auto NewBuffer = new uint8_t[NewSize];
         memcpy(NewBuffer, OldBuffer, NewSize);
         AssignBase(NewBuffer, NewSize);
-        if (IsOwned)
+        if (IsOwned_)
             delete[] OldBuffer;
         else
-            IsOwned = true;
+            IsOwned_ = true;
     }
 
     void Clear()
     {
         ClearBase();
-        IsOwned = false;
+        IsOwned_ = false;
     }
 
 private:
-    bool IsOwned = false;
+    bool IsOwned_ = false;
 };
 
 class raw_frame
