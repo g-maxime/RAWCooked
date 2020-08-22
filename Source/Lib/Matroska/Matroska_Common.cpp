@@ -640,7 +640,7 @@ using namespace matroska_issue;
 void SanitizeFileName(buffer& FileName)
 {
     auto FileName_Size = FileName.GetSize();
-    auto FileName_Data = FileName.GetDataForModification();
+    auto FileName_Data = FileName.GetData();
 
     // Replace illegal characters (on the target platform) by underscore
     // Note: the output is not exactly as the source content and information about the exact source file name is lost, this is a limitation of the target platform impossible to bypass
@@ -1712,9 +1712,9 @@ bool matroska::ParseDecodedFrame(trackinfo* TrackInfo_Current, input_base_uncomp
             return true; // Overlaps detected
         buffer Frame_Buffer;
         Frame_Buffer.Create(FileSize); // TODO: more optimal method without allocation of the full file size and without new/delete
-        Frame_Buffer.CopyFrom(RawFrame->Pre);
+        Frame_Buffer.CopyCut(RawFrame->Pre);
         Frame_Buffer.SetZero(Pre_Size, Post_Offset - Pre_Size);
-        Frame_Buffer.CopyFrom(FileSize - Post_Offset, RawFrame->Post);
+        Frame_Buffer.CopyCut(FileSize - Post_Offset, RawFrame->Post);
         ParseResult = FrameParser->Parse(Frame_Buffer);
     }
     else
@@ -1733,7 +1733,7 @@ void matroska::Uncompress(buffer& Output)
         Output.Create(RealBuffer_Size);
 
         uLongf t = (uLongf)RealBuffer_Size;
-        if (uncompress((Bytef*)Output.GetDataForModification(), &t, (const Bytef*)Buffer.GetData() + Buffer_Offset, (uLong)(Levels[Level].Offset_End - Buffer_Offset))<0)
+        if (uncompress((Bytef*)Output.GetData(), &t, (const Bytef*)Buffer.GetData() + Buffer_Offset, (uLong)(Levels[Level].Offset_End - Buffer_Offset))<0)
         {
             Output.Clear();
         }
@@ -1775,7 +1775,7 @@ void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedxxx_yyy(elemen
 //---------------------------------------------------------------------------
 void matroska::StoreFromCurrentToEndOfElement(buffer &Output)
 {
-    Output.Copy(Buffer.GetData() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
+    Output.CopyExpand(Buffer.GetData() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
 }
 
 //---------------------------------------------------------------------------

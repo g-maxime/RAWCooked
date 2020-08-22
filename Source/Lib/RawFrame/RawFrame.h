@@ -20,9 +20,9 @@ struct buffer_base
 {
 protected:
     buffer_base() = delete;
-    buffer_base(size_t Size_, const uint8_t* Data_) :
-        Size(Size_),
-        Data(Data_)
+    buffer_base(size_t NewSize, const uint8_t* NewData) :
+        Size_(NewSize),
+        Data_(NewData)
     {}
     buffer_base(buffer_base& Buffer) = delete;
     buffer_base(buffer_base&& Buffer) = delete;
@@ -33,51 +33,58 @@ protected:
 
     void ClearBase()
     {
-        Size = 0;
-        Data = nullptr;
+        Size_ = 0;
+        Data_ = nullptr;
+    }
+
+    void DeleteBase()
+    {
+        Size_ = 0;
+        delete[] Data_;
+        Data_ = nullptr;
     }
 
     void AssignBase(const buffer_base& Buffer)
     {
-        Size = Buffer.Size;
-        Data = Buffer.Data;
+        Size_ = Buffer.Size_;
+        Data_ = Buffer.Data_;
     }
 
-    void AssignBase(size_t Size_, const uint8_t* Data_)
+    void AssignBase(const uint8_t* NewData, size_t NewSize)
     {
-        Size = Size_;
-        Data = Data_;
+        Size_ = NewSize;
+        Data_ = NewData;
     }
 
 public:
     const size_t GetSize() const
     {
-        return Size;
+        return Size_;
     }
 
     const uint8_t* const GetData() const
     {
-        return Data;
+        return Data_;
     }
 
     const uint8_t& operator [] (size_t n) const
     {
-        return Data[n];
+        return Data_[n];
     }
 
     const bool Empty() const
     {
-        return !Size;
+        return !Size_;
     }
 
     string ToString()
     {
-        return string((const char*)GetData(), GetSize());
+        return move(string((const char*)GetData(), GetSize()));
     }
 
-protected:
-    size_t Size;
-    const uint8_t* Data;
+private:
+    const uint8_t* Data_;
+    size_t Size_;
 };
 
 struct buffer : buffer_base
@@ -85,11 +92,9 @@ struct buffer : buffer_base
     buffer() :
         buffer_base(0, nullptr)
     {}
-    buffer(const buffer& Buffer) :
-        buffer_base(Buffer.Size, Buffer.Data)
-    {}
+    buffer(const buffer& Buffer) = delete;
     buffer(buffer&& Buffer) :
-        buffer_base(Buffer.Size, Buffer.Data)
+        buffer_base(Buffer.GetSize(), Buffer.GetData())
     {
         Buffer.ClearBase();
     }
@@ -108,72 +113,70 @@ struct buffer : buffer_base
         delete[] GetData();
     }
 
-    size_t GetSizeForModification() const
+    uint8_t* GetData() const
     {
-        return GetSize();
+        return (uint8_t*)buffer_base::GetData(); // We are sure wa can modify this buffer
     }
 
-    uint8_t* GetDataForModification() const
+    void Create(size_t NewSize)
     {
-        return (uint8_t*)Data;
+        delete[] GetData();
+        AssignBase(new uint8_t[NewSize], NewSize);
     }
 
-    void Create(size_t Size_)
+    size_t CopyCut(size_t Offset, const buffer_base& Buffer_Source)
     {
-        delete[] Data;
-        AssignBase(Size_, new uint8_t[Size_]);
-    }
-
-    size_t CopyFrom(size_t Pos, const buffer_base& Buffer_Source)
-    {
-        auto SizeToCopy_Max = GetSizeForModification();
-        if (Buffer_Source.Empty() || Pos > SizeToCopy_Max)
+        auto SizeToCopy_Max = GetSize();
+        if (Offset > SizeToCopy_Max)
             return 0;
-        SizeToCopy_Max  -= Pos;
+        SizeToCopy_Max -= Offset;
         auto SizeToCopy = Buffer_Source.GetSize();
         if (SizeToCopy > SizeToCopy_Max)
             SizeToCopy = SizeToCopy_Max;
-        memcpy(GetDataForModification() + Pos, Buffer_Source.GetData(), SizeToCopy);
+        memcpy(GetData() + Offset, Buffer_Source.GetData(), SizeToCopy);
         return SizeToCopy;
     }
-    size_t CopyFrom(const buffer_base& Buffer_Source)
+    size_t CopyCut(const buffer_base& Buffer_Source)
     {
-        return CopyFrom(0, Buffer_Source);
+        return CopyCut(0, Buffer_Source);
+    }
+
+    void CopyExpand(const uint8_t* const NewData, size_t NewSize)
+    {
+        Create(NewSize);
+        memcpy(GetData(), NewData, GetSize());
     }
 
     void SetZero()
     {
-        memset(GetDataForModification(), 0, Size);
+        memset(GetData(), 0, GetSize());
     }
 
-    void SetZero(size_t Offset, size_t Count)
+    size_t SetZero(size_t Offset, size_t Count)
     {
-        if (Offset >= Size || Count >= Size || Offset >= Size - Count)
-            return;
-        memset(GetDataForModification(), 0, Size);
+        auto SizeToZero = GetSize();
+        if (Offset > SizeToZero)
+            return 0;
+        SizeToZero -= Offset;
+        memset(GetData(), 0, SizeToZero);
+        return SizeToZero;
     }
 
-    void Copy(const uint8_t* Data_, size_t Size_)
+    void Resize(size_t NewSize)
     {
-        Create(Size_);
-        memcpy(GetDataForModification(), Data_, Size);
-    }
-
-    void Resize(size_t Size_)
-    {
-        if (Size_ < GetSize())
+        if (NewSize < GetSize())
         {
-            AssignBase(Size_, GetData()); // We just change the Size value, not shrink of memory
+            AssignBase(GetData(), NewSize); // We just change the Size value, no shrink of memory
             return;
         }
-        auto NewBuffer = new uint8_t[Size_];
-        memcpy(NewBuffer, GetData(), Size_);
-        AssignBase(Size_, NewBuffer);
+        auto NewBuffer = new uint8_t[NewSize];
+        memcpy(NewBuffer, GetData(), GetSize());
+        AssignBase(NewBuffer, NewSize);
     }
 
     void Clear()
     {
-        delete[] Data;
+        delete[] GetData();
         ClearBase();
     }
 };
@@ -183,17 +186,17 @@ struct buffer_view : buffer_base
     buffer_view() :
         buffer_base(0, nullptr)
     {}
-    buffer_view(const uint8_t* Data_, size_t Size_) :
-        buffer_base(Size_, Data_)
+    buffer_view(const uint8_t* const NewData, size_t NewSize) :
+        buffer_base(NewSize, NewData)
     {}
     buffer_view(const buffer_view& Buffer) :
-        buffer_base(Buffer.Size, Buffer.Data)
+        buffer_base(Buffer.GetSize(), Buffer.GetData())
     {}
     buffer_view(const buffer_base& Buffer) :
-        buffer_base(Buffer.GetSize(), (uint8_t*)Buffer.GetData()) // static cast, we guarantee that the class permits only const
+        buffer_base(Buffer.GetSize(), Buffer.GetData())
     {}
     buffer_view(buffer_view&& Buffer) :
-        buffer_base(Buffer.Size, Buffer.Data)
+        buffer_base(Buffer.GetSize(), Buffer.GetData())
     {
         Buffer.ClearBase();
     }
@@ -225,24 +228,24 @@ struct buffer_or_view : buffer_base
     buffer_or_view() :
         buffer_base(0, nullptr)
     {}
-    /*buffer_or_view(uint8_t* Data_, size_t Size_) :
-        buffer_base(Size_, Data_),
-        IsOwned(true)
-    {}*/
-    buffer_or_view(const uint8_t* Data_, size_t Size_) :
-        buffer_base(Size_, Data_)
+    buffer_or_view(const uint8_t* const NewData, size_t NewSize) :
+        buffer_base(NewSize, NewData)
     {}
     buffer_or_view(const buffer_or_view& Buffer) :
-        buffer_base(Buffer.Size, Buffer.Data)
+        buffer_base(Buffer.GetSize(), Buffer.GetData())
     {}
     buffer_or_view(const buffer& Buffer) :
         buffer_base(Buffer.GetSize(), Buffer.GetData())
     {}
+    buffer_or_view(const buffer_view& Buffer) :
+        buffer_base(Buffer.GetSize(), Buffer.GetData())
+    {}
     buffer_or_view(buffer_or_view&& Buffer) :
-        buffer_base(Buffer.Size, Buffer.Data),
+        buffer_base(Buffer.GetSize(), Buffer.GetData()),
         IsOwned(Buffer.IsOwned)
     {
         Buffer.ClearBase();
+        Buffer.IsOwned = false;
     }
 
     buffer_or_view& operator = (buffer_or_view&& Buffer)
@@ -263,45 +266,45 @@ struct buffer_or_view : buffer_base
     {
         if (!IsOwned)
             return;
-        delete[] Data;
+        delete[] GetData();
     }
 
     size_t GetSizeForModification() const
     {
-        return IsOwned ? Size : 0;
+        return IsOwned ? GetSize() : 0;
     }
 
     uint8_t* GetDataForModification() const
     {
-        return IsOwned ? (uint8_t*)Data : nullptr;
+        return IsOwned ? (uint8_t*)GetData() : nullptr;
     }
 
-    void Create(size_t Size_)
+    void Create(size_t NewSize)
     {
         if (IsOwned)
-            delete[] Data;
+            delete[] GetData();
         else
             IsOwned = true;
-        AssignBase(Size_, new uint8_t[Size_]);
+        AssignBase(new uint8_t[NewSize], NewSize);
     }
 
-    void Copy(const uint8_t* Data_, size_t Size_)
+    void Copy(const uint8_t* NewData, size_t NewSize)
     {
-        Create(Size_);
-        memcpy(GetDataForModification(), Data_, Size);
+        Create(NewSize);
+        memcpy(GetDataForModification(), NewData, GetSize());
     }
 
-    void Resize(size_t Size_)
+    void Resize(size_t NewSize)
     {
-        if (Size_ < GetSize())
+        if (NewSize < GetSize())
         {
-            AssignBase(Size_, GetData()); // We just change the Size value, not shrink of memory
+            AssignBase(GetData(), NewSize); // We just change the Size value, no shrink of memory
             return;
         }
         auto OldBuffer = GetData();
-        auto NewBuffer = new uint8_t[Size_];
-        memcpy(NewBuffer, OldBuffer, Size_);
-        AssignBase(Size_, NewBuffer);
+        auto NewBuffer = new uint8_t[NewSize];
+        memcpy(NewBuffer, OldBuffer, NewSize);
+        AssignBase(NewBuffer, NewSize);
         if (IsOwned)
             delete[] OldBuffer;
         else
@@ -314,6 +317,7 @@ struct buffer_or_view : buffer_base
         IsOwned = false;
     }
 
+private:
     bool IsOwned = false;
 };
 

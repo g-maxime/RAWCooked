@@ -31,156 +31,139 @@ int filemap::Open_ReadMode(const char* FileName)
 {
     Close();
 
-    bool FileIsOpen;
-
+    size_t NewSize;
     #if defined(_WIN32) || defined(_WINDOWS)
-        HANDLE& File = (HANDLE&)Private;
-        File = CreateFileA(FileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-        if (File != INVALID_HANDLE_VALUE)
+        auto NewFile = CreateFileA(FileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+        if (NewFile != INVALID_HANDLE_VALUE)
         {
             DWORD FileSizeHigh;
-            Size = GetFileSize(File, &FileSizeHigh);
-            if (Size != INVALID_FILE_SIZE || GetLastError() == NO_ERROR)
+            auto FileSizeLow = GetFileSize(NewFile, &FileSizeHigh);
+            if ((FileSizeLow != INVALID_FILE_SIZE || GetLastError() == NO_ERROR) // If no error (special case with 32-bit max value)
+             && (!FileSizeHigh || sizeof(size_t) >= 8)) // Mapping 4+ GiB files is not supported in 32-bit mode
             {
-                Size |= ((size_t)FileSizeHigh) << 32;
-                if (Size)
+                NewSize = ((size_t)FileSizeHigh) << 32 | FileSizeLow;
+                if (NewSize)
                 {
-                    HANDLE& Mapping = (HANDLE&)Private2;
-                    Mapping = CreateFileMapping(File, 0, PAGE_READONLY, 0, 0, 0);
-                    if (Mapping)
-                        FileIsOpen = true;
+                    auto Mapping = (HANDLE&)Private2;
+                    Mapping = CreateFileMapping(NewFile, 0, PAGE_READONLY, 0, 0, 0);
+                    if (!Mapping)
+                        Private = NewFile;
                     else
-                    {
-                        Close();
-                        FileIsOpen = false;
-                    }
+                        CloseHandle(NewFile);
                 }
                 else
-                    FileIsOpen = true; // CreateFileMapping does not support 0-byte files, so we map manually to NULL
+                    Private = NewFile; // CreateFileMapping does not support 0-byte files, so we map manually to NULL
             }
             else
             {
-                Close();
-                FileIsOpen = false;
+                CloseHandle(NewFile);
             }
         }
-        else
-            FileIsOpen = false;
     #else
-        int& P = (int&)Private;
-        P = open(FileName, O_RDONLY, 0);
-        if (P != -1)
+        auto fd = open(FileName, O_RDONLY, 0);
+        if (fd != -1)
         {
             struct stat Fstat;
             if (!stat(FileName, &Fstat))
             {
-                Size = Fstat.st_size;
-                FileIsOpen = true;
+                NewSize = Fstat.st_size;
+                Private = fd;
             }
             else
-            {
-                Close();
-                FileIsOpen = false;
-            }
+                close(fd);
         }
-        else
-            FileIsOpen = false;
 
     #endif
 
-    if (FileIsOpen)
-        FileIsOpen = Remap() ? false : true;
-
-    if (!FileIsOpen)
-        return 1;
-
-    return 0;
+    if (!Private)
+        return 1; 
+    return Remap(NewSize);
 }
 
 //---------------------------------------------------------------------------
-int filemap::Remap()
+int filemap::Remap(size_t NewSize)
 {
-    if (Data)
+    // Close previous map
+    if (GetData())
     {
         #if defined(_WIN32) || defined(_WINDOWS)
-            UnmapViewOfFile(Data);
+            UnmapViewOfFile(GetData());
         #else
-            munmap(Data, Size);
+            munmap(GetData(), NewSize());
         #endif
-        Data = NULL;
+        ClearBase();
     }
 
-    if (!Size)
-      return 0;
+    // Special case for 0-byte files
+    if (!NewSize)
+        return 0;
 
+    // New map
     #if defined(_WIN32) || defined(_WINDOWS)
-        HANDLE& Mapping = (HANDLE&)Private2;
-        Data = (const uint8_t*)MapViewOfFile(Mapping, FILE_MAP_READ, 0, 0, 0);
-        if (!Data)
-        {
-            CloseHandle(Mapping);
-            HANDLE& File = (HANDLE&)Private;
-            CloseHandle(File);
-            Mapping = NULL;
-            File = INVALID_HANDLE_VALUE;
-            Size = 0;
-            return 1;
-        }
+        auto Mapping = (HANDLE&)Private2;
+        auto NewData = MapViewOfFile(Mapping, FILE_MAP_READ, 0, 0, 0);
+        const decltype(NewData) NewData_Fail = 0;
     #else
-        int& P = (int&)Private;
-        Data = (const uint8_t*)mmap(NULL, Size, PROT_READ, MAP_FILE | MAP_PRIVATE, P, 0);
-        if (Data == MAP_FAILED)
-        {
-            Data = NULL;
-            Close();
-            return 1;
-        }
+        auto fd = (int&)Private;
+        auto NewData = mmap(NULL, NewSize, PROT_READ, MAP_FILE | MAP_PRIVATE, fd, 0);
+        const decltype(NewData) NewData_Fail = MAP_FAILED;
     #endif
 
+    // Assign
+    if (NewData == NewData_Fail)
+    {
+        Close();
+        return 1;
+    }
+    AssignBase((const uint8_t*)NewData, NewSize);
     return 0;
 }
 
 //---------------------------------------------------------------------------
 int filemap::Close()
 {
+    // Close map
+    if (GetData())
+    {
+        #if defined(_WIN32) || defined(_WINDOWS)
+            UnmapViewOfFile(GetData());
+        #else
+            munmap(GetData(), GetSize());
+        #endif
+        ClearBase();
+    }
+
+    // Close intermediate
     #if defined(_WIN32) || defined(_WINDOWS)
-        if (Data)
+        auto Mapping = (HANDLE&)Private2;
+        if (Mapping)
         {
-            UnmapViewOfFile(Data);
-            HANDLE& Mapping = (HANDLE&)Private2;
             CloseHandle(Mapping);
-            Private2 = (void*)-1;
-            Data = NULL;
-            Size = 0;
-        }
-        HANDLE& File = (HANDLE&)Private;
-        if (File != INVALID_HANDLE_VALUE)
-        {
-            if (CloseHandle(File) == 0)
-            {
-                Private = (void*)-1;
-                return 1;
-            }
-        }
-    #else
-        if (Data)
-        {
-            munmap(Data, Size);
-            Data = NULL;
-            Size = 0;
-        }
-        int& P = (int&)Private;
-        if (P != -1)
-        {
-            if (close(P))
-            {
-                Private = (void*)-1;
-                return 1;
-            }
+            Private2 = NULL;
         }
     #endif
 
-    Private = (void*)-1;
+    // Close file
+    if (Private)
+    {
+        #if defined(_WIN32) || defined(_WINDOWS)
+            auto File = (HANDLE&)Private;
+            if (!CloseHandle(File))
+            {
+                Private = nullptr;
+                return 1;
+            }
+        #else
+            int& fd = (int&)Private;
+            if (close(fd))
+            {
+                Private = (void*)-1;
+                return 1;
+            }
+        #endif
+        Private = nullptr;
+    }
+
     return 0;
 }
 
@@ -246,10 +229,10 @@ file::return_value file::Open_WriteMode(const string& BaseDirectory, const strin
 //---------------------------------------------------------------------------
 // file
 
-file::return_value file::Write(const uint8_t* Data, size_t Size)
+file::return_value file::Write(const uint8_t* GetData, size_t GetSize)
 {
     // Handle size of 0
-    if (!Size)
+    if (!GetSize)
         return OK;
 
     // Check that a file is open
@@ -257,32 +240,32 @@ file::return_value file::Write(const uint8_t* Data, size_t Size)
     #if defined(_WIN32) || defined(_WINDOWS)
     HANDLE& P = (HANDLE&)Private;
     BOOL Result;
-    while (Offset < Size)
+    while (Offset < GetSize)
     {
         DWORD BytesWritten;
         DWORD Size_Temp;
-        if (Size - Offset >= (DWORD)-1) // WriteFile() accepts only DWORDs
+        if (GetSize - Offset >= (DWORD)-1) // WriteFile() accepts only DWORDs
             Size_Temp = (DWORD)-1;
         else
-            Size_Temp = (DWORD)(Size - Offset);
-        Result = WriteFile(P, Data + Offset, Size_Temp, &BytesWritten, NULL);
+            Size_Temp = (DWORD)(GetSize - Offset);
+        Result = WriteFile(P, GetData + Offset, Size_Temp, &BytesWritten, NULL);
         if (BytesWritten == 0 || Result == FALSE)
             break;
         Offset += BytesWritten;
     }
-    if (Result == FALSE || Offset < Size)
+    if (Result == FALSE || Offset < GetSize)
     #else
     int& P = (int&)Private;
     ssize_t BytesWritten;
-    while (Offset < Size)
+    while (Offset < GetSize)
     {
-        size_t Size_Temp = Size - Offset;
-        BytesWritten = write(P, Data, Size_Temp);
+        size_t Size_Temp = GetSize - Offset;
+        BytesWritten = write(P, GetData, Size_Temp);
         if (BytesWritten == 0 || BytesWritten == -1)
             break;
         Offset += (size_t)BytesWritten;
     }
-    if (BytesWritten == -1 || Offset < Size)
+    if (BytesWritten == -1 || Offset < GetSize)
     #endif
     {
         return Error_FileWrite;

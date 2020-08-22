@@ -301,8 +301,8 @@ private:
                     return;
 
                 auto& Content = Data[Element].Content[Pos];
-                auto Content_Size = Content.GetSizeForModification();
-                auto Content_Data = Content.GetDataForModification();
+                auto Content_Size = Content.GetSize();
+                auto Content_Data = Content.GetData();
                 for (size_t i = 0; i < Content_Size && i < Mask_Size; i++)
                     Content_Data[i] += Mask_Data[i];
             }
