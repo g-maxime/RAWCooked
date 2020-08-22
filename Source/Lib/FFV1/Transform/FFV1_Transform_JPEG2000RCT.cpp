@@ -19,12 +19,13 @@ transform_jpeg2000rct::transform_jpeg2000rct(raw_frame* RawFrame_, size_t Bits_,
     Offset = ((pixel_t)1) << Bits;
     Flavor_Private = RawFrame->Flavor_Private;
 
-    size_t FrameBuffer_Temp_Size = RawFrame->Planes.size();
+    size_t FrameBuffer_Temp_Size = RawFrame->Planes().size();
     for (size_t p = 0; p<FrameBuffer_Temp_Size; p++)
     {
-        FrameBuffer_Temp[p] = RawFrame->Planes[p]->Buffer().Data();
-        FrameBuffer_Temp[p] += y_offset*RawFrame->Planes[p]->AllBytesPerLine();
-        FrameBuffer_Temp[p] += x_offset*RawFrame->Planes[p]->BitsPerBlock()/RawFrame->Planes[p]->PixelsPerBlock()/8; //TODO: check when not byte boundary
+        const auto& Plane = RawFrame->Plane(p);
+        FrameBuffer_Temp[p] = Plane->Buffer().Data();
+        FrameBuffer_Temp[p] += y_offset * Plane->AllBytesPerLine();
+        FrameBuffer_Temp[p] += x_offset * Plane->BitsPerBlock() / Plane->PixelsPerBlock() / 8; //TODO: check when not byte boundary
     }
 }
 
@@ -39,8 +40,12 @@ void transform_jpeg2000rct::From(size_t w, pixel_t* Y, pixel_t* U, pixel_t* V, p
         default:;
     }
 
-    for (size_t p = 0; p<RawFrame->Planes.size(); p++)
-        FrameBuffer_Temp[p]+= RawFrame->Planes[p]->AllBytesPerLine();
+    size_t FrameBuffer_Temp_Size = RawFrame->Planes().size();
+    for (size_t p = 0; p < FrameBuffer_Temp_Size; p++)
+    {
+        const auto& Plane = RawFrame->Plane(p);
+        FrameBuffer_Temp[p] += Plane->AllBytesPerLine();
+    }
 }
 
 //---------------------------------------------------------------------------

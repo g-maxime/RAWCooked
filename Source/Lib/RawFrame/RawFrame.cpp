@@ -14,12 +14,12 @@
 //---------------------------------------------------------------------------
 void raw_frame::Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample)
 {
-    if (!Planes.empty())
+    if (!Planes_.empty())
         return; //TODO: manage when it changes
 
-    for (size_t i = 0; i < Planes.size(); i++)
-        delete Planes[i];
-    Planes.clear();
+    for (const auto& Plane : Planes_)
+        delete Plane;
+    Planes_.clear();
 
     switch (Flavor)
     {
@@ -35,23 +35,23 @@ void raw_frame::FFmpeg_Create(size_t colorspace_type, size_t width, size_t heigh
     switch (colorspace_type)
     {
         case 0: // YCbCr --> YA Packed if no chroma, alpha and <=8, else YUV Planar
-                Planes.push_back(new plane(width, height, (bits_per_raw_sample + 7) / 8 * ((bits_per_raw_sample <= 8 && !chroma_planes && alpha_plane) ? 2 : 1))); // Luma
+                Planes_.push_back(new plane(width, height, (bits_per_raw_sample + 7) / 8 * ((bits_per_raw_sample <= 8 && !chroma_planes && alpha_plane) ? 2 : 1))); // Luma
                 if (chroma_planes)
                 {
                     size_t h_divisor = h_chroma_subsample;
                     size_t v_divisor = v_chroma_subsample;
                     for (size_t i = 0; i < 2; i++)
-                        Planes.push_back(new plane((width + h_divisor - 1) / h_divisor, (height + v_divisor - 1) / v_divisor, bits_per_raw_sample / 8 + ((bits_per_raw_sample % 8) ? 1 : 0))); //Chroma
+                        Planes_.push_back(new plane((width + h_divisor - 1) / h_divisor, (height + v_divisor - 1) / v_divisor, bits_per_raw_sample / 8 + ((bits_per_raw_sample % 8) ? 1 : 0))); //Chroma
                 }
                 if (alpha_plane && !(bits_per_raw_sample <= 8 && !chroma_planes))
-                    Planes.push_back(new plane(width, height, (bits_per_raw_sample + 7) / 8)); //Alpha
+                    Planes_.push_back(new plane(width, height, (bits_per_raw_sample + 7) / 8)); //Alpha
                 break;
         case 1: // JPEG2000-RCT --> RGB Packed if <=8, else RGB planar
                 if (bits_per_raw_sample <= 8)
-                    Planes.push_back(new plane(width, height, (bits_per_raw_sample + 7) / 8 * 4)); // 4 values are always stored, even if alpha does not exists 
+                    Planes_.push_back(new plane(width, height, (bits_per_raw_sample + 7) / 8 * 4)); // 4 values are always stored, even if alpha does not exists 
                 else
                     for (size_t i = 0; i < (alpha_plane ? 4 : 3); i++)
-                        Planes.push_back(new plane(width, height, (bits_per_raw_sample + 7) / 8)); // R, G, B, optionnaly A
+                        Planes_.push_back(new plane(width, height, (bits_per_raw_sample + 7) / 8)); // R, G, B, optionnaly A
                 break;
         default: ; 
     }
@@ -63,7 +63,7 @@ void raw_frame::DPX_Create(size_t colorspace_type, size_t width, size_t height, 
     switch (colorspace_type)
     {
         case 1: // JPEG2000-RCT --> RGB
-                Planes.push_back(new plane(width, height, dpx::BitsPerBlock((dpx::flavor)Flavor_Private), dpx::PixelsPerBlock((dpx::flavor)Flavor_Private)));
+                Planes_.push_back(new plane(width, height, dpx::BitsPerBlock((dpx::flavor)Flavor_Private), dpx::PixelsPerBlock((dpx::flavor)Flavor_Private)));
         default: ;
     }
 }
@@ -74,7 +74,7 @@ void raw_frame::TIFF_Create(size_t colorspace_type, size_t width, size_t height,
     switch (colorspace_type)
     {
         case 1: // JPEG2000-RCT --> RGB
-                Planes.push_back(new plane(width, height, tiff::BitsPerBlock((tiff::flavor)Flavor_Private), tiff::PixelsPerBlock((tiff::flavor)Flavor_Private)));
+                Planes_.push_back(new plane(width, height, tiff::BitsPerBlock((tiff::flavor)Flavor_Private), tiff::PixelsPerBlock((tiff::flavor)Flavor_Private)));
         default: ;
     }
 }
@@ -84,8 +84,8 @@ size_t raw_frame::GetFrameSize()
 {
     auto FrameSize = Buffer.Size();
 
-    for (auto&& Plane : Planes)
-        FrameSize += Plane->Buffer.Size();
+    for (auto&& Plane : Planes_)
+        FrameSize += Plane->Buffer().Size();
 
     return FrameSize;
 }

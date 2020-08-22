@@ -399,7 +399,14 @@ public:
         size_t                  BitsPerBlock_;
         size_t                  PixelsPerBlock_;
     };
-    std::vector<plane*> Planes;
+    const std::vector<plane*> Planes() const
+    {
+        return Planes_;
+    }
+    const plane* Plane(size_t p) const
+    {
+        return Planes_[p];
+    }
 
     enum flavor
     {
@@ -418,8 +425,8 @@ public:
 
     ~raw_frame()
     {
-        for (size_t i = 0; i < Planes.size(); i++)
-            delete Planes[i];
+        for (auto& Plane : Planes_)
+            delete Plane;
     }
 
     // Creation
@@ -430,6 +437,7 @@ public:
     size_t GetTotalSize();
 
 private:
+    std::vector<plane*> Planes_;
     void FFmpeg_Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample);
     void DPX_Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample);
     void TIFF_Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample);
