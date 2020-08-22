@@ -396,14 +396,14 @@ public:
         size_t                  PixelsPerBlock_;
     };
 
-    const buffer_view& Pre() const
+    const buffer_or_view& Pre() const
     {
         return Pre_;
     }
 
-    void SetPre(const buffer_view& NewPre)
+    void SetPre(buffer_or_view&& NewPre)
     {
-        Pre_ = NewPre;
+        Pre_ = move(NewPre);
     }
 
     void ClearPre()
@@ -411,14 +411,14 @@ public:
         Pre_.Clear();
     }
 
-    const buffer_view& Post() const
+    const buffer_or_view& Post() const
     {
         return Post_;
     }
 
-    void SetPost(const buffer_view& NewPost)
+    void SetPost(buffer_or_view&& NewPost)
     {
-        Post_ = NewPost;
+        Post_ = move(NewPost);
     }
 
     void ClearPost()
@@ -426,14 +426,14 @@ public:
         Post_.Clear();
     }
 
-    const buffer_view& In() const
+    const buffer_or_view& In() const
     {
         return In_;
     }
 
-    void SetIn(const buffer_view& NewIn)
+    void SetIn(buffer_or_view&& NewIn)
     {
-        In_ = NewIn;
+        In_ = move(NewIn);
     }
 
     void ClearIn()
@@ -500,9 +500,9 @@ public:
 private:
     buffer_or_view              Buffer_;
     std::vector<plane*>         Planes_;
-    buffer_view                 Pre_;
-    buffer_view                 Post_;
-    buffer_view                 In_;
+    buffer_or_view              Pre_;
+    buffer_or_view              Post_;
+    buffer_or_view              In_;
     void FFmpeg_Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample);
     void DPX_Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample);
     void TIFF_Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample);
