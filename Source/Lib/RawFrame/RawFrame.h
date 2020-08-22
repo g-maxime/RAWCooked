@@ -18,9 +18,35 @@ using namespace std;
 
 struct buffer_base
 {
+public:
+    const uint8_t* const Data() const
+    {
+        return Data_;
+    }
+
+    const uint8_t& operator [] (size_t n) const
+    {
+        return Data_[n];
+    }
+
+    const size_t Size() const
+    {
+        return Size_;
+    }
+
+    const bool Empty() const
+    {
+        return !Size_;
+    }
+
+    string ToString()
+    {
+        return move(string((const char*)Data(), Size()));
+    }
+
 protected:
     buffer_base() = delete;
-    buffer_base(size_t NewSize, const uint8_t* NewData) :
+    buffer_base(const uint8_t* NewData, size_t NewSize) :
         Size_(NewSize),
         Data_(NewData)
     {}
@@ -39,47 +65,19 @@ protected:
 
     void DeleteBase()
     {
-        Size_ = 0;
         delete[] Data_;
-        Data_ = nullptr;
+        ClearBase();
     }
 
     void AssignBase(const buffer_base& Buffer)
     {
-        Size_ = Buffer.Size_;
-        Data_ = Buffer.Data_;
+        AssignBase(Buffer.Data(), Buffer.Size());
     }
 
     void AssignBase(const uint8_t* NewData, size_t NewSize)
     {
         Size_ = NewSize;
         Data_ = NewData;
-    }
-
-public:
-    const size_t Size() const
-    {
-        return Size_;
-    }
-
-    const uint8_t* const Data() const
-    {
-        return Data_;
-    }
-
-    const uint8_t& operator [] (size_t n) const
-    {
-        return Data_[n];
-    }
-
-    const bool Empty() const
-    {
-        return !Size_;
-    }
-
-    string ToString()
-    {
-        return move(string((const char*)Data(), Size()));
     }
 
 private:
@@ -90,11 +88,11 @@ private:
 struct buffer : buffer_base
 {
     buffer() :
-        buffer_base(0, nullptr)
+        buffer_base(nullptr, 0)
     {}
     buffer(const buffer& Buffer) = delete;
     buffer(buffer&& Buffer) :
-        buffer_base(Buffer.Size(), Buffer.Data())
+        buffer_base(Buffer.Data(), Buffer.Size())
     {
         Buffer.ClearBase();
     }
@@ -184,19 +182,19 @@ struct buffer : buffer_base
 struct buffer_view : buffer_base
 {
     buffer_view() :
-        buffer_base(0, nullptr)
+        buffer_base(nullptr, 0)
     {}
     buffer_view(const uint8_t* const NewData, size_t NewSize) :
-        buffer_base(NewSize, NewData)
+        buffer_base(NewData, NewSize)
     {}
     buffer_view(const buffer_view& Buffer) :
-        buffer_base(Buffer.Size(), Buffer.Data())
+        buffer_base(Buffer.Data(), Buffer.Size())
     {}
     buffer_view(const buffer_base& Buffer) :
-        buffer_base(Buffer.Size(), Buffer.Data())
+        buffer_base(Buffer.Data(), Buffer.Size())
     {}
     buffer_view(buffer_view&& Buffer) :
-        buffer_base(Buffer.Size(), Buffer.Data())
+        buffer_base(Buffer.Data(), Buffer.Size())
     {
         Buffer.ClearBase();
     }
@@ -226,22 +224,22 @@ struct buffer_view : buffer_base
 struct buffer_or_view : buffer_base
 {
     buffer_or_view() :
-        buffer_base(0, nullptr)
+        buffer_base(nullptr, 0)
     {}
     buffer_or_view(const uint8_t* const NewData, size_t NewSize) :
-        buffer_base(NewSize, NewData)
+        buffer_base(NewData, NewSize)
     {}
     buffer_or_view(const buffer_or_view& Buffer) :
-        buffer_base(Buffer.Size(), Buffer.Data())
+        buffer_base(Buffer.Data(), Buffer.Size())
     {}
     buffer_or_view(const buffer& Buffer) :
-        buffer_base(Buffer.Size(), Buffer.Data())
+        buffer_base(Buffer.Data(), Buffer.Size())
     {}
     buffer_or_view(const buffer_view& Buffer) :
-        buffer_base(Buffer.Size(), Buffer.Data())
+        buffer_base(Buffer.Data(), Buffer.Size())
     {}
     buffer_or_view(buffer_or_view&& Buffer) :
-        buffer_base(Buffer.Size(), Buffer.Data()),
+        buffer_base(Buffer.Data(), Buffer.Size()),
         IsOwned(Buffer.IsOwned)
     {
         Buffer.ClearBase();

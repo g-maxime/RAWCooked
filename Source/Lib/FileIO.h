@@ -21,7 +21,7 @@ class filemap : public buffer_base
 {
 public:
     // Constructor/Destructor
-                                filemap() : buffer_base(0, nullptr) {}
+                                filemap() : buffer_base(nullptr, 0) {}
                                 ~filemap() { Close(); }
 
     // Actions
