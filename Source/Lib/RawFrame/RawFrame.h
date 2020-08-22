@@ -136,7 +136,7 @@ struct buffer : buffer_base
         AssignBase(new uint8_t[NewSize], NewSize);
     }
 
-    size_t CopyCut(size_t Offset, const buffer_base& Buffer_Source)
+    size_t CopyLimit(size_t Offset, const buffer_base& Buffer_Source)
     {
         auto SizeToCopy_Max = Size();
         if (Offset > SizeToCopy_Max)
@@ -148,9 +148,9 @@ struct buffer : buffer_base
         memcpy(Data() + Offset, Buffer_Source.Data(), SizeToCopy);
         return SizeToCopy;
     }
-    size_t CopyCut(const buffer_base& Buffer_Source)
+    size_t CopyLimit(const buffer_base& Buffer_Source)
     {
-        return CopyCut(0, Buffer_Source);
+        return CopyLimit(0, Buffer_Source);
     }
 
     void CopyExpand(const uint8_t* const NewData, size_t NewSize)

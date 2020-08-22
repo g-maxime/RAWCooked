@@ -1646,9 +1646,9 @@ bool matroska::ParseDecodedFrame(trackinfo* TrackInfo_Current, input_base_uncomp
             return true; // Overlaps detected
         buffer Frame_Buffer;
         Frame_Buffer.Create(FileSize); // TODO: more optimal method without allocation of the full file size and without new/delete
-        Frame_Buffer.CopyCut(RawFrame->Pre());
+        Frame_Buffer.CopyLimit(RawFrame->Pre());
         Frame_Buffer.SetZero(Pre_Size, Post_Offset - Pre_Size);
-        Frame_Buffer.CopyCut(FileSize - Post_Offset, RawFrame->Post());
+        Frame_Buffer.CopyLimit(FileSize - Post_Offset, RawFrame->Post());
         ParseResult = FrameParser->Parse(Frame_Buffer);
     }
     else
