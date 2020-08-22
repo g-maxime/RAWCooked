@@ -63,10 +63,9 @@ protected:
         Data_ = nullptr;
     }
 
-    void DeleteBase()
+    void ClearKeepSizeBase() // Use it only as intermediate setting
     {
-        delete[] Data_;
-        ClearBase();
+        Data_ = nullptr;
     }
 
     void AssignBase(const buffer_base& Buffer)
@@ -76,8 +75,18 @@ protected:
 
     void AssignBase(const uint8_t* NewData, size_t NewSize)
     {
-        Size_ = NewSize;
         Data_ = NewData;
+        Size_ = NewSize;
+    }
+
+    void AssignKeepSizeBase(const uint8_t* NewData)
+    {
+        Data_ = NewData;
+    }
+
+    void AssignKeepDataBase(size_t NewSize) // Use it only as intermediate setting
+    {
+        Size_ = NewSize;
     }
 
 private:
@@ -119,6 +128,11 @@ struct buffer : buffer_base
     void Create(size_t NewSize)
     {
         delete[] Data();
+        if (!NewSize)
+        {
+            ClearBase();
+            return;
+        }
         AssignBase(new uint8_t[NewSize], NewSize);
     }
 
@@ -162,6 +176,11 @@ struct buffer : buffer_base
 
     void Resize(size_t NewSize)
     {
+        if (!NewSize)
+        {
+            ClearBase();
+            return;
+        }
         if (NewSize < Size())
         {
             AssignBase(Data(), NewSize); // We just change the Size value, no shrink of memory

@@ -76,27 +76,28 @@ int filemap::Open_ReadMode(const char* FileName)
 #endif
 
     if (!Private)
-        return 1; 
-    return Remap(NewSize);
+        return 1;
+    AssignKeepDataBase(NewSize); // Intermediate, Remap() will set the data pointer
+    return Remap();
 }
 
 //---------------------------------------------------------------------------
-int filemap::Remap(size_t NewSize)
+int filemap::Remap()
 {
+    // Special case for 0-byte files
+    if (Empty())
+        return 0;
+
     // Close previous map
     if (Data())
     {
 #if defined(_WIN32) || defined(_WINDOWS)
-            UnmapViewOfFile(Data());
+        UnmapViewOfFile(Data());
 #else
-            munmap(Data(), Size());
+        munmap(Data(), Size());
 #endif
-        ClearBase();
+        ClearKeepSizeBase(); // Intermediate, size is needed later
     }
-
-    // Special case for 0-byte files
-    if (!NewSize)
-        return 0;
 
     // New map
 #if defined(_WIN32) || defined(_WINDOWS)
@@ -105,7 +106,7 @@ int filemap::Remap(size_t NewSize)
     const decltype(NewData) NewData_Fail = 0;
 #else
     auto fd = (int&)Private;
-    auto NewData = mmap(NULL, NewSize, PROT_READ, MAP_FILE | MAP_PRIVATE, fd, 0);
+    auto NewData = mmap(NULL, Size(), PROT_READ, MAP_FILE | MAP_PRIVATE, fd, 0);
     const decltype(NewData) NewData_Fail = MAP_FAILED;
 #endif
 
@@ -115,7 +116,7 @@ int filemap::Remap(size_t NewSize)
         Close();
         return 1;
     }
-    AssignBase((const uint8_t*)NewData, NewSize);
+    AssignKeepSizeBase((const uint8_t*)NewData);
     return 0;
 }
 
