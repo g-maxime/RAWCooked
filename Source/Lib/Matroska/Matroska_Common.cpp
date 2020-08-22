@@ -574,7 +574,8 @@ void matroska::FLAC_Write(const uint32_t* buffer[], size_t blocksize)
             break;
     }
 
-    TrackInfo_Current->Frame.RawFrame->Buffer().Resize(Data - TrackInfo_Current->Frame.RawFrame->Buffer().Data());
+    Buffer.Resize(Data - Buffer.Data());
+
     TrackInfo_Current->FrameWriter.FrameCall(TrackInfo_Current->Frame.RawFrame);
 }
 
