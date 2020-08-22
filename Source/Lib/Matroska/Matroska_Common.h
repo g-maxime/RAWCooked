@@ -34,7 +34,7 @@ class ThreadPool;
 class flac_info;
 class hashes;
 
-class frame_writer
+class frame_writer : frame_process
 {
 public:
     // Constructor / Destructor
@@ -346,8 +346,6 @@ private:
     {
         frame_writer            FrameWriter;
         reversibility_data      ReversibilityData;
-        raw_frame*              R_A;
-        raw_frame*              R_B;
         input_base_uncompressed* DecodedFrameParser;
         flac_info*              FlacInfo;
         frame                   Frame;
@@ -355,8 +353,6 @@ private:
 
         trackinfo(frame_writer& FrameWriter_Source) :
             FrameWriter(FrameWriter_Source),
-            R_A(nullptr),
-            R_B(nullptr),
             DecodedFrameParser(nullptr),
             FlacInfo(nullptr),
             Format(Format_None)

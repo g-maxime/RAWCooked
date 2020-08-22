@@ -1305,30 +1305,34 @@ void matroska::Segment_Cluster()
         {
             auto& ReversibilityData = TrackInfo_Current->ReversibilityData;
             auto& RawFrame = TrackInfo_Current->Frame.RawFrame;
+            RawFrame = new raw_frame;
+
+            ReversibilityData.StartParsing();
+            RawFrame->SetPre(ReversibilityData.GetDataContent(Element_BeforeData));
+            RawFrame->SetPost(ReversibilityData.GetDataContent(Element_AfterData));
+            bool InitResult;
+            switch (TrackInfo_Current->Format)
+            {
+                case Format_FFV1: InitResult = InitOutput_FFV1(TrackInfo_Current); break;
+                case Format_FLAC: InitResult = InitOutput_FLAC(TrackInfo_Current, RawFrame->Pre()); break;
+                default: InitResult = false;
+            }
+            if (InitResult)
+            {
+                //TODO handle errors
+            }
 
             if (ReversibilityData.Unique)
             {
-                RawFrame->SetPre(ReversibilityData.GetDataContent(Element_BeforeData));
                 TrackInfo_Current->FrameWriter.OutputFileName = ReversibilityData.Data[Element_FileName].Content[0].ToString();
                 FormatPath(TrackInfo_Current->FrameWriter.OutputFileName);
                 TrackInfo_Current->FrameWriter.FrameCall(RawFrame);
                 RawFrame->ClearPre();
 
-                bool InitResult;
-                switch (TrackInfo_Current->Format)
-                {
-                    case Format_FFV1: InitResult = InitOutput_FFV1(TrackInfo_Current); break;
-                    case Format_FLAC: InitResult = InitOutput_FLAC(TrackInfo_Current, RawFrame->Pre()); break;
-                    default: InitResult = false;
-                }
-                if (InitResult)
-                {
-                    //TODO handle errors
-                }
-
                 TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin] = true;
                 TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = true;
             }
+
         }
 }
 
@@ -1346,21 +1350,9 @@ void matroska::Segment_Cluster_SimpleBlock()
         // Timestamp
         Block_Timestamp = (Buffer[Buffer_Offset + 1] << 8 || Buffer[Buffer_Offset + 2]);
 
-        // Load balancing between 2 frames (1 is parsed and 1 is written on disk), TODO: better handling
-        if (!TrackInfo_Current->R_A)
-        {
-            TrackInfo_Current->R_A = new raw_frame;
-            TrackInfo_Current->R_B = new raw_frame;
-            TrackInfo_Current->ReversibilityData.StartParsing();
-        }
-        if (TrackInfo_Current->ReversibilityData.Pos % 2)
-            TrackInfo_Current->Frame.RawFrame = TrackInfo_Current->R_B;
-        else
-            TrackInfo_Current->Frame.RawFrame = TrackInfo_Current->R_A;
-
+        // Parsing
         auto& ReversibilityData = TrackInfo_Current->ReversibilityData;
         auto& RawFrame = TrackInfo_Current->Frame.RawFrame;
-
         switch (TrackInfo_Current->Format)
         {
             case Format_FFV1:
@@ -1622,10 +1614,8 @@ bool matroska::GetFormatAndFlavor(trackinfo* TrackInfo_Current, input_base_uncom
         Undecodable(undecodable::ReversibilityData_UnreadableFrameHeader);
         return true;
     }
-    TrackInfo_Current->R_A->Flavor = Flavor;
-    TrackInfo_Current->R_A->Flavor_Private = PotentialParser->Flavor;
-    TrackInfo_Current->R_B->Flavor = Flavor;
-    TrackInfo_Current->R_B->Flavor_Private = PotentialParser->Flavor;
+    TrackInfo_Current->Frame.RawFrame->Flavor = Flavor;
+    TrackInfo_Current->Frame.RawFrame->Flavor_Private = PotentialParser->Flavor;
 
     if (Actions[Action_Conch])
         PotentialParser->Actions.set(Action_Conch);

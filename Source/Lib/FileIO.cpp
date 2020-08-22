@@ -44,10 +44,12 @@ int filemap::Open_ReadMode(const char* FileName)
             NewSize = ((size_t)FileSizeHigh) << 32 | FileSizeLow;
             if (NewSize)
             {
-                auto Mapping = (HANDLE&)Private2;
-                Mapping = CreateFileMapping(NewFile, 0, PAGE_READONLY, 0, 0, 0);
-                if (!Mapping)
+                auto NewMapping = CreateFileMapping(NewFile, 0, PAGE_READONLY, 0, 0, 0);
+                if (NewMapping)
+                {
                     Private = NewFile;
+                    Private2 = NewMapping;
+                }
                 else
                     CloseHandle(NewFile);
             }
