@@ -72,9 +72,10 @@ public:
         mode_Max,
     };
     bitset<mode_Max>            Mode;
+    string                      OutputFileName;
 
     // Actions
-    void                        FrameCall(raw_frame* RawFrame, const string& OutputFileName);
+    void                        FrameCall(raw_frame* RawFrame);
 
 private:
     bool                        WriteFile(raw_frame* RawFrame);
@@ -351,7 +352,6 @@ private:
         flac_info*              FlacInfo;
         frame                   Frame;
         format                  Format;
-        string                  OutputFileName;
 
         trackinfo(frame_writer& FrameWriter_Source) :
             FrameWriter(FrameWriter_Source),

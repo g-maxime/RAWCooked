@@ -139,7 +139,7 @@ frame_writer::~frame_writer()
 }
 
 
-void frame_writer::FrameCall(raw_frame* RawFrame, const string& OutputFileName)
+void frame_writer::FrameCall(raw_frame* RawFrame)
 {
     // Post-processing
     RawFrame->MergeIn();
@@ -575,7 +575,7 @@ void matroska::FLAC_Write(const uint32_t* buffer[], size_t blocksize)
     }
 
     TrackInfo_Current->Frame.RawFrame->Buffer().Resize(Data - TrackInfo_Current->Frame.RawFrame->Buffer().Data());
-    TrackInfo_Current->FrameWriter.FrameCall(TrackInfo_Current->Frame.RawFrame, TrackInfo_Current->OutputFileName);
+    TrackInfo_Current->FrameWriter.FrameCall(TrackInfo_Current->Frame.RawFrame);
 }
 
 //---------------------------------------------------------------------------
@@ -814,7 +814,7 @@ void matroska::Shutdown()
         {
             TrackInfo_Current->Frame.RawFrame->Buffer().Clear();
             TrackInfo_Current->Frame.RawFrame->SetPost(TrackInfo_Current->ReversibilityData.Data[Element_AfterData].Content[0]);
-            TrackInfo_Current->FrameWriter.FrameCall(TrackInfo_Current->Frame.RawFrame, TrackInfo_Current->OutputFileName);
+            TrackInfo_Current->FrameWriter.FrameCall(TrackInfo_Current->Frame.RawFrame);
 
             TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = false;
         }
@@ -1083,7 +1083,8 @@ void matroska::Segment_Attachments_AttachedFile_FileData()
         RawFrame.SetPre(buffer_view(Buffer.Data() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset));
 
         frame_writer FrameWriter(FrameWriter_Template);
-        FrameWriter.FrameCall(&RawFrame, AttachedFile_FileName);
+        FrameWriter.OutputFileName = AttachedFile_FileName;
+        FrameWriter.FrameCall(&RawFrame);
     }
 
     auto& AttachedFile = AttachedFiles[AttachedFile_FileName];
@@ -1150,7 +1151,8 @@ void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedAttachment_Fil
         raw_frame RawFrame;
 
         frame_writer FrameWriter(FrameWriter_Template);
-        FrameWriter.FrameCall(&RawFrame, AttachedFile_FileName);
+        FrameWriter.OutputFileName = AttachedFile_FileName;
+        FrameWriter.FrameCall(&RawFrame);
     }
 }
 
@@ -1306,9 +1308,9 @@ void matroska::Segment_Cluster()
             if (ReversibilityData.Unique)
             {
                 RawFrame->SetPre(ReversibilityData.GetDataContent(Element_BeforeData));
-                TrackInfo_Current->OutputFileName = ReversibilityData.Data[Element_FileName].Content[0].ToString();
-                FormatPath(TrackInfo_Current->OutputFileName);
-                TrackInfo_Current->FrameWriter.FrameCall(RawFrame, TrackInfo_Current->OutputFileName);
+                TrackInfo_Current->FrameWriter.OutputFileName = ReversibilityData.Data[Element_FileName].Content[0].ToString();
+                FormatPath(TrackInfo_Current->FrameWriter.OutputFileName);
+                TrackInfo_Current->FrameWriter.FrameCall(RawFrame);
                 RawFrame->ClearPre();
 
                 bool InitResult;
@@ -1369,9 +1371,9 @@ void matroska::Segment_Cluster_SimpleBlock()
                                 ParseDecodedFrame(TrackInfo_Current);
                             if (ReversibilityData.Data[Element_FileName].Content && ReversibilityData.Pos < ReversibilityData.Count)
                             {
-                                string OutputFileName = ReversibilityData.Data[Element_FileName].Content[ReversibilityData.Pos].ToString();
-                                FormatPath(OutputFileName);
-                                TrackInfo_Current->FrameWriter.FrameCall(RawFrame, OutputFileName);
+                                TrackInfo_Current->FrameWriter.OutputFileName = ReversibilityData.Data[Element_FileName].Content[ReversibilityData.Pos].ToString();
+                                FormatPath(TrackInfo_Current->FrameWriter.OutputFileName);
+                                TrackInfo_Current->FrameWriter.FrameCall(RawFrame);
                             }
                             else if (ReversibilityData.Count)
                                 Undecodable(undecodable::ReversibilityData_FrameCount);
@@ -1382,7 +1384,7 @@ void matroska::Segment_Cluster_SimpleBlock()
                             break;
             case Format_PCM:
                             RawFrame->AssignBufferView(Buffer.Data() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
-                            TrackInfo_Current->FrameWriter.FrameCall(RawFrame, TrackInfo_Current->OutputFileName);
+                            TrackInfo_Current->FrameWriter.FrameCall(RawFrame);
                             break;
             default:;
         }
