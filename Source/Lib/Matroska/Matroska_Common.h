@@ -351,6 +351,7 @@ private:
         flac_info*              FlacInfo;
         frame                   Frame;
         format                  Format;
+        string                  OutputFileName;
 
         trackinfo(frame_writer& FrameWriter_Source) :
             FrameWriter(FrameWriter_Source),
@@ -397,7 +398,6 @@ private:
     friend class                frame_writer;  
 
     //Utils
-    bool ConfigureVideoFormatAndFlavor(trackinfo* TrackInfo);
     bool GetFormatAndFlavor(trackinfo* TrackInfo, input_base_uncompressed* PotentialParser, raw_frame::flavor Flavor);
     bool ParseDecodedFrame(trackinfo* TrackInfo, input_base_uncompressed* Parser = nullptr); // If Parser is not provided, TrackInfo decoder and frame size is used
     void Uncompress(buffer& Buffer);
@@ -406,6 +406,8 @@ private:
     void RejectIncompatibleVersions();
     void ProcessCodecPrivate_FFV1();
     void ProcessCodecPrivate_FLAC();
+    bool InitOutput_FFV1(trackinfo* TrackInfo);
+    bool InitOutput_FLAC(trackinfo* TrackInfo_Current, const buffer_view& Pre);
     void ProcessFrame_FLAC();
 };
 

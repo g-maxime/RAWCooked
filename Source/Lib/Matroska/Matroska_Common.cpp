@@ -575,12 +575,7 @@ void matroska::FLAC_Write(const uint32_t* buffer[], size_t blocksize)
     }
 
     TrackInfo_Current->Frame.RawFrame->Buffer().Resize(Data - TrackInfo_Current->Frame.RawFrame->Buffer().Data());
-
-    string OutputFileName = TrackInfo_Current->ReversibilityData.Data[Element_FileName].Content[0].ToString();
-    FormatPath(OutputFileName);
-
-    //FramesPool->submit(WriteFrameCall, Buffer[Buffer_Offset] & 0x7F, TrackInfo_Current->Frame.RawFrame, WriteFrameCall_Opaque); //TODO: looks like there is some issues with threads and small tasks
-    TrackInfo_Current->FrameWriter.FrameCall(TrackInfo_Current->Frame.RawFrame, OutputFileName);
+    TrackInfo_Current->FrameWriter.FrameCall(TrackInfo_Current->Frame.RawFrame, TrackInfo_Current->OutputFileName);
 }
 
 //---------------------------------------------------------------------------
@@ -814,25 +809,14 @@ void matroska::Shutdown()
     {
         trackinfo* TrackInfo_Current = TrackInfo[i];
 
-        if (TrackInfo_Current->ReversibilityData.Unique && TrackInfo_Current->Frame.RawFrame)
+        // Write end of the file if the file is unique per track
+        if (TrackInfo_Current->ReversibilityData.Unique && TrackInfo_Current->ReversibilityData.Data[Element_AfterData].Content && !TrackInfo_Current->ReversibilityData.Data[Element_AfterData].Content[0].Empty())
         {
-            TrackInfo_Current->Frame.RawFrame->ClearPre();
             TrackInfo_Current->Frame.RawFrame->Buffer().Clear();
-            if (TrackInfo_Current->ReversibilityData.Data[Element_AfterData].Content && !TrackInfo_Current->ReversibilityData.Data[Element_AfterData].Content[0].Empty())
-            {
-                TrackInfo_Current->Frame.RawFrame->SetPost(TrackInfo_Current->ReversibilityData.Data[Element_AfterData].Content[0]);
-            }
-            else
-            {
-                TrackInfo_Current->Frame.RawFrame->ClearPost();
-            }
+            TrackInfo_Current->Frame.RawFrame->SetPost(TrackInfo_Current->ReversibilityData.Data[Element_AfterData].Content[0]);
+            TrackInfo_Current->FrameWriter.FrameCall(TrackInfo_Current->Frame.RawFrame, TrackInfo_Current->OutputFileName);
 
-            string OutputFileName = TrackInfo_Current->ReversibilityData.Data[Element_FileName].Content[0].ToString();
-            FormatPath(OutputFileName);
-
-            //FramesPool->submit(WriteFrameCall, Buffer[Buffer_Offset] & 0x7F, TrackInfo_Current->Frame.RawFrame, WriteFrameCall_Opaque); //TODO: looks like there is some issues with threads and small tasks
             TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = false;
-            TrackInfo_Current->FrameWriter.FrameCall(TrackInfo_Current->Frame.RawFrame, OutputFileName);
         }
 
         // Checks
@@ -1311,6 +1295,38 @@ void matroska::Segment_Cluster()
             Hashes_FromAttachments = nullptr;
         }
     }
+
+    // Init
+    for (auto& TrackInfo_Current : TrackInfo)
+        if (TrackInfo_Current)
+        {
+            auto& ReversibilityData = TrackInfo_Current->ReversibilityData;
+            auto& RawFrame = TrackInfo_Current->Frame.RawFrame;
+
+            if (ReversibilityData.Unique)
+            {
+                RawFrame->SetPre(ReversibilityData.GetDataContent(Element_BeforeData));
+                TrackInfo_Current->OutputFileName = ReversibilityData.Data[Element_FileName].Content[0].ToString();
+                FormatPath(TrackInfo_Current->OutputFileName);
+                TrackInfo_Current->FrameWriter.FrameCall(RawFrame, TrackInfo_Current->OutputFileName);
+                RawFrame->ClearPre();
+
+                bool InitResult;
+                switch (TrackInfo_Current->Format)
+                {
+                    case Format_FFV1: InitResult = InitOutput_FFV1(TrackInfo_Current); break;
+                    case Format_FLAC: InitResult = InitOutput_FLAC(TrackInfo_Current, RawFrame->Pre()); break;
+                    default: InitResult = false;
+                }
+                if (InitResult)
+                {
+                    //TODO handle errors
+                }
+
+                TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin] = true;
+                TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = true;
+            }
+        }
 }
 
 //---------------------------------------------------------------------------
@@ -1348,8 +1364,6 @@ void matroska::Segment_Cluster_SimpleBlock()
                             RawFrame->SetPre(ReversibilityData.GetDataContent(Element_BeforeData));
                             RawFrame->SetPost(ReversibilityData.GetDataContent(Element_AfterData));
                             RawFrame->SetIn(ReversibilityData.GetDataContent(Element_InData));
-                            if (!ReversibilityData.Pos && ConfigureVideoFormatAndFlavor(TrackInfo_Current))
-                                return;
                             TrackInfo_Current->Frame.Read_Buffer_Continue(Buffer.Data() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
                             if (Actions[Action_Conch] || Actions[Action_Coherency])
                                 ParseDecodedFrame(TrackInfo_Current);
@@ -1357,85 +1371,20 @@ void matroska::Segment_Cluster_SimpleBlock()
                             {
                                 string OutputFileName = ReversibilityData.Data[Element_FileName].Content[ReversibilityData.Pos].ToString();
                                 FormatPath(OutputFileName);
-
                                 TrackInfo_Current->FrameWriter.FrameCall(RawFrame, OutputFileName);
                             }
                             else if (ReversibilityData.Count)
                                 Undecodable(undecodable::ReversibilityData_FrameCount);
                             break;
             case Format_FLAC:
-                            if (ReversibilityData.Unique && !TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin])
-                            {
-                                TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = true;
-                                RawFrame->SetPre(ReversibilityData.GetDataContent(Element_BeforeData));
-
-                                if (!RawFrame->Pre().Empty())
-                                {
-                                    wav WAV;
-                                    WAV.Actions.set(Action_Encode);
-                                    WAV.Actions.set(Action_AcceptTruncated);
-                                    if (!WAV.Parse(RawFrame->Pre()))
-                                    {
-                                        if (!WAV.IsSupported())
-                                        {
-                                            Undecodable(undecodable::ReversibilityData_UnreadableFrameHeader);
-                                            return;
-                                        }
-                                        TrackInfo_Current->FlacInfo->Endianness = WAV.Endianness();
-                                        if (WAV.BitDepth() == 8 && TrackInfo_Current->FlacInfo->bits_per_sample == 16)
-                                            TrackInfo_Current->FlacInfo->bits_per_sample = 8; // FFmpeg encoder converts 8-bit input to 16-bit output, forcing 8-bit ouptut in return
-                                    }
-                                    else
-                                    {
-                                        aiff AIFF;
-                                        AIFF.Actions.set(Action_Encode);
-                                        AIFF.Actions.set(Action_AcceptTruncated);
-                                        if (!AIFF.Parse(RawFrame->Pre()))
-                                        {
-                                            if (!AIFF.IsSupported())
-                                            {
-                                                Undecodable(undecodable::ReversibilityData_UnreadableFrameHeader);
-                                                return;
-                                            }
-                                            TrackInfo_Current->FlacInfo->Endianness = AIFF.Endianness();
-                                            if (AIFF.sampleSize() == 8 && TrackInfo_Current->FlacInfo->bits_per_sample == 16)
-                                                TrackInfo_Current->FlacInfo->bits_per_sample = 8; // FFmpeg encoder converts 8-bit input to 16-bit output, forcing 8-bit ouptut in return
-                                        }
-                                    }
-                                }
-                            }
-
                             TrackInfo_Current->FlacInfo->Buffer_Offset_Temp = Buffer_Offset + 4;
                             ProcessFrame_FLAC();
-
-                            if (ReversibilityData.Unique && !TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin])
-                            {
-                                TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin] = true;
-                                RawFrame->ClearPre();
-                            }
                             break;
             case Format_PCM:
-                            if (ReversibilityData.Unique && !TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin])
-                            {
-                                TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = true;
-                                RawFrame->SetPre(ReversibilityData.GetDataContent(Element_BeforeData));
-                            }
-
                             RawFrame->AssignBufferView(Buffer.Data() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
-                            {
-                                string OutputFileName = ReversibilityData.Data[Element_FileName].Content[0].ToString();
-                                FormatPath(OutputFileName);
-
-                                TrackInfo_Current->FrameWriter.FrameCall(RawFrame, OutputFileName);
-                            }
-
-                            if (ReversibilityData.Unique && !TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin])
-                            {
-                                TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin] = true;
-                                RawFrame->ClearPre();
-                            }
+                            TrackInfo_Current->FrameWriter.FrameCall(RawFrame, TrackInfo_Current->OutputFileName);
                             break;
-                default:;
+            default:;
         }
 
         TrackInfo_Current->ReversibilityData.NextFrame();
@@ -1650,15 +1599,6 @@ void matroska::ProgressIndicator_Show()
 }
 
 //---------------------------------------------------------------------------
-bool matroska::ConfigureVideoFormatAndFlavor(trackinfo* TrackInfo_Current)
-{
-    if (GetFormatAndFlavor(TrackInfo_Current, new dpx(Errors), raw_frame::Flavor_DPX))
-        if (GetFormatAndFlavor(TrackInfo_Current, new tiff(Errors), raw_frame::Flavor_TIFF))
-            return true;
-    return false;
-}
-
-//---------------------------------------------------------------------------
 bool matroska::GetFormatAndFlavor(trackinfo* TrackInfo_Current, input_base_uncompressed* PotentialParser, raw_frame::flavor Flavor)
 {
     PotentialParser->Actions.set(Action_Encode);
@@ -1825,6 +1765,56 @@ void matroska::ProcessCodecPrivate_FLAC()
 
     TrackInfo_Current->FlacInfo->Buffer_Offset_Temp = Buffer_Offset;
     ProcessFrame_FLAC();
+}
+
+//---------------------------------------------------------------------------
+bool matroska::InitOutput_FFV1(trackinfo* TrackInfo_Current)
+{
+    if (GetFormatAndFlavor(TrackInfo_Current, new dpx(Errors), raw_frame::Flavor_DPX))
+        if (GetFormatAndFlavor(TrackInfo_Current, new tiff(Errors), raw_frame::Flavor_TIFF))
+            return true;
+    return false;
+}
+
+//---------------------------------------------------------------------------
+bool matroska::InitOutput_FLAC(trackinfo* TrackInfo_Current, const buffer_view& Pre)
+{
+    if (Pre.Empty())
+        return false;
+
+    wav WAV;
+    WAV.Actions.set(Action_Encode);
+    WAV.Actions.set(Action_AcceptTruncated);
+    if (!WAV.Parse(Pre))
+    {
+        if (!WAV.IsSupported())
+        {
+            Undecodable(undecodable::ReversibilityData_UnreadableFrameHeader);
+            return true;
+        }
+        TrackInfo_Current->FlacInfo->Endianness = WAV.Endianness();
+        if (WAV.BitDepth() == 8 && TrackInfo_Current->FlacInfo->bits_per_sample == 16)
+            TrackInfo_Current->FlacInfo->bits_per_sample = 8; // FFmpeg encoder converts 8-bit input to 16-bit output, forcing 8-bit ouptut in return
+    }
+    else
+    {
+        aiff AIFF;
+        AIFF.Actions.set(Action_Encode);
+        AIFF.Actions.set(Action_AcceptTruncated);
+        if (!AIFF.Parse(Pre))
+        {
+            if (!AIFF.IsSupported())
+            {
+                Undecodable(undecodable::ReversibilityData_UnreadableFrameHeader);
+                return true;
+            }
+            TrackInfo_Current->FlacInfo->Endianness = AIFF.Endianness();
+            if (AIFF.sampleSize() == 8 && TrackInfo_Current->FlacInfo->bits_per_sample == 16)
+                TrackInfo_Current->FlacInfo->bits_per_sample = 8; // FFmpeg encoder converts 8-bit input to 16-bit output, forcing 8-bit ouptut in return
+        }
+    }
+
+    return false;
 }
 
 //---------------------------------------------------------------------------
