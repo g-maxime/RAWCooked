@@ -89,7 +89,7 @@ int filemap::Remap(size_t NewSize)
 #if defined(_WIN32) || defined(_WINDOWS)
             UnmapViewOfFile(Data());
 #else
-            munmap(Data(), NewSize());
+            munmap(Data(), Size());
 #endif
         ClearBase();
     }
