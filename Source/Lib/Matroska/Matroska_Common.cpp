@@ -138,25 +138,11 @@ frame_writer::~frame_writer()
     delete (MD5_CTX*)MD5;
 }
 
-//---------------------------------------------------------------------------
-void FrameCall_MergeIn(buffer_or_view& Buffer, const buffer_base& In)
-{
-    auto Buffer_Size = Buffer.Size();
-    if (Buffer_Size || Buffer_Size != In.Size())
-        return;
-
-    auto Buffer_Data = Buffer.DataForModification();
-    auto In_Data = In.Data();
-    for (size_t i = 0; i < Buffer_Size; i++)
-        Buffer_Data[i] ^= In_Data[i];
-}
 
 void frame_writer::FrameCall(raw_frame* RawFrame, const string& OutputFileName)
 {
     // Post-processing
-    FrameCall_MergeIn(RawFrame->Buffer(), RawFrame->In);
-    if (RawFrame->Planes().size() == 1 && RawFrame->Plane(0))
-        FrameCall_MergeIn(buffer_or_view(RawFrame->Plane(0)->Buffer()), RawFrame->In);
+    RawFrame->MergeIn();
 
     if (!Mode[IsNotBegin])
     {
@@ -483,9 +469,10 @@ void matroska::FLAC_Write(const uint32_t* buffer[], size_t blocksize)
 {
     trackinfo* TrackInfo_Current = TrackInfo[TrackInfo_Pos];
 
-    if (!TrackInfo_Current->Frame.RawFrame->Buffer().Data())
-        TrackInfo_Current->Frame.RawFrame->Buffer().Create(16384 / 8 * TrackInfo_Current->FlacInfo->bits_per_sample*TrackInfo_Current->FlacInfo->channels); // 16384 is the max blocksize in spec
-    auto Buffer_Current = TrackInfo_Current->Frame.RawFrame->Buffer().DataForModification();
+    auto& Buffer = TrackInfo_Current->Frame.RawFrame->Buffer();
+    if (!Buffer.Data())
+        Buffer.Create(16384 / 8 * TrackInfo_Current->FlacInfo->bits_per_sample*TrackInfo_Current->FlacInfo->channels); // 16384 is the max blocksize in spec
+    auto Data = Buffer.DataForModification();
 
     // Converting libFLAC output to WAV style
     uint8_t channels = TrackInfo_Current->FlacInfo->channels;
@@ -501,14 +488,14 @@ void matroska::FLAC_Write(const uint32_t* buffer[], size_t blocksize)
                                 for (size_t i = 0; i < blocksize; i++)
                                     for (size_t j = 0; j < channels; j++)
                                     {
-                                        *(Buffer_Current++) = (uint8_t)(buffer[j][i]);
+                                        *(Data++) = (uint8_t)(buffer[j][i]);
                                     }
                                 break;
                             case 1:
                                 for (size_t i = 0; i < blocksize; i++)
                                     for (size_t j = 0; j < channels; j++)
                                     {
-                                        *(Buffer_Current++) = (uint8_t)((buffer[j][i]) + 128);
+                                        *(Data++) = (uint8_t)((buffer[j][i]) + 128);
                                     }
                                 break;
                         }
@@ -520,14 +507,14 @@ void matroska::FLAC_Write(const uint32_t* buffer[], size_t blocksize)
                                 for (size_t i = 0; i < blocksize; i++)
                                     for (size_t j = 0; j < channels; j++)
                                     {
-                                        *(Buffer_Current++) = (uint8_t)(buffer[j][i] >> 8);
+                                        *(Data++) = (uint8_t)(buffer[j][i] >> 8);
                                     }
                                 break;
                             case 1:
                                 for (size_t i = 0; i < blocksize; i++)
                                     for (size_t j = 0; j < channels; j++)
                                     {
-                                        *(Buffer_Current++) = (uint8_t)((buffer[j][i] >> 8) + 128);
+                                        *(Data++) = (uint8_t)((buffer[j][i] >> 8) + 128);
                                     }
                                 break;
                         }
@@ -541,16 +528,16 @@ void matroska::FLAC_Write(const uint32_t* buffer[], size_t blocksize)
                         for (size_t i = 0; i < blocksize; i++)
                             for (size_t j = 0; j < channels; j++)
                             {
-                                *(Buffer_Current++) = (uint8_t)(buffer[j][i] >> 8);
-                                *(Buffer_Current++) = (uint8_t)(buffer[j][i]);
+                                *(Data++) = (uint8_t)(buffer[j][i] >> 8);
+                                *(Data++) = (uint8_t)(buffer[j][i]);
                             }
                         break;
                 case 1:
                         for (size_t i = 0; i < blocksize; i++)
                             for (size_t j = 0; j < channels; j++)
                             {
-                                *(Buffer_Current++) = (uint8_t)(buffer[j][i]);
-                                *(Buffer_Current++) = (uint8_t)(buffer[j][i] >> 8);
+                                *(Data++) = (uint8_t)(buffer[j][i]);
+                                *(Data++) = (uint8_t)(buffer[j][i] >> 8);
                             }
                         break;
             }
@@ -562,25 +549,25 @@ void matroska::FLAC_Write(const uint32_t* buffer[], size_t blocksize)
                         for (size_t i = 0; i < blocksize; i++)
                             for (size_t j = 0; j < channels; j++)
                             {
-                                *(Buffer_Current++) = (uint8_t)(buffer[j][i] >> 16);
-                                *(Buffer_Current++) = (uint8_t)(buffer[j][i] >> 8);
-                                *(Buffer_Current++) = (uint8_t)(buffer[j][i]);
+                                *(Data++) = (uint8_t)(buffer[j][i] >> 16);
+                                *(Data++) = (uint8_t)(buffer[j][i] >> 8);
+                                *(Data++) = (uint8_t)(buffer[j][i]);
                             }
                         break;
                 case 1:
                         for (size_t i = 0; i < blocksize; i++)
                             for (size_t j = 0; j < channels; j++)
                             {
-                                *(Buffer_Current++) = (uint8_t)(buffer[j][i]);
-                                *(Buffer_Current++) = (uint8_t)(buffer[j][i] >> 8);
-                                *(Buffer_Current++) = (uint8_t)(buffer[j][i] >> 16);
+                                *(Data++) = (uint8_t)(buffer[j][i]);
+                                *(Data++) = (uint8_t)(buffer[j][i] >> 8);
+                                *(Data++) = (uint8_t)(buffer[j][i] >> 16);
                             }
                         break;
             }
             break;
     }
 
-    TrackInfo_Current->Frame.RawFrame->Buffer().Resize(Buffer_Current - TrackInfo_Current->Frame.RawFrame->Buffer().Data());
+    TrackInfo_Current->Frame.RawFrame->Buffer().Resize(Data - TrackInfo_Current->Frame.RawFrame->Buffer().Data());
 
     string OutputFileName = TrackInfo_Current->ReversibilityData.Data[Element_FileName].Content[0].ToString();
     FormatPath(OutputFileName);

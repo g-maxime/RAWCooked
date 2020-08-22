@@ -447,6 +447,9 @@ public:
     size_t FrameSize();
     size_t TotalSize();
 
+    // Processing
+    void MergeIn();
+
 private:
     buffer_or_view              Buffer_;
     std::vector<plane*>         Planes_;
