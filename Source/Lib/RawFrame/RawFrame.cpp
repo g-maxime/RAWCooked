@@ -80,7 +80,7 @@ void raw_frame::TIFF_Create(size_t colorspace_type, size_t width, size_t height,
 }
 
 //---------------------------------------------------------------------------
-size_t raw_frame::GetFrameSize()
+size_t raw_frame::FrameSize()
 {
     auto FrameSize = Buffer.Size();
 
@@ -91,7 +91,7 @@ size_t raw_frame::GetFrameSize()
 }
 
 //---------------------------------------------------------------------------
-size_t raw_frame::GetTotalSize()
+size_t raw_frame::TotalSize()
 {
-    return Pre.Size() + max(In.Size(), GetFrameSize()) + Post.Size();
+    return Pre.Size() + max(In.Size(), FrameSize()) + Post.Size();
 }

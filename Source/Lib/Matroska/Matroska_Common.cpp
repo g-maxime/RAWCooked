@@ -1716,7 +1716,7 @@ bool matroska::ParseDecodedFrame(trackinfo* TrackInfo_Current, input_base_uncomp
     }
     else
     {
-        ParseResult = FrameParser->Parse(RawFrame->Pre, Parser ? (decltype(RawFrame->GetTotalSize()))-1 : RawFrame->GetTotalSize());
+        ParseResult = FrameParser->Parse(RawFrame->Pre, Parser ? (decltype(RawFrame->TotalSize()))-1 : RawFrame->TotalSize());
     }
     return ParseResult;
 }

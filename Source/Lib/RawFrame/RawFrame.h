@@ -399,10 +399,12 @@ public:
         size_t                  BitsPerBlock_;
         size_t                  PixelsPerBlock_;
     };
+
     const std::vector<plane*> Planes() const
     {
         return Planes_;
     }
+
     const plane* Plane(size_t p) const
     {
         return Planes_[p];
@@ -433,8 +435,8 @@ public:
     void Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample);
 
     // Info
-    size_t GetFrameSize();
-    size_t GetTotalSize();
+    size_t FrameSize();
+    size_t TotalSize();
 
 private:
     std::vector<plane*> Planes_;
