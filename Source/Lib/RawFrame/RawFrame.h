@@ -348,7 +348,6 @@ public:
     buffer_view                 Pre;
     buffer_view                 Post;
     buffer_view                 In;
-    buffer_or_view              Buffer;
 
     struct plane
     {
@@ -400,6 +399,16 @@ public:
         size_t                  PixelsPerBlock_;
     };
 
+    buffer_or_view& Buffer()
+    {
+        return Buffer_;
+    }
+
+    void AssignBufferView(const uint8_t* NewData, size_t NewSize)
+    {
+        Buffer_ = buffer_or_view(NewData, NewSize);
+    }
+    
     const std::vector<plane*> Planes() const
     {
         return Planes_;
@@ -439,7 +448,8 @@ public:
     size_t TotalSize();
 
 private:
-    std::vector<plane*> Planes_;
+    buffer_or_view              Buffer_;
+    std::vector<plane*>         Planes_;
     void FFmpeg_Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample);
     void DPX_Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample);
     void TIFF_Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample);

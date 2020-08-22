@@ -82,7 +82,7 @@ void raw_frame::TIFF_Create(size_t colorspace_type, size_t width, size_t height,
 //---------------------------------------------------------------------------
 size_t raw_frame::FrameSize()
 {
-    auto FrameSize = Buffer.Size();
+    auto FrameSize = Buffer_.Size();
 
     for (auto&& Plane : Planes_)
         FrameSize += Plane->Buffer().Size();

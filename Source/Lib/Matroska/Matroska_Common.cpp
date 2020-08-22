@@ -154,7 +154,7 @@ void FrameCall_MergeIn(buffer_or_view& Buffer, const buffer_base& In)
 void frame_writer::FrameCall(raw_frame* RawFrame, const string& OutputFileName)
 {
     // Post-processing
-    FrameCall_MergeIn(RawFrame->Buffer, RawFrame->In);
+    FrameCall_MergeIn(RawFrame->Buffer(), RawFrame->In);
     if (RawFrame->Planes().size() == 1 && RawFrame->Plane(0))
         FrameCall_MergeIn(buffer_or_view(RawFrame->Plane(0)->Buffer()), RawFrame->In);
 
@@ -355,7 +355,7 @@ bool frame_writer::WriteFile(raw_frame* RawFrame)
 {
     if (WriteFile_Write(Offset, File_Write, RawFrame->Pre))
         return true;
-    if (WriteFile_Write(Offset, File_Write, RawFrame->Buffer))
+    if (WriteFile_Write(Offset, File_Write, RawFrame->Buffer()))
         return true;
     for (const auto& Plane : RawFrame->Planes())
         if (Plane && WriteFile_Write(Offset, File_Write, Plane->Buffer()))
@@ -388,7 +388,7 @@ bool frame_writer::CheckFile(raw_frame* RawFrame)
 
     if (CheckFile_Compare(Offset_Current, File_Read, RawFrame->Pre))
         return true;
-    if (CheckFile_Compare(Offset_Current, File_Read, RawFrame->Buffer))
+    if (CheckFile_Compare(Offset_Current, File_Read, RawFrame->Buffer()))
         return true;
     for (const auto& Plane : RawFrame->Planes())
         if (Plane && CheckFile_Compare(Offset_Current, File_Read, Plane->Buffer()))
@@ -405,8 +405,8 @@ bool frame_writer::CheckMD5(raw_frame* RawFrame)
 {
     if (RawFrame->Pre.Size())
         MD5_Update((MD5_CTX*)MD5, RawFrame->Pre.Data(), (unsigned long)RawFrame->Pre.Size());
-    if (RawFrame->Buffer.Size())
-        MD5_Update((MD5_CTX*)MD5, RawFrame->Buffer.Data(), (unsigned long)RawFrame->Buffer.Size());
+    if (RawFrame->Buffer().Size())
+        MD5_Update((MD5_CTX*)MD5, RawFrame->Buffer().Data(), (unsigned long)RawFrame->Buffer().Size());
     for (const auto& Plane : RawFrame->Planes())
         if (Plane && Plane->Buffer().Size())
             MD5_Update((MD5_CTX*)MD5, Plane->Buffer().Data(), (unsigned long)Plane->Buffer().Size());
@@ -483,9 +483,9 @@ void matroska::FLAC_Write(const uint32_t* buffer[], size_t blocksize)
 {
     trackinfo* TrackInfo_Current = TrackInfo[TrackInfo_Pos];
 
-    if (!TrackInfo_Current->Frame.RawFrame->Buffer.Data())
-        TrackInfo_Current->Frame.RawFrame->Buffer.Create(16384 / 8 * TrackInfo_Current->FlacInfo->bits_per_sample*TrackInfo_Current->FlacInfo->channels); // 16384 is the max blocksize in spec
-    auto Buffer_Current = TrackInfo_Current->Frame.RawFrame->Buffer.DataForModification();
+    if (!TrackInfo_Current->Frame.RawFrame->Buffer().Data())
+        TrackInfo_Current->Frame.RawFrame->Buffer().Create(16384 / 8 * TrackInfo_Current->FlacInfo->bits_per_sample*TrackInfo_Current->FlacInfo->channels); // 16384 is the max blocksize in spec
+    auto Buffer_Current = TrackInfo_Current->Frame.RawFrame->Buffer().DataForModification();
 
     // Converting libFLAC output to WAV style
     uint8_t channels = TrackInfo_Current->FlacInfo->channels;
@@ -580,7 +580,7 @@ void matroska::FLAC_Write(const uint32_t* buffer[], size_t blocksize)
             break;
     }
 
-    TrackInfo_Current->Frame.RawFrame->Buffer.Resize(Buffer_Current - TrackInfo_Current->Frame.RawFrame->Buffer.Data());
+    TrackInfo_Current->Frame.RawFrame->Buffer().Resize(Buffer_Current - TrackInfo_Current->Frame.RawFrame->Buffer().Data());
 
     string OutputFileName = TrackInfo_Current->ReversibilityData.Data[Element_FileName].Content[0].ToString();
     FormatPath(OutputFileName);
@@ -822,7 +822,7 @@ void matroska::Shutdown()
 
         if (TrackInfo_Current->ReversibilityData.Unique && TrackInfo_Current->Frame.RawFrame)
         {
-            TrackInfo_Current->Frame.RawFrame->Buffer.Clear();
+            TrackInfo_Current->Frame.RawFrame->Buffer().Clear();
             TrackInfo_Current->Frame.RawFrame->Pre.Clear();
             if (TrackInfo_Current->ReversibilityData.Data[Element_AfterData].Content && !TrackInfo_Current->ReversibilityData.Data[Element_AfterData].Content[0].Empty())
             {
@@ -1426,7 +1426,7 @@ void matroska::Segment_Cluster_SimpleBlock()
                                 TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = true;
                                 RawFrame->Pre = ReversibilityData.GetDataContent(Element_BeforeData);
                             }
-                            RawFrame->Buffer = buffer_or_view(Buffer.Data() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
+                            RawFrame->AssignBufferView(Buffer.Data() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
 
                             {
                                 string OutputFileName = ReversibilityData.Data[Element_FileName].Content[0].ToString();
