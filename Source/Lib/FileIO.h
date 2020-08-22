@@ -17,11 +17,11 @@
 using namespace std;
 //---------------------------------------------------------------------------
 
-class filemap : public buffer_base
+class filemap : public buffer_view
 {
 public:
     // Constructor/Destructor
-                                filemap() : buffer_base(nullptr, 0) {}
+                                filemap() : buffer_view(nullptr, 0) {}
                                 ~filemap() { Close(); }
 
     // Actions
