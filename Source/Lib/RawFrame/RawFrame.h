@@ -353,18 +353,13 @@ public:
     struct plane
     {
         buffer                  Buffer;
-        size_t                  Width;
-        size_t                  Width_Padding;
-        size_t                  Height;
-        size_t                  BitsPerBlock;
-        size_t                  PixelsPerBlock;
 
-        plane(size_t Width_, size_t Height_, size_t BitsPerBlock_, size_t PixelsPerBlock_ = 1)
+        plane(size_t NewWidth, size_t NewHeight, size_t NewBitsPerBlock, size_t NewPixelsPerBlock = 1)
             :
-            Width(Width_),
-            Height(Height_),
-            BitsPerBlock(BitsPerBlock_),
-            PixelsPerBlock(PixelsPerBlock_)
+            Width(NewWidth),
+            Height(NewHeight),
+            BitsPerBlock(NewBitsPerBlock),
+            PixelsPerBlock(NewPixelsPerBlock)
         {
             Width_Padding=0; //TODO: option for padding size
             if (Width_Padding)
@@ -382,6 +377,13 @@ public:
         {
             return (Width+Width_Padding)*BitsPerBlock/PixelsPerBlock/8;
         }
+
+    private:
+        size_t                  Width;
+        size_t                  Width_Padding;
+        size_t                  Height;
+        size_t                  BitsPerBlock;
+        size_t                  PixelsPerBlock;
     };
     std::vector<plane*> Planes;
 
