@@ -476,7 +476,7 @@ void matroska::FLAC_Write(const uint32_t* buffer[], size_t blocksize)
     auto& RawFrame = TrackInfo_Current->Frame.RawFrame;
     auto& Buffer = RawFrame->Buffer();
     if (!Buffer.Data())
-        Buffer.Create(16384 / 8 * TrackInfo_Current->FlacInfo->bits_per_sample*TrackInfo_Current->FlacInfo->channels); // 16384 is the max blocksize in spec
+        Buffer.Create(16384 / 8 * TrackInfo_Current->FlacInfo->bits_per_sample * TrackInfo_Current->FlacInfo->channels); // 16384 is the max blocksize in spec
     auto Data = Buffer.DataForModification();
 
     // Converting libFLAC output to WAV style
@@ -1352,39 +1352,47 @@ void matroska::Segment_Cluster_SimpleBlock()
         // Parsing
         auto& ReversibilityData = TrackInfo_Current->ReversibilityData;
         auto& RawFrame = TrackInfo_Current->Frame.RawFrame;
+        if (!TrackInfo_Current->ReversibilityData.Unique)
+        {
+            RawFrame->SetPre(ReversibilityData.GetDataContent(Element_BeforeData));
+            RawFrame->SetPost(ReversibilityData.GetDataContent(Element_AfterData));
+            RawFrame->SetIn(ReversibilityData.GetDataContent(Element_InData));
+            if (ReversibilityData.Data[Element_FileName].Content && ReversibilityData.Pos < ReversibilityData.Count)
+            {
+                TrackInfo_Current->FrameWriter.OutputFileName = ReversibilityData.Data[Element_FileName].Content[ReversibilityData.Pos].ToString();
+                FormatPath(TrackInfo_Current->FrameWriter.OutputFileName);
+            }
+            else
+            {
+                TrackInfo_Current->FrameWriter.OutputFileName.clear();
+                if (ReversibilityData.Count)
+                    Undecodable(undecodable::ReversibilityData_FrameCount);
+            }
+        }
+        auto CurrentBufferOffset = Buffer_Offset + 4;
+        auto CurrentBufferData = Buffer.Data() + CurrentBufferOffset;
+        auto CurrentBufferSize = Levels[Level].Offset_End - CurrentBufferOffset;
         switch (TrackInfo_Current->Format)
         {
             case Format_FFV1:
-                            TrackInfo_Current->Frame.Read_Buffer_Continue(Buffer.Data() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
-                            RawFrame->SetPre(ReversibilityData.GetDataContent(Element_BeforeData));
-                            RawFrame->SetPost(ReversibilityData.GetDataContent(Element_AfterData));
-                            RawFrame->SetIn(ReversibilityData.GetDataContent(Element_InData));
-                            if (Actions[Action_Conch] || Actions[Action_Coherency])
-                                ParseDecodedFrame(TrackInfo_Current);
-                            if (ReversibilityData.Data[Element_FileName].Content && ReversibilityData.Pos < ReversibilityData.Count)
-                            {
-                                TrackInfo_Current->FrameWriter.OutputFileName = ReversibilityData.Data[Element_FileName].Content[ReversibilityData.Pos].ToString();
-                                FormatPath(TrackInfo_Current->FrameWriter.OutputFileName);
-                                RawFrame->Process();
-                            }
-                            else
-                            {
-                                TrackInfo_Current->FrameWriter.OutputFileName.clear();
-                                if (ReversibilityData.Count)
-                                    Undecodable(undecodable::ReversibilityData_FrameCount);
-                            }
+                            TrackInfo_Current->Frame.Read_Buffer_Continue(CurrentBufferData, CurrentBufferSize);
+                            RawFrame->Process();
                             break;
             case Format_FLAC:
-                            TrackInfo_Current->FlacInfo->Buffer_Offset_Temp = Buffer_Offset + 4;
+                            TrackInfo_Current->FlacInfo->Buffer_Offset_Temp = CurrentBufferOffset;
                             ProcessFrame_FLAC();
                             break;
             case Format_PCM:
-                            RawFrame->AssignBufferView(Buffer.Data() + Buffer_Offset + 4, Levels[Level].Offset_End - Buffer_Offset - 4);
+                            RawFrame->AssignBufferView(CurrentBufferData, CurrentBufferSize);
                             RawFrame->Process();
                             break;
             default:;
         }
-
+        if (!TrackInfo_Current->ReversibilityData.Unique)
+        {
+            if (Actions[Action_Conch] || Actions[Action_Coherency])
+                ParseDecodedFrame(TrackInfo_Current);
+        }
         TrackInfo_Current->ReversibilityData.NextFrame();
     }
 }

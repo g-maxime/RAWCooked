@@ -55,7 +55,7 @@ protected:
     buffer_base& operator = (const buffer_base& Buffer) = delete;
     buffer_base& operator = (const buffer_base&& Buffer) = delete;
 
-    virtual ~buffer_base() = 0 {};
+    virtual ~buffer_base() = 0;
 
     void ClearBase()
     {
@@ -93,6 +93,7 @@ private:
     const uint8_t* Data_;
     size_t Size_;
 };
+inline buffer_base::~buffer_base() {}
 
 struct buffer : buffer_base
 {
