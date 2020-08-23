@@ -80,7 +80,7 @@ bool CreateDirectory (const string& Dir)
         if (CreateDirectoryA(Dir.c_str(), NULL))
             return false;
         #else
-        struct stat s = { 0 };
+        struct stat s = {};
         if (!stat(Dir.c_str(), &s) && (s.st_mode & S_IFDIR))
             return false;
         if (!mkdir(Dir.c_str(), 0700))

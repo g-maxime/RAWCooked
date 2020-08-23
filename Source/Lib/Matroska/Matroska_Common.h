@@ -232,7 +232,7 @@ private:
                 if (Content)
                     return;
                 Content = new buffer[Size];
-                memset(Content, 0x00, Size * sizeof(buffer*));
+                memset(Content, 0x00, Size * sizeof(buffer));
             }
 
             ~content_per_element()

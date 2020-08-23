@@ -37,6 +37,10 @@
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
+#else
+#ifndef FLAC__HAS_X86INTRIN
+#define FLAC__HAS_X86INTRIN 0
+#endif
 #endif
 
 #ifndef FLAC__CPU_X86_64

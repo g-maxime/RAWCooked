@@ -168,7 +168,7 @@ ELEMENT_END()
 
 
 //---------------------------------------------------------------------------
-aiff::call aiff::SubElements_Void(uint64_t Name)
+aiff::call aiff::SubElements_Void(uint64_t /*Name*/)
 {
     Levels[Level].SubElements = &aiff::SubElements_Void; return &aiff::Void;
 }
@@ -320,7 +320,7 @@ void aiff::AIFF_COMM()
     }
 
     uint16_t numChannels = Get_B2();
-    uint32_t numSamplesFrames = Get_B4();
+    Get_B4(); // numSamplesFrames
     uint16_t sampleSize = Get_B2();
     long double sampleRate = Get_BF10();
     endianness Endianness = BE;

@@ -25,7 +25,7 @@ public:
 
 private:
     raw_frame*                  RawFrame;
-    const uint8_t*              FrameBuffer_Temp[4];
+    uint8_t*                    FrameBuffer_Temp[4];
     size_t                      Bits;
     pixel_t                     Offset;
     uint64_t                    Flavor_Private; //Used by specialized flavor for marking the configuration of such flavor (e.g. endianness of DPX)

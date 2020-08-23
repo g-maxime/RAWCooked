@@ -32,9 +32,9 @@ public:
     int                         Close();
 
 private:
-    void*                       Private = nullptr;
+    intptr_t                    Private = 0;
     #if defined(_WIN32) || defined(_WINDOWS)
-    void*                       Private2 = nullptr;
+    intptr_t                    Private2 = 0;
     #endif //defined(_WIN32) || defined(_WINDOWS)
 };
 

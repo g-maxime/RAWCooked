@@ -8,7 +8,14 @@
 #include "Lib/FFV1/FFV1_Frame.h"
 #include "Lib/RawFrame/RawFrame.h"
 #include "Lib/CRC32/ZenCRC32.h"
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreorder"
+#endif
 #include "ThreadPool.h"
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 //---------------------------------------------------------------------------
 
 //***************************************************************************

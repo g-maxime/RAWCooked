@@ -217,7 +217,7 @@ void slice::Parse()
     if (IsFirstSlice)
     {
         uint8_t State = states_default;
-        bool keyframe = E.b(State);
+        E.b(State); // keyframe
     }
 
     // Parameters

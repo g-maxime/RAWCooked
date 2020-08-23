@@ -66,7 +66,7 @@ int global::SetAcceptFiles()
 //---------------------------------------------------------------------------
 int global::SetCheck(bool Value)
 {
-    Check = true;
+    Check = Value;
     return 0;
 }
 
@@ -130,7 +130,7 @@ int global::SetEncode(bool Value)
 //---------------------------------------------------------------------------
 int global::SetFrameMd5(bool Value)
 {
-    FrameMd5 = true;
+    FrameMd5 = Value;
     return 0;
 }
 
@@ -319,7 +319,6 @@ int global::SetOption(const char* argv[], int& i, int argc)
     {
         if (++i >= argc)
             return Error_NotTested(argv[i - 1]);
-        int SliceCount = atoi(argv[i]);
         if (!strcmp(argv[i], "0")
          || !strcmp(argv[i], "1"))
         {
@@ -756,7 +755,7 @@ void global::ProgressIndicator_Show()
 
             ProgressIndicator_Value = ProgressIndicator_New;
         }
-    } while (ProgressIndicator_IsEnd.wait_for(Lock, Frequency) == cv_status::timeout, ProgressIndicator_Current != ProgressIndicator_Total);
+    } while (ProgressIndicator_IsEnd.wait_for(Lock, Frequency) == cv_status::timeout && ProgressIndicator_Current != ProgressIndicator_Total);
 
     // Show summary
     cerr << '\r';

@@ -168,7 +168,7 @@ ELEMENT_END()
 
 
 //---------------------------------------------------------------------------
-wav::call wav::SubElements_Void(uint64_t Name)
+wav::call wav::SubElements_Void(uint64_t /*Name*/)
 {
     Levels[Level].SubElements = &wav::SubElements_Void; return &wav::Void;
 }

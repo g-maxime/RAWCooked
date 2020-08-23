@@ -403,9 +403,12 @@ int main(int argc, const char* argv[])
     // Parse files
     RAWcooked.FileName = Global.rawcooked_reversibility_data_FileName;
     int Value = 0;
-    for (int i = 0; i < Input.Files.size(); i++)
-        if (Value = ParseFile(i))
+    for (size_t i = 0; i < Input.Files.size(); i++)
+    {
+        Value = ParseFile(i);
+        if (Value)
             break;
+    }
     RAWcooked.Close();
 
     // Coherency checks

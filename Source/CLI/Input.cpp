@@ -384,7 +384,7 @@ int input::AnalyzeInputs(global& Global)
     Global.HasAtLeastOneDir = false;
     Global.HasAtLeastOneFile = false;
     bool HasMoreThanOneFile = false;
-    for (int i = 0; i < Global.Inputs.size(); i++)
+    for (size_t i = 0; i < Global.Inputs.size(); i++)
     {
         if (IsDir(Global.Inputs[i].c_str()))
         {
@@ -438,7 +438,7 @@ int input::AnalyzeInputs(global& Global)
 
     // Global path position
     Global.Path_Pos_Global = (size_t)-1;
-    for (int i = 0; i < Files.size(); i++)
+    for (size_t i = 0; i < Files.size(); i++)
     {
         size_t Path_Pos;
         DetectPathPos(Files[i], Path_Pos);

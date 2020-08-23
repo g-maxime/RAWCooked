@@ -179,10 +179,13 @@ public:
         {
         case 3:    NewBits -= 8;
             ToReturn |= *(Buffer++) << NewBits;
+            //fallthrough
         case 2:    NewBits -= 8;
             ToReturn |= *(Buffer++) << NewBits;
+            //fallthrough
         case 1:    NewBits -= 8;
             ToReturn |= *(Buffer++) << NewBits;
+            //fallthrough
         default:;
         }
         LastByte = *(Buffer++);

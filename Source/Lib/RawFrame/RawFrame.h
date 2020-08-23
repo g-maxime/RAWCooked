@@ -19,7 +19,7 @@ using namespace std;
 struct buffer_base
 {
 public:
-    const uint8_t* const Data() const
+    const uint8_t* Data() const
     {
         return Data_;
     }
@@ -29,12 +29,12 @@ public:
         return Data_[n];
     }
 
-    const size_t Size() const
+    size_t Size() const
     {
         return Size_;
     }
 
-    const bool Empty() const
+    bool Empty() const
     {
         return !Size_;
     }
@@ -47,8 +47,8 @@ public:
 protected:
     buffer_base() = delete;
     buffer_base(const uint8_t* NewData, size_t NewSize) :
-        Size_(NewSize),
-        Data_(NewData)
+        Data_(NewData),
+        Size_(NewSize)
     {}
     buffer_base(buffer_base& Buffer) = delete;
     buffer_base(buffer_base&& Buffer) = delete;
@@ -121,10 +121,17 @@ struct buffer : buffer_base
         delete[] Data();
     }
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#endif
     uint8_t* Data() const
     {
-        return (uint8_t*)buffer_base::Data(); // We are sure wa can modify this buffer
+        return (uint8_t*)buffer_base::Data(); // We are sure we can modify this buffer
     }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
     void Create(size_t NewSize)
     {
@@ -154,7 +161,7 @@ struct buffer : buffer_base
         return CopyLimit(0, Buffer_Source);
     }
 
-    void CopyExpand(const uint8_t* const NewData, size_t NewSize)
+    void CopyExpand(const uint8_t* NewData, size_t NewSize)
     {
         Create(NewSize);
         memcpy(Data(), NewData, Size());
@@ -171,7 +178,9 @@ struct buffer : buffer_base
         if (Offset > SizeToZero)
             return 0;
         SizeToZero -= Offset;
-        memset(Data(), 0, SizeToZero);
+        if (SizeToZero > Count)
+            SizeToZero = Count;
+        memset(Data() + Offset, 0, SizeToZero);
         return SizeToZero;
     }
 
@@ -204,7 +213,7 @@ struct buffer_view : buffer_base
     buffer_view() :
         buffer_base(nullptr, 0)
     {}
-    buffer_view(const uint8_t* const NewData, size_t NewSize) :
+    buffer_view(const uint8_t* NewData, size_t NewSize) :
         buffer_base(NewData, NewSize)
     {}
     buffer_view(const buffer_view& Buffer) :
@@ -246,7 +255,7 @@ struct buffer_or_view : buffer_base
     buffer_or_view() :
         buffer_base(nullptr, 0)
     {}
-    buffer_or_view(const uint8_t* const NewData, size_t NewSize) :
+    buffer_or_view(const uint8_t* NewData, size_t NewSize) :
         buffer_base(NewData, NewSize)
     {}
     buffer_or_view(const buffer_or_view& Buffer) :
@@ -287,6 +296,10 @@ struct buffer_or_view : buffer_base
         delete[] Data();
     }
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#endif
     uint8_t* DataForModification()
     {
         if (!IsOwned_)
@@ -299,6 +312,9 @@ struct buffer_or_view : buffer_base
 
         return (uint8_t*)Data(); // It is owned so modification is possible
     }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
     void Create(size_t NewSize)
     {
@@ -307,6 +323,16 @@ struct buffer_or_view : buffer_base
         else
             IsOwned_ = true;
         AssignBase(new uint8_t[NewSize], NewSize);
+    }
+
+    void Assign(const uint8_t* NewData, size_t NewSize)
+    {
+        if (IsOwned_)
+        {
+            delete[] Data();
+            IsOwned_ = false;
+        }
+        AssignBase(NewData, NewSize);
     }
 
     void CopyCut(const uint8_t* NewData, size_t NewSize)
@@ -334,8 +360,12 @@ struct buffer_or_view : buffer_base
 
     void Clear()
     {
+        if (IsOwned_)
+        {
+            delete[] Data();
+            IsOwned_ = false;
+        }
         ClearBase();
-        IsOwned_ = false;
     }
 
 private:

@@ -1102,8 +1102,8 @@ uint32_t ZenCRC32(const uint8_t* Buffer, size_t Size)
     while (((intptr_t)Buffer & 15) && Buffer < End)
         C = (C >> 8) ^ CRC32_Table[((uint8_t)C) ^ *Buffer++] ;
 
-    const uint64_t* Buffer16 = (uint64_t*)Buffer;
-    const uint64_t* End16 = (uint64_t*)(((intptr_t)End)&((intptr_t)-1)-15);
+    const uint64_t* Buffer16 = (const uint64_t*)Buffer;
+    const uint64_t* End16 = (const uint64_t*)(((intptr_t)End)&(((intptr_t)-1)-15));
     while (Buffer16 < End16)
     {
         uint64_t c0 = (*(const uint64_t *)Buffer16++) ^  C;

@@ -339,9 +339,7 @@ void transform_jpeg2000rct::TIFF_From(size_t w, pixel_t* Y, pixel_t* U, pixel_t*
 {
     uint8_t*  FrameBuffer_Temp_8  = (uint8_t* )FrameBuffer_Temp[0];
     uint16_t* FrameBuffer_Temp_16 = (uint16_t*)FrameBuffer_Temp[0];
-    uint32_t* FrameBuffer_Temp_32 = (uint32_t*)FrameBuffer_Temp[0];
 
-    size_t t=0, s=0;
     for (size_t x = 0; x < w; x++)
     {
         pixel_t g = Y[x];

@@ -193,7 +193,7 @@ void dpx::ParseBuffer()
 
         // Adapt previous frame content from new frame content
         uint32_t* HeaderCopy32 = (uint32_t*)HeaderCopy;
-        uint32_t* Buffer32 = (uint32_t*)Buffer.Data();
+        const uint32_t* Buffer32 = (const uint32_t*)Buffer.Data();
         memmove(HeaderCopy + 36, Buffer.Data() + 36, 160 - 36); // Image filename + Creation date/time: yyyy:mm:dd:hh:mm:ssLTZ
         HeaderCopy32[1676 / 4] = Buffer32[1676 / 4]; // Count
         HeaderCopy32[1712 / 4] = Buffer32[1712 / 4]; // Frame position in sequence

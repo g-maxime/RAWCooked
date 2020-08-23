@@ -22,7 +22,14 @@
 #include <sstream>
 #include <iomanip>
 #include <chrono>
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreorder"
+#endif
 #include "ThreadPool.h"
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 #include "FLAC/stream_decoder.h"
 #include "zlib.h"
 extern "C"
@@ -924,7 +931,7 @@ void matroska::Shutdown()
 }
 
 //---------------------------------------------------------------------------
-matroska::call matroska::SubElements_Void(uint64_t Name)
+matroska::call matroska::SubElements_Void(uint64_t /*Name*/)
 {
     Levels[Level].SubElements = &matroska::SubElements_Void; return &matroska::Void;
 }
@@ -1582,7 +1589,7 @@ void matroska::ProgressIndicator_Show()
             ProgressIndicator_Value = ProgressIndicator_New;
         }
     }
-    while (ProgressIndicator_IsEnd.wait_for(Lock, Frequency) == cv_status::timeout, Buffer_Offset != Buffer.Size());
+    while (ProgressIndicator_IsEnd.wait_for(Lock, Frequency) == cv_status::timeout && Buffer_Offset != Buffer.Size());
 
     // Show summary
     steady_clock::time_point Clock_Current = steady_clock::now();

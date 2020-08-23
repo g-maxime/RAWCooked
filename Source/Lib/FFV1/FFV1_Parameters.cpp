@@ -15,9 +15,9 @@ extern const state_transitions_struct default_state_transitions;
 
 //---------------------------------------------------------------------------
 parameters::parameters() :
-    error_message(NULL),
     RC_state_transitions_custom(NULL),
-    ConfigurationRecord_IsPresent(false)
+    ConfigurationRecord_IsPresent(false),
+    error_message(NULL)
 {
 }
 
@@ -245,7 +245,7 @@ bool parameters::QuantizationTable(rangecoder& E, size_t i, size_t j, pixel_t &s
     QuantTableSets[i].QuantTables[j][MAX_QUANT_TABLE_SIZE/2] = -QuantTableSets[i].QuantTables[j][127];
 
     scale *= 2 * v - 1;
-    if (scale > 32768U)
+    if (scale > 32768)
         return Error("FFV1-HEADER-QuantizationTable-scale:1");
 
     return false;

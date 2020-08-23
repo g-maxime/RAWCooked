@@ -49,14 +49,14 @@ int filemap::Open_ReadMode(const char* FileName)
                 auto NewMapping = CreateFileMapping(NewFile, 0, PAGE_READONLY, 0, 0, 0);
                 if (NewMapping)
                 {
-                    Private = (void*)NewFile;
-                    Private2 = (void*)NewMapping;
+                    Private = (intptr_t)NewFile;
+                    Private2 = (intptr_t)NewMapping;
                 }
                 else
                     CloseHandle(NewFile);
             }
             else
-                Private = (void*)NewFile; // CreateFileMapping does not support 0-byte files, so we map manually to NULL
+                Private = (intptr_t)NewFile; // CreateFileMapping does not support 0-byte files, so we will map manually to nullptr
         }
         else
         {
@@ -71,7 +71,7 @@ int filemap::Open_ReadMode(const char* FileName)
         if (!stat(FileName, &Fstat))
         {
             NewSize = Fstat.st_size;
-            Private = (void*)fd;
+            Private = (intptr_t)fd;
         }
         else
             close(fd);
@@ -86,6 +86,20 @@ int filemap::Open_ReadMode(const char* FileName)
 }
 
 //---------------------------------------------------------------------------
+#if defined(_WIN32) || defined(_WINDOWS)
+#else
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#endif
+inline int munmap_const(const void* addr, size_t length)
+{
+    return munmap((void*)addr, length);
+}
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+#endif
 int filemap::Remap()
 {
     // Special case for 0-byte files
@@ -98,7 +112,7 @@ int filemap::Remap()
 #if defined(_WIN32) || defined(_WINDOWS)
         UnmapViewOfFile(Data());
 #else
-        munmap((void*)Data(), Size());
+        munmap_const(Data(), Size());
 #endif
         ClearKeepSizeBase(); // Intermediate, size is needed later
     }
@@ -130,11 +144,11 @@ int filemap::Close()
     // Close map
     if (Data())
     {
-        #if defined(_WIN32) || defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WINDOWS)
             UnmapViewOfFile(Data());
-        #else
-            munmap((void*)Data(), Size());
-        #endif
+#else
+            munmap_const(Data(), Size());
+#endif
         ClearBase();
     }
 
@@ -144,7 +158,7 @@ int filemap::Close()
     if (Mapping)
     {
         CloseHandle(Mapping);
-        Private2 = NULL;
+        Private2 = 0;
     }
 #endif
 
@@ -155,18 +169,18 @@ int filemap::Close()
             auto File = (HANDLE&)Private;
             if (!CloseHandle(File))
             {
-                Private = nullptr;
+                Private = 0;
                 return 1;
             }
 #else
             int& fd = (int&)Private;
             if (close(fd))
             {
-                Private = (void*)-1;
+                Private = 0;
                 return 1;
             }
 #endif
-        Private = nullptr;
+        Private = 0;
     }
 
     return 0;
@@ -253,7 +267,7 @@ file::return_value file::Write(const uint8_t* Data, size_t Size)
             Size_Temp = (DWORD)-1;
         else
             Size_Temp = (DWORD)(Size - Offset);
-        Result = WriteFile(P, Data + Offset, Size_Temp, &BytesWritten, NULL);
+        Result = WriteFile(P, Data + Offset, Size_Temp, &BytesWritten, nullptr);
         if (BytesWritten == 0 || Result == FALSE)
             break;
         Offset += BytesWritten;
@@ -291,7 +305,7 @@ file::return_value file::Seek(int64_t Offset, seek_value Method)
     HANDLE& P = (HANDLE&)Private;
     LARGE_INTEGER Offset2;
     Offset2.QuadPart = Offset;
-    if (SetFilePointerEx(P, Offset2, NULL, Method) == 0)
+    if (SetFilePointerEx(P, Offset2, nullptr, Method) == 0)
 #else
     int& P = (int&)Private;
     int whence;
