@@ -32,6 +32,10 @@
 
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
+#else
+#ifndef ENABLE_64_BIT_WORDS
+#define ENABLE_64_BIT_WORDS 0
+#endif
 #endif
 
 #include <stdlib.h>

@@ -623,7 +623,7 @@ const char* wav::Channels_String(wav::flavor Flavor)
 }
 
 //---------------------------------------------------------------------------
-wav::endianness wav::Endianness(wav::flavor Flavor)
+wav::endianness wav::Endianness(wav::flavor /*Flavor*/)
 {
     return LE; //For the moment all is LE or Unsigned
 }

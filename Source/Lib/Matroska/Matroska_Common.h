@@ -103,9 +103,9 @@ public:
 
     void                        Shutdown();
 
-    bool                        Quiet;
-    bool                        NoWrite;
-    bool                        NoOutputCheck;
+    bool                        Quiet = false;
+    bool                        NoWrite = false;
+    bool                        NoOutputCheck = false;
     hashes*                     Hashes_FromRAWcooked;
     hashes*                     Hashes_FromAttachments;
 
@@ -116,7 +116,7 @@ public:
     void                        FLAC_Read(uint8_t buffer[], size_t* bytes);
     void                        FLAC_Tell(uint64_t* absolute_byte_offset);
     void                        FLAC_Metadata(uint8_t channels, uint8_t bits_per_sample);
-    void                        FLAC_Write(const uint32_t* buffer[], size_t blocksize);
+    void                        FLAC_Write(const uint32_t* const buffer[], size_t blocksize);
 
 private:
     void                        ParseBuffer();
@@ -142,7 +142,7 @@ private:
         call SubElements_##_NAME(uint64_t Name);
 
     #define MATROSKA_ELEM_XY(_NAME, _X, _Y) \
-        void _NAME##_X##_Y() { Segment_Attachments_AttachedFile_FileData_RawCookedxxx_yyy(Element_##_Y, Type_##_X); } \
+        void _NAME##_X##_Y() { Segment_Attachments_AttachedFile_FileData_RawCookedxxx_yyy(element::_Y, type::_X); } \
         call SubElements_##_NAME##_X##_Y(uint64_t Name);
 
     MATROSKA_ELEMENT(_);
@@ -205,20 +205,20 @@ private:
 
     string                      RAWcooked_LibraryName;
     string                      RAWcooked_LibraryVersion;
-    enum element
+    enum class element
     {
-        Element_FileName,
-        Element_BeforeData,
-        Element_AfterData,
-        Element_InData,
-        Element_Max,
+        FileName,
+        BeforeData,
+        AfterData,
+        InData,
     };
-    enum type
+    static const size_t Element_Max = (size_t)element::InData + 1;
+    enum class type
     {
-        Type_Block_,
-        Type_Block_MaskAddition,
-        Type_Track_,
-        Type_Track_MaskBase,
+        Block_,
+        Block_MaskAddition,
+        Track_,
+        Track_MaskBase,
     };
     struct reversibility_data
     {
@@ -232,7 +232,6 @@ private:
                 if (Content)
                     return;
                 Content = new buffer[Size];
-                memset(Content, 0x00, Size * sizeof(buffer));
             }
 
             ~content_per_element()
@@ -285,41 +284,41 @@ private:
 
         void MoveToDataMask(element Element, buffer& Buffer)
         {
-            Data[Element].Mask = move(Buffer);
+            Data[(size_t)Element].Mask = move(Buffer);
         }
 
         void MoveToDataContent(element Element, buffer& Buffer, bool AddMask)
         {
-            Data[Element].Check(Unique ? 1 : 1000000);
-            Data[Element].Content[Pos] = move(Buffer);
+            Data[(size_t)Element].Check(Unique ? 1 : 1000000);
+            Data[(size_t)Element].Content[Pos] = move(Buffer);
 
             if (AddMask)
             {
-                auto& Mask = Data[Element].Mask;
+                auto& Mask = Data[(size_t)Element].Mask;
                 auto Mask_Size = Mask.Size();
                 auto Mask_Data = Mask.Data();
                 if (!Mask_Size)
                     return;
 
-                auto& Content = Data[Element].Content[Pos];
+                auto& Content = Data[(size_t)Element].Content[Pos];
                 auto Content_Size = Content.Size();
                 auto Content_Data = Content.Data();
                 for (size_t i = 0; i < Content_Size && i < Mask_Size; i++)
                     Content_Data[i] += Mask_Data[i];
             }
 
-            if (Element == Element_FileName)
+            if (Element == element::FileName)
             {
-                auto& Content = Data[Element_FileName].Content[Pos];
+                auto& Content = Data[(size_t)element::FileName].Content[Pos];
                 ::SanitizeFileName(Content);
             }
         }
 
         buffer_view GetDataContent(element Element)
         {
-            if (Pos >= Count || !Data[Element].Content || !Data[Element].Content[Pos].Size())
+            if (Pos >= Count || !Data[(size_t)Element].Content || !Data[(size_t)Element].Content[Pos].Size())
                 return buffer_view();
-            return buffer_view(Data[Element].Content[Pos]);
+            return buffer_view(Data[(size_t)Element].Content[Pos]);
         }
 
         void SetFileSize(uint64_t Value)
@@ -384,7 +383,7 @@ private:
         Compat_18_10_1,
     };
     reversibility_compat        ReversibilityCompat = Compat_Modern;
-    ThreadPool*                 FramesPool;
+    ThreadPool*                 FramesPool = nullptr;
     frame_writer                FrameWriter_Template;
     condition_variable          ProgressIndicator_IsEnd;
     bool                        ProgressIndicator_IsPaused = false;

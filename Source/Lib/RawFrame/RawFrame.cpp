@@ -24,8 +24,8 @@ void raw_frame::Create(size_t colorspace_type, size_t width, size_t height, size
     switch (Flavor)
     {
         case Flavor_FFmpeg: FFmpeg_Create(colorspace_type, width, height, bits_per_raw_sample, chroma_planes, alpha_plane, h_chroma_subsample, v_chroma_subsample); break;
-        case Flavor_DPX: DPX_Create(colorspace_type, width, height, bits_per_raw_sample, chroma_planes, alpha_plane, h_chroma_subsample, v_chroma_subsample); break;
-        case Flavor_TIFF: TIFF_Create(colorspace_type, width, height, bits_per_raw_sample, chroma_planes, alpha_plane, h_chroma_subsample, v_chroma_subsample); break;
+        case Flavor_DPX: DPX_Create(colorspace_type, width, height); break;
+        case Flavor_TIFF: TIFF_Create(colorspace_type, width, height); break;
     }
 }
 
@@ -58,7 +58,7 @@ void raw_frame::FFmpeg_Create(size_t colorspace_type, size_t width, size_t heigh
 }
 
 //---------------------------------------------------------------------------
-void raw_frame::DPX_Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample)
+void raw_frame::DPX_Create(size_t colorspace_type, size_t width, size_t height)
 {
     switch (colorspace_type)
     {
@@ -69,7 +69,7 @@ void raw_frame::DPX_Create(size_t colorspace_type, size_t width, size_t height, 
 }
 
 //---------------------------------------------------------------------------
-void raw_frame::TIFF_Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample)
+void raw_frame::TIFF_Create(size_t colorspace_type, size_t width, size_t height)
 {
     switch (colorspace_type)
     {

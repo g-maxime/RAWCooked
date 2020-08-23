@@ -29,7 +29,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* It is assumed that this header will be included after "config.h". */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#else
+#ifndef HAVE_BSWAP32
+#define HAVE_BSWAP32 0
+#endif
+#ifndef CPU_IS_BIG_ENDIAN
+#define CPU_IS_BIG_ENDIAN 0
+#endif
+#endif
 
 #if HAVE_BSWAP32			/* GCC and Clang */
 

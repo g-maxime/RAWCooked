@@ -41,6 +41,15 @@
 #ifndef FLAC__HAS_X86INTRIN
 #define FLAC__HAS_X86INTRIN 0
 #endif
+#ifndef HAVE_BSWAP32
+#define HAVE_BSWAP32 0
+#endif
+#ifndef CPU_IS_BIG_ENDIAN
+#define CPU_IS_BIG_ENDIAN 0
+#endif
+#ifndef WORDS_BIGENDIAN
+#define WORDS_BIGENDIAN 0
+#endif
 #endif
 
 #ifndef FLAC__CPU_X86_64

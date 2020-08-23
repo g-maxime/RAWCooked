@@ -394,7 +394,6 @@ void tiff::ParseBuffer()
     uint32_t Height = 0;
     uint32_t FillOrder = 1;
     uint32_t Orientation = 1;
-    uint32_t RowsPerStrip = (uint32_t)-1;
     uint32_t PlanarConfiguration = 1;
     uint32_t ExtraSamples = (uint32_t)-1;
     vector<uint32_t> StripOffsets;
@@ -438,11 +437,11 @@ void tiff::ParseBuffer()
             CASE_V (e::StripOffsets                 , StripOffsets);
             CASE_2 (e::Orientation                  , Orientation);
             CASE_2 (e::SamplesPerPixel              , Info.SamplesPerPixel);
-            CASE_2 (e::RowsPerStrip                 , RowsPerStrip);
             CASE_V (e::StripByteCounts              , StripBytesCounts);
             CASE_2 (e::PlanarConfiguration          , PlanarConfiguration);
             CASE_2 (e::ExtraSamples                 , ExtraSamples);
             CASE_3 (e::SampleFormat                 , Info.SampleFormat, sampleformat);
+            case    e::RowsPerStrip                 :
             case    e::Threshholding                :
             case    e::CellWidth                    :
             case    e::CellLength                   :
@@ -511,7 +510,7 @@ void tiff::ParseBuffer()
                                                         break;
         }
     }
-    uint32_t IFDOffset = Get_X4();
+    Get_X4(); // IFDOffset
 
     // Supported?
     for (size_t Tested = 0;;)

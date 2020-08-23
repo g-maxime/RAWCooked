@@ -1,5 +1,9 @@
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
+#else
+#ifndef WORDS_BIGENDIAN
+#define WORDS_BIGENDIAN 0
+#endif
 #endif
 
 #include <stdlib.h>		/* for malloc() */
