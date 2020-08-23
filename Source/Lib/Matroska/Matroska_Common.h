@@ -34,7 +34,7 @@ class ThreadPool;
 class flac_info;
 class hashes;
 
-class frame_writer : frame_process
+class frame_writer : public raw_frame_process
 {
 public:
     // Constructor / Destructor
@@ -74,10 +74,10 @@ public:
     bitset<mode_Max>            Mode;
     string                      OutputFileName;
 
+private:
     // Actions
     void                        FrameCall(raw_frame* RawFrame);
 
-private:
     bool                        WriteFile(raw_frame* RawFrame);
     bool                        CheckFile(raw_frame* RawFrame);
     bool                        CheckMD5(raw_frame* RawFrame);

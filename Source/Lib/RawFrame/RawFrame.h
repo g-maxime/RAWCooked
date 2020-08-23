@@ -341,6 +341,14 @@ private:
     bool IsOwned_ = false;
 };
 
+class raw_frame;
+class raw_frame_process
+{
+private:
+    virtual void                FrameCall(raw_frame* RawFrame) = 0;
+    friend class raw_frame;
+};
+
 class raw_frame
 {
 public:
@@ -406,11 +414,6 @@ public:
         Pre_ = move(NewPre);
     }
 
-    void ClearPre()
-    {
-        Pre_.Clear();
-    }
-
     const buffer_or_view& Post() const
     {
         return Post_;
@@ -421,24 +424,9 @@ public:
         Post_ = move(NewPost);
     }
 
-    void ClearPost()
-    {
-        Post_.Clear();
-    }
-
-    const buffer_or_view& In() const
-    {
-        return In_;
-    }
-
     void SetIn(buffer_or_view&& NewIn)
     {
         In_ = move(NewIn);
-    }
-
-    void ClearIn()
-    {
-        In_.Clear();
     }
 
     buffer_or_view& Buffer()
@@ -495,7 +483,8 @@ public:
     size_t TotalSize();
 
     // Processing
-    void MergeIn();
+    void Process();
+    raw_frame_process* FrameProcess = nullptr;
 
 private:
     buffer_or_view              Buffer_;
@@ -506,6 +495,7 @@ private:
     void FFmpeg_Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample);
     void DPX_Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample);
     void TIFF_Create(size_t colorspace_type, size_t width, size_t height, size_t bits_per_raw_sample, bool chroma_planes, bool alpha_plane, size_t h_chroma_subsample, size_t v_chroma_subsample);
+    void MergeIn();
 };
 
 //---------------------------------------------------------------------------

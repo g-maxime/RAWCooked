@@ -97,6 +97,19 @@ size_t raw_frame::TotalSize()
 }
 
 //---------------------------------------------------------------------------
+void raw_frame::Process()
+{
+    MergeIn();
+
+    if (FrameProcess)
+        FrameProcess->FrameCall(this);
+
+    Pre_.Clear();
+    Post_.Clear();
+    In_.Clear();
+}
+
+//---------------------------------------------------------------------------
 void raw_frame::MergeIn()
 {
     auto Buffer_Size = Buffer_.Size();
