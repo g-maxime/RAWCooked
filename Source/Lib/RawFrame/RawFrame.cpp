@@ -100,13 +100,13 @@ size_t raw_frame::TotalSize()
 void raw_frame::Process()
 {
     MergeIn();
+    In_.Clear();
 
     if (FrameProcess)
         FrameProcess->FrameCall(this);
 
     Pre_.Clear();
     Post_.Clear();
-    In_.Clear();
 }
 
 //---------------------------------------------------------------------------

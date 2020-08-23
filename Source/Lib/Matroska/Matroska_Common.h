@@ -347,18 +347,17 @@ private:
     {
         frame_writer            FrameWriter;
         reversibility_data      ReversibilityData;
-        input_base_uncompressed* DecodedFrameParser;
-        flac_info*              FlacInfo;
+        input_base_uncompressed* DecodedFrameParser = nullptr;
+        flac_info*              FlacInfo = nullptr;
         frame                   Frame;
-        format                  Format;
+        format                  Format = format::None;
 
         trackinfo(frame_writer& FrameWriter_Source) :
-            FrameWriter(FrameWriter_Source),
-            DecodedFrameParser(nullptr),
-            FlacInfo(nullptr),
-            Format(format::None)
+            FrameWriter(FrameWriter_Source)
             {
             }
+
+        ~trackinfo();
     };
     vector<trackinfo*>          TrackInfo;
     size_t                      TrackInfo_Pos;

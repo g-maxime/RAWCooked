@@ -239,6 +239,6 @@ void frame::Clear()
             delete Slices[i].Content;
         delete[] Slices;
     }
-    Slices = NULL;
+    Slices = nullptr;
 }
 

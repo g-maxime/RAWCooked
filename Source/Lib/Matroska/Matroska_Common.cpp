@@ -585,6 +585,14 @@ void matroska::FLAC_Write(const uint32_t* const buffer[], size_t blocksize)
 }
 
 //---------------------------------------------------------------------------
+//
+matroska::trackinfo::~trackinfo()
+{
+    delete DecodedFrameParser;
+    delete FlacInfo;
+}
+
+//---------------------------------------------------------------------------
 // Errors
 
 namespace matroska_issue {
@@ -814,6 +822,7 @@ void matroska::Shutdown()
         // Write end of the file if the file is unique per track
         if (TrackInfo_Current->ReversibilityData.Unique && TrackInfo_Current->ReversibilityData.Data[(size_t)element::AfterData].Content && !TrackInfo_Current->ReversibilityData.Data[(size_t)element::AfterData].Content[0].Empty())
         {
+            TrackInfo_Current->Frame.RawFrame->AssignBufferView(nullptr, 0);
             TrackInfo_Current->Frame.RawFrame->SetPost(TrackInfo_Current->ReversibilityData.Data[(size_t)element::AfterData].Content[0]);
             TrackInfo_Current->Frame.RawFrame->Process();
 
@@ -852,7 +861,11 @@ void matroska::Shutdown()
                 }
             }
         }
+
+        delete TrackInfo_Current->Frame.RawFrame;
+        delete TrackInfo_Current;
     }
+    TrackInfo.clear();
 
     if (Hashes_FromRAWcooked)
     {
@@ -1320,6 +1333,7 @@ void matroska::Segment_Cluster()
                 case format::FLAC: InitResult = InitOutput_FLAC(TrackInfo_Current, RawFrame->Pre()); break;
                 default: InitResult = false;
             }
+            RawFrame->SetPost(buffer_or_view());
             if (InitResult)
             {
                 //TODO handle errors
@@ -1327,15 +1341,13 @@ void matroska::Segment_Cluster()
 
             if (ReversibilityData.Unique)
             {
-                TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = true;
-
                 TrackInfo_Current->FrameWriter.OutputFileName = ReversibilityData.Data[(size_t)element::FileName].Content[0].ToString();
                 FormatPath(TrackInfo_Current->FrameWriter.OutputFileName);
-                RawFrame->Process();
 
+                TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = true;
+                RawFrame->Process();
                 TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin] = true;
             }
-
         }
 }
 
@@ -1793,9 +1805,6 @@ bool matroska::InitOutput_FFV1(trackinfo* TrackInfo_Current)
 //---------------------------------------------------------------------------
 bool matroska::InitOutput_FLAC(trackinfo* TrackInfo_Current, const buffer_view& Pre)
 {
-    if (Pre.Empty())
-        return false;
-
     wav WAV;
     WAV.Actions.set(Action_Encode);
     WAV.Actions.set(Action_AcceptTruncated);

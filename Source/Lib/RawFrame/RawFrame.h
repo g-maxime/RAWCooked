@@ -383,7 +383,7 @@ private:
 class raw_frame
 {
 public:
-    uint64_t                    Flavor_Private; //Used by specialized flavor for marking the configuration of such flavor (e.g. endianness of DPX)
+    uint64_t                    Flavor_Private = 0; //Used by specialized flavor for marking the configuration of such flavor (e.g. endianness of DPX)
 
     struct plane
     {
@@ -493,13 +493,7 @@ public:
         TIFF,
     };
     static const size_t Flavor_Max = __LINE__ - __flavor_line - 4;
-    flavor                       Flavor;
-
-    raw_frame() :
-        Flavor_Private(0),
-        Flavor(flavor::FFmpeg)
-    {
-    }
+    flavor                       Flavor = flavor::FFmpeg;
 
     ~raw_frame()
     {

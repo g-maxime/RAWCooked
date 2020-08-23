@@ -14,17 +14,9 @@ extern const state_transitions_struct default_state_transitions;
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-parameters::parameters() :
-    RC_state_transitions_custom(NULL),
-    ConfigurationRecord_IsPresent(false),
-    error_message(NULL)
-{
-}
-
-//---------------------------------------------------------------------------
 parameters::~parameters()
 {
-    delete[] RC_state_transitions_custom;
+    delete RC_state_transitions_custom;
 }
 
 //---------------------------------------------------------------------------

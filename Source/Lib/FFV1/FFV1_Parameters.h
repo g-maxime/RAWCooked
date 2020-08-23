@@ -28,7 +28,6 @@ struct slice_struct
 
 struct parameters
 {
-    parameters();
     ~parameters();
 
     // Run
@@ -55,7 +54,7 @@ struct parameters
     uint32_t                    height;
 
     // Specific to Range Coder coder_type
-    state_transitions_struct*   RC_state_transitions_custom; // From state_transition_delta
+    state_transitions_struct*   RC_state_transitions_custom = nullptr; // From state_transition_delta
     quant_table_sets_rc_struct  RC_ContextSets; // states before starting a slice
 
     // Temp (used for having the code readable)
@@ -64,11 +63,11 @@ struct parameters
     size_t                      plane_count;
     uint8_t                     bits_max;
     pixel_t                     bits_mask;
-    bool                        ConfigurationRecord_IsPresent;
+    bool                        ConfigurationRecord_IsPresent = false;
     bool                        IsOverflow16bit;
 
     // Error message
-    const char*                 error_message;
+    const char*                 error_message = nullptr;
 
 private:
     bool                        QuantizationTableSet(rangecoder& E, size_t i);
