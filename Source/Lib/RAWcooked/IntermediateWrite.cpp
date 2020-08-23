@@ -91,7 +91,7 @@ bool intermediate_write::Delete()
 }
 
 //---------------------------------------------------------------------------
-void intermediate_write::WriteToDisk(uint8_t* Buffer, size_t Buffer_Size)
+void intermediate_write::WriteToDisk(const uint8_t* Buffer, size_t Buffer_Size)
 {
     if (!File_WasCreated)
     {

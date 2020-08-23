@@ -37,7 +37,8 @@ public:
     size_t                      slice_x;
     size_t                      slice_y;
 
-    enum flavor : uint8_t
+    static const size_t __flavor_line = __LINE__;
+    enum class flavor
     {
         Raw_RGB_8,
         Raw_RGB_10_FilledA_LE,
@@ -55,8 +56,8 @@ public:
         Raw_RGBA_12_FilledA_LE,
         Raw_RGBA_16_BE,
         Raw_RGBA_16_LE,
-        Flavor_Max,
     };
+    static const size_t Flavor_Max = __LINE__ - __flavor_line - 4;
 
     enum endianness : uint8_t
     {

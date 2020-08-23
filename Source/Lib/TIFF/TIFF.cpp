@@ -145,13 +145,13 @@ struct tiff_tested
 
 struct tiff_tested TIFF_Tested[] =
 {
-    { { tiff::Raw   , tiff::RGB     ,  3,  8, tiff::U   , tiff::LE}, tiff::Raw_RGB_8_U              },
-    { { tiff::Raw   , tiff::RGB     ,  3, 16, tiff::U   , tiff::BE}, tiff::Raw_RGB_16_U_BE          },
-    { { tiff::Raw   , tiff::RGB     ,  3, 16, tiff::U   , tiff::LE}, tiff::Raw_RGB_16_U_LE          },
-    { { tiff::Raw   , tiff::RGB     ,  4,  8, tiff::U   , tiff::LE}, tiff::Raw_RGBA_8_U             },
-    { { tiff::Raw   , tiff::RGB     ,  4, 16, tiff::U   , tiff::LE}, tiff::Raw_RGBA_16_U_LE         },
-    { { tiff::Raw   , tiff::RGB     ,  0,  0, tiff::U   , tiff::LE}, tiff::Flavor_Max                },
+    { { tiff::compression::Raw   , tiff::RGB     ,  3,  8, tiff::U   , tiff::LE}, tiff::flavor::Raw_RGB_8_U              },
+    { { tiff::compression::Raw   , tiff::RGB     ,  3, 16, tiff::U   , tiff::BE}, tiff::flavor::Raw_RGB_16_U_BE          },
+    { { tiff::compression::Raw   , tiff::RGB     ,  3, 16, tiff::U   , tiff::LE}, tiff::flavor::Raw_RGB_16_U_LE          },
+    { { tiff::compression::Raw   , tiff::RGB     ,  4,  8, tiff::U   , tiff::LE}, tiff::flavor::Raw_RGBA_8_U             },
+    { { tiff::compression::Raw   , tiff::RGB     ,  4, 16, tiff::U   , tiff::LE}, tiff::flavor::Raw_RGBA_16_U_LE         },
 };
+const size_t TIFF_Tested_Size = sizeof(TIFF_Tested) / sizeof(tiff_tested);
 
 //---------------------------------------------------------------------------
 
@@ -513,20 +513,18 @@ void tiff::ParseBuffer()
     Get_X4(); // IFDOffset
 
     // Supported?
-    for (size_t Tested = 0;;)
+    for (auto& TIFF_Tested_Item : TIFF_Tested)
     {
-        tiff_tested& TIFF_Tested_Item = TIFF_Tested[Tested++];
-        if (TIFF_Tested_Item.Flavor == tiff::Flavor_Max)
+        if (TIFF_Tested_Item.Info == Info)
         {
-            Unsupported(unsupported::Flavor);
-            return;
-        }
-        tiff_info& I = TIFF_Tested_Item.Info;
-        if (I == Info)
-        {
-            Flavor = TIFF_Tested_Item.Flavor;
+            Flavor = (decltype(Flavor))TIFF_Tested_Item.Flavor;
             break;
         }
+    }
+    if (Flavor == (decltype(Flavor))-1)
+    {
+        Unsupported(unsupported::Flavor);
+        return;
     }
 
     // Unsupported tag content
@@ -666,18 +664,17 @@ size_t tiff::BitsPerBlock(tiff::flavor Flavor)
 {
     switch (Flavor)
     {
-        case tiff::Raw_RGB_8_U:
+        case tiff::flavor::Raw_RGB_8_U:
                                         return 24;          // 3x8-bit content
-        case tiff::Raw_RGB_16_U_BE:
-        case tiff::Raw_RGB_16_U_LE:
+        case tiff::flavor::Raw_RGB_16_U_BE:
+        case tiff::flavor::Raw_RGB_16_U_LE:
                                         return 48;          // 3x16-bit content
-        case tiff::Raw_RGBA_8_U:
+        case tiff::flavor::Raw_RGBA_8_U:
                                         return 32;          // 4x8-bit content
-        case tiff::Raw_RGBA_16_U_LE:
+        case tiff::flavor::Raw_RGBA_16_U_LE:
                                         return 64;          // 4x16-bit content
-        default:
-                                        return 0;
     }
+    return 24;
 }
 
 //---------------------------------------------------------------------------
@@ -685,15 +682,15 @@ size_t tiff::PixelsPerBlock(tiff::flavor Flavor)
 {
     switch (Flavor)
     {
-        case tiff::Raw_RGB_8_U:
-        case tiff::Raw_RGB_16_U_BE:
-        case tiff::Raw_RGB_16_U_LE:
-        case tiff::Raw_RGBA_8_U:
-        case tiff::Raw_RGBA_16_U_LE:
+        case tiff::flavor::Raw_RGB_8_U:
+        case tiff::flavor::Raw_RGB_16_U_BE:
+        case tiff::flavor::Raw_RGB_16_U_LE:
+        case tiff::flavor::Raw_RGBA_8_U:
+        case tiff::flavor::Raw_RGBA_16_U_LE:
                                         return 1;
-        default:
-                                        return 0;
     }
+
+    return 1;
 }
 
 //---------------------------------------------------------------------------
@@ -701,16 +698,16 @@ tiff::descriptor tiff::Descriptor(tiff::flavor Flavor)
 {
     switch (Flavor)
     {
-        case Raw_RGB_8_U:
-        case Raw_RGB_16_U_BE:
-        case Raw_RGB_16_U_LE:
+        case flavor::Raw_RGB_8_U:
+        case flavor::Raw_RGB_16_U_BE:
+        case flavor::Raw_RGB_16_U_LE:
                                         return RGB;
-        case Raw_RGBA_8_U:
-        case Raw_RGBA_16_U_LE:
+        case flavor::Raw_RGBA_8_U:
+        case flavor::Raw_RGBA_16_U_LE:
                                         return RGBA;
-        default:
-                                        return (tiff::descriptor)-1;
     }
+
+    return RGB;
 }
 const char* tiff::Descriptor_String(tiff::flavor Flavor)
 {
@@ -722,7 +719,7 @@ const char* tiff::Descriptor_String(tiff::flavor Flavor)
                                         return "RGB";
         case RGBA:
                                         return "RGBA";
-        default:
+        default :
                                         return "";
     }
 }
@@ -732,16 +729,16 @@ uint8_t tiff::BitsPerSample(tiff::flavor Flavor)
 {
     switch (Flavor)
     {
-        case Raw_RGB_8_U:
-        case Raw_RGBA_8_U:
+        case flavor::Raw_RGB_8_U:
+        case flavor::Raw_RGBA_8_U:
                                         return 8;
-        case Raw_RGB_16_U_BE:
-        case Raw_RGB_16_U_LE:
-        case Raw_RGBA_16_U_LE:
+        case flavor::Raw_RGB_16_U_BE:
+        case flavor::Raw_RGB_16_U_LE:
+        case flavor::Raw_RGBA_16_U_LE:
                                         return 16;
-        default:
-                                        return 0;
     }
+
+    return 8;
 }
 const char* tiff::BitsPerSample_String(tiff::flavor Flavor)
 {
@@ -767,15 +764,15 @@ tiff::sampleformat tiff::SampleFormat(tiff::flavor Flavor)
 {
     switch (Flavor)
     {
-        case Raw_RGB_8_U:
-        case Raw_RGBA_8_U:
-        case Raw_RGB_16_U_BE:
-        case Raw_RGB_16_U_LE:
-        case Raw_RGBA_16_U_LE:
+        case flavor::Raw_RGB_8_U:
+        case flavor::Raw_RGBA_8_U:
+        case flavor::Raw_RGB_16_U_BE:
+        case flavor::Raw_RGB_16_U_LE:
+        case flavor::Raw_RGBA_16_U_LE:
                                         return U;
-        default:
-                                        return (sampleformat)-1;
     }
+
+    return U;
 }
 const char* tiff::SampleFormat_String(tiff::flavor Flavor)
 {
@@ -800,14 +797,16 @@ tiff::endianness tiff::Endianness(tiff::flavor Flavor)
 {
     switch (Flavor)
     {
-        case Raw_RGB_16_U_BE:
-                                        return BE;
-        case Raw_RGB_16_U_LE:
-        case Raw_RGBA_16_U_LE:
+        case flavor::Raw_RGB_8_U:
+        case flavor::Raw_RGB_16_U_LE:
+        case flavor::Raw_RGBA_8_U:
+        case flavor::Raw_RGBA_16_U_LE:
                                         return LE;
-        default:
-                                        return (tiff::endianness)-1;
+        case flavor::Raw_RGB_16_U_BE:
+                                        return BE;
     }
+
+    return LE;
 }
 const char* tiff::Endianess_String(tiff::flavor Flavor)
 {
@@ -819,9 +818,9 @@ const char* tiff::Endianess_String(tiff::flavor Flavor)
                                         return "LE";
         case BE:
                                         return "BE";
-        default:
-                                        return "";
     }
+
+    return "LE";
 }
 //---------------------------------------------------------------------------
 string TIFF_Flavor_String(uint8_t Flavor)

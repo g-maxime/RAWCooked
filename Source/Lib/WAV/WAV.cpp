@@ -100,40 +100,40 @@ struct wav_tested
     uint32_t                    SamplesPerSec;
     uint8_t                     BitDepth;
     uint8_t                     Channels;
-    wav::endianness              Endianness;
+    wav::endianness             Endianness;
     wav::flavor                 Flavor;
 };
 
 const size_t WAV_Tested_Size = 27;
 struct wav_tested WAV_Tested[WAV_Tested_Size] =
 {
-    { 44100,  8, 1, wav::LE, wav::PCM_44100_8_1_U   },
-    { 44100,  8, 2, wav::LE, wav::PCM_44100_8_2_U   },
-    { 44100,  8, 6, wav::LE, wav::PCM_44100_8_6_U   },
-    { 44100, 16, 1, wav::LE, wav::PCM_44100_16_1_LE },
-    { 44100, 16, 2, wav::LE, wav::PCM_44100_16_2_LE },
-    { 44100, 16, 6, wav::LE, wav::PCM_44100_16_6_LE },
-    { 44100, 24, 1, wav::LE, wav::PCM_44100_24_1_LE },
-    { 44100, 24, 2, wav::LE, wav::PCM_44100_24_2_LE },
-    { 44100, 24, 6, wav::LE, wav::PCM_44100_24_6_LE },
-    { 48000,  8, 1, wav::LE, wav::PCM_48000_8_1_U   },
-    { 48000,  8, 2, wav::LE, wav::PCM_48000_8_2_U   },
-    { 48000,  8, 6, wav::LE, wav::PCM_48000_8_6_U   },
-    { 48000, 16, 1, wav::LE, wav::PCM_48000_16_1_LE },
-    { 48000, 16, 2, wav::LE, wav::PCM_48000_16_2_LE },
-    { 48000, 16, 6, wav::LE, wav::PCM_48000_16_6_LE },
-    { 48000, 24, 1, wav::LE, wav::PCM_48000_24_1_LE },
-    { 48000, 24, 2, wav::LE, wav::PCM_48000_24_2_LE },
-    { 48000, 24, 6, wav::LE, wav::PCM_48000_24_6_LE },
-    { 96000,  8, 1, wav::LE, wav::PCM_96000_8_1_U   },
-    { 96000,  8, 2, wav::LE, wav::PCM_96000_8_2_U   },
-    { 96000,  8, 6, wav::LE, wav::PCM_96000_8_6_U   },
-    { 96000, 16, 1, wav::LE, wav::PCM_96000_16_1_LE },
-    { 96000, 16, 2, wav::LE, wav::PCM_96000_16_2_LE },
-    { 96000, 16, 6, wav::LE, wav::PCM_96000_16_6_LE },
-    { 96000, 24, 1, wav::LE, wav::PCM_96000_24_1_LE },
-    { 96000, 24, 2, wav::LE, wav::PCM_96000_24_2_LE },
-    { 96000, 24, 6, wav::LE, wav::PCM_96000_24_6_LE },
+    { 44100,  8, 1, wav::LE, wav::flavor::PCM_44100_8_1_U   },
+    { 44100,  8, 2, wav::LE, wav::flavor::PCM_44100_8_2_U   },
+    { 44100,  8, 6, wav::LE, wav::flavor::PCM_44100_8_6_U   },
+    { 44100, 16, 1, wav::LE, wav::flavor::PCM_44100_16_1_LE },
+    { 44100, 16, 2, wav::LE, wav::flavor::PCM_44100_16_2_LE },
+    { 44100, 16, 6, wav::LE, wav::flavor::PCM_44100_16_6_LE },
+    { 44100, 24, 1, wav::LE, wav::flavor::PCM_44100_24_1_LE },
+    { 44100, 24, 2, wav::LE, wav::flavor::PCM_44100_24_2_LE },
+    { 44100, 24, 6, wav::LE, wav::flavor::PCM_44100_24_6_LE },
+    { 48000,  8, 1, wav::LE, wav::flavor::PCM_48000_8_1_U   },
+    { 48000,  8, 2, wav::LE, wav::flavor::PCM_48000_8_2_U   },
+    { 48000,  8, 6, wav::LE, wav::flavor::PCM_48000_8_6_U   },
+    { 48000, 16, 1, wav::LE, wav::flavor::PCM_48000_16_1_LE },
+    { 48000, 16, 2, wav::LE, wav::flavor::PCM_48000_16_2_LE },
+    { 48000, 16, 6, wav::LE, wav::flavor::PCM_48000_16_6_LE },
+    { 48000, 24, 1, wav::LE, wav::flavor::PCM_48000_24_1_LE },
+    { 48000, 24, 2, wav::LE, wav::flavor::PCM_48000_24_2_LE },
+    { 48000, 24, 6, wav::LE, wav::flavor::PCM_48000_24_6_LE },
+    { 96000,  8, 1, wav::LE, wav::flavor::PCM_96000_8_1_U   },
+    { 96000,  8, 2, wav::LE, wav::flavor::PCM_96000_8_2_U   },
+    { 96000,  8, 6, wav::LE, wav::flavor::PCM_96000_8_6_U   },
+    { 96000, 16, 1, wav::LE, wav::flavor::PCM_96000_16_1_LE },
+    { 96000, 16, 2, wav::LE, wav::flavor::PCM_96000_16_2_LE },
+    { 96000, 16, 6, wav::LE, wav::flavor::PCM_96000_16_6_LE },
+    { 96000, 24, 1, wav::LE, wav::flavor::PCM_96000_24_1_LE },
+    { 96000, 24, 2, wav::LE, wav::flavor::PCM_96000_24_2_LE },
+    { 96000, 24, 6, wav::LE, wav::flavor::PCM_96000_24_6_LE },
 };
 
 //---------------------------------------------------------------------------
@@ -448,7 +448,7 @@ void wav::WAVE_fmt_()
         Unsupported(unsupported::Flavor);
         return;
     }
-    Flavor = WAV_Tested[Tested].Flavor;
+    Flavor = (decltype(Flavor))WAV_Tested[Tested].Flavor;
 
     if (InputInfo && !InputInfo->SampleRate)
         InputInfo->SampleRate = SamplesPerSec;
@@ -459,35 +459,35 @@ uint32_t wav::SamplesPerSec(wav::flavor Flavor)
 {
     switch (Flavor)
     {
-        case PCM_44100_8_1_U:
-        case PCM_44100_8_2_U:
-        case PCM_44100_8_6_U:
-        case PCM_44100_16_1_LE:
-        case PCM_44100_16_2_LE:
-        case PCM_44100_16_6_LE:
-        case PCM_44100_24_1_LE:
-        case PCM_44100_24_2_LE:
-        case PCM_44100_24_6_LE:
+        case flavor::PCM_44100_8_1_U:
+        case flavor::PCM_44100_8_2_U:
+        case flavor::PCM_44100_8_6_U:
+        case flavor::PCM_44100_16_1_LE:
+        case flavor::PCM_44100_16_2_LE:
+        case flavor::PCM_44100_16_6_LE:
+        case flavor::PCM_44100_24_1_LE:
+        case flavor::PCM_44100_24_2_LE:
+        case flavor::PCM_44100_24_6_LE:
                                         return 44100;
-        case PCM_48000_8_1_U:
-        case PCM_48000_8_2_U:
-        case PCM_48000_8_6_U:
-        case PCM_48000_16_1_LE:
-        case PCM_48000_16_2_LE:
-        case PCM_48000_16_6_LE:
-        case PCM_48000_24_1_LE:
-        case PCM_48000_24_2_LE:
-        case PCM_48000_24_6_LE:
+        case flavor::PCM_48000_8_1_U:
+        case flavor::PCM_48000_8_2_U:
+        case flavor::PCM_48000_8_6_U:
+        case flavor::PCM_48000_16_1_LE:
+        case flavor::PCM_48000_16_2_LE:
+        case flavor::PCM_48000_16_6_LE:
+        case flavor::PCM_48000_24_1_LE:
+        case flavor::PCM_48000_24_2_LE:
+        case flavor::PCM_48000_24_6_LE:
                                         return 48000;
-        case PCM_96000_8_1_U:
-        case PCM_96000_8_2_U:
-        case PCM_96000_8_6_U:
-        case PCM_96000_16_1_LE:
-        case PCM_96000_16_2_LE:
-        case PCM_96000_16_6_LE:
-        case PCM_96000_24_1_LE:
-        case PCM_96000_24_2_LE:
-        case PCM_96000_24_6_LE:
+        case flavor::PCM_96000_8_1_U:
+        case flavor::PCM_96000_8_2_U:
+        case flavor::PCM_96000_8_6_U:
+        case flavor::PCM_96000_16_1_LE:
+        case flavor::PCM_96000_16_2_LE:
+        case flavor::PCM_96000_16_6_LE:
+        case flavor::PCM_96000_24_1_LE:
+        case flavor::PCM_96000_24_2_LE:
+        case flavor::PCM_96000_24_6_LE:
                                         return 96000;
         default:
                                         return 0;
@@ -515,35 +515,35 @@ uint8_t wav::BitDepth(wav::flavor Flavor)
 {
     switch (Flavor)
     {
-        case PCM_44100_8_1_U:
-        case PCM_44100_8_2_U:
-        case PCM_44100_8_6_U:
-        case PCM_48000_8_1_U:
-        case PCM_48000_8_2_U:
-        case PCM_48000_8_6_U:
-        case PCM_96000_8_1_U:
-        case PCM_96000_8_2_U:
-        case PCM_96000_8_6_U:
+        case flavor::PCM_44100_8_1_U:
+        case flavor::PCM_44100_8_2_U:
+        case flavor::PCM_44100_8_6_U:
+        case flavor::PCM_48000_8_1_U:
+        case flavor::PCM_48000_8_2_U:
+        case flavor::PCM_48000_8_6_U:
+        case flavor::PCM_96000_8_1_U:
+        case flavor::PCM_96000_8_2_U:
+        case flavor::PCM_96000_8_6_U:
                                         return 8;
-        case PCM_44100_16_1_LE:
-        case PCM_44100_16_2_LE:
-        case PCM_44100_16_6_LE:
-        case PCM_48000_16_1_LE:
-        case PCM_48000_16_2_LE:
-        case PCM_48000_16_6_LE:
-        case PCM_96000_16_1_LE:
-        case PCM_96000_16_2_LE:
-        case PCM_96000_16_6_LE:
+        case flavor::PCM_44100_16_1_LE:
+        case flavor::PCM_44100_16_2_LE:
+        case flavor::PCM_44100_16_6_LE:
+        case flavor::PCM_48000_16_1_LE:
+        case flavor::PCM_48000_16_2_LE:
+        case flavor::PCM_48000_16_6_LE:
+        case flavor::PCM_96000_16_1_LE:
+        case flavor::PCM_96000_16_2_LE:
+        case flavor::PCM_96000_16_6_LE:
                                         return 16;
-        case PCM_44100_24_1_LE:
-        case PCM_44100_24_2_LE:
-        case PCM_44100_24_6_LE:
-        case PCM_48000_24_1_LE:
-        case PCM_48000_24_2_LE:
-        case PCM_48000_24_6_LE:
-        case PCM_96000_24_1_LE:
-        case PCM_96000_24_2_LE:
-        case PCM_96000_24_6_LE:
+        case flavor::PCM_44100_24_1_LE:
+        case flavor::PCM_44100_24_2_LE:
+        case flavor::PCM_44100_24_6_LE:
+        case flavor::PCM_48000_24_1_LE:
+        case flavor::PCM_48000_24_2_LE:
+        case flavor::PCM_48000_24_6_LE:
+        case flavor::PCM_96000_24_1_LE:
+        case flavor::PCM_96000_24_2_LE:
+        case flavor::PCM_96000_24_6_LE:
                                         return 24;
         default:
                                         return 0;
@@ -571,35 +571,35 @@ uint8_t wav::Channels(wav::flavor Flavor)
 {
     switch (Flavor)
     {
-        case PCM_44100_8_1_U:
-        case PCM_48000_8_1_U:
-        case PCM_96000_8_1_U:
-        case PCM_44100_16_1_LE:
-        case PCM_48000_16_1_LE:
-        case PCM_96000_16_1_LE:
-        case PCM_48000_24_1_LE:
-        case PCM_44100_24_1_LE:
-        case PCM_96000_24_1_LE:
+        case flavor::PCM_44100_8_1_U:
+        case flavor::PCM_48000_8_1_U:
+        case flavor::PCM_96000_8_1_U:
+        case flavor::PCM_44100_16_1_LE:
+        case flavor::PCM_48000_16_1_LE:
+        case flavor::PCM_96000_16_1_LE:
+        case flavor::PCM_48000_24_1_LE:
+        case flavor::PCM_44100_24_1_LE:
+        case flavor::PCM_96000_24_1_LE:
                                         return 1;
-        case PCM_44100_8_2_U:
-        case PCM_48000_8_2_U:
-        case PCM_96000_8_2_U:
-        case PCM_44100_16_2_LE:
-        case PCM_48000_16_2_LE:
-        case PCM_96000_16_2_LE:
-        case PCM_44100_24_2_LE:
-        case PCM_48000_24_2_LE:
-        case PCM_96000_24_2_LE:
+        case flavor::PCM_44100_8_2_U:
+        case flavor::PCM_48000_8_2_U:
+        case flavor::PCM_96000_8_2_U:
+        case flavor::PCM_44100_16_2_LE:
+        case flavor::PCM_48000_16_2_LE:
+        case flavor::PCM_96000_16_2_LE:
+        case flavor::PCM_44100_24_2_LE:
+        case flavor::PCM_48000_24_2_LE:
+        case flavor::PCM_96000_24_2_LE:
                                         return 2;
-        case PCM_44100_8_6_U:
-        case PCM_48000_8_6_U:
-        case PCM_96000_8_6_U:
-        case PCM_44100_16_6_LE:
-        case PCM_48000_16_6_LE:
-        case PCM_96000_16_6_LE:
-        case PCM_44100_24_6_LE:
-        case PCM_48000_24_6_LE:
-        case PCM_96000_24_6_LE:
+        case flavor::PCM_44100_8_6_U:
+        case flavor::PCM_48000_8_6_U:
+        case flavor::PCM_96000_8_6_U:
+        case flavor::PCM_44100_16_6_LE:
+        case flavor::PCM_48000_16_6_LE:
+        case flavor::PCM_96000_16_6_LE:
+        case flavor::PCM_44100_24_6_LE:
+        case flavor::PCM_48000_24_6_LE:
+        case flavor::PCM_96000_24_6_LE:
                                         return 6;
         default:
                                         return 0;

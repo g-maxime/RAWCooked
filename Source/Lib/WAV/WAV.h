@@ -29,7 +29,8 @@ public:
 
     string                      Flavor_String();
 
-    enum flavor
+    static const size_t __flavor_line = __LINE__;
+    enum class flavor : uint8_t
     {
         PCM_44100_8_1_U,
         PCM_44100_8_2_U,
@@ -58,8 +59,8 @@ public:
         PCM_96000_24_1_LE,
         PCM_96000_24_2_LE,
         PCM_96000_24_6_LE,
-        Flavor_Max,
     };
+    static const size_t Flavor_Max = __LINE__ - __flavor_line - 4;
     enum endianness
     {
         BE, // Or Signed for 8-bit

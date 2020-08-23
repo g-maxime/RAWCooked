@@ -18,32 +18,35 @@ using namespace std;
 
 //---------------------------------------------------------------------------
 // Features
-enum feature : uint8_t
+static const size_t __feature_line = __LINE__;
+enum class feature : uint8_t
 {
-    Feature_GeneralOptions,
-    Feature_InputOptions,
-    Feature_EncodingOptions,
-    Feature_MultipleTracks,
-    Feature_Max,
+    GeneralOptions,
+    InputOptions,
+    EncodingOptions,
+    MultipleTracks,
 };
+static const size_t Feature_Max = __LINE__ - __feature_line - 4;
 
 //---------------------------------------------------------------------------
 // Muxer
-enum muxer : uint8_t
+static const size_t __muxer_line = __LINE__;
+enum class muxer : uint8_t
 {
-    Muxer_Matroska,
-    Muxer_Max,
+    Matroska,
 };
+static const size_t Muxer_Max = __LINE__ - __muxer_line - 4;
 
 //---------------------------------------------------------------------------
 // Encoder
-enum encoder : uint8_t
+static const size_t __encoder_line = __LINE__;
+enum class encoder : uint8_t
 {
-    Encoder_FFV1,
-    Encoder_PCM,
-    Encoder_FLAC,
-    Encoder_Max,
+    FFV1,
+    PCM,
+    FLAC,
 };
+static const size_t Encoder_Max = __LINE__ - __encoder_line - 4;
 
 //---------------------------------------------------------------------------
 struct license

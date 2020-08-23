@@ -38,7 +38,7 @@ public:
     errors*                     Errors = nullptr;
 
     // File IO
-    void WriteToDisk(uint8_t* Buffer, size_t Buffer_Size);
+    void WriteToDisk(const uint8_t* Buffer, size_t Buffer_Size);
 
 protected:
     // File IO

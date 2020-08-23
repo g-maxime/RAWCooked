@@ -194,17 +194,19 @@ private:
     MATROSKA_ELEMENT(Segment_Tracks_TrackEntry_Video_PixelHeight);
     MATROSKA_ELEMENT(Void);
 
-    enum format
+    static const size_t __format_line = __LINE__;
+    enum class format
     {
-        Format_None,
-        Format_FFV1,
-        Format_FLAC,
-        Format_PCM,
-        Format_Max,
+        None,
+        FFV1,
+        FLAC,
+        PCM,
     };
+    static const size_t Format_Max = __LINE__ - __format_line - 4;
 
     string                      RAWcooked_LibraryName;
     string                      RAWcooked_LibraryVersion;
+    static const size_t __element_line = __LINE__;
     enum class element
     {
         FileName,
@@ -212,7 +214,7 @@ private:
         AfterData,
         InData,
     };
-    static const size_t Element_Max = (size_t)element::InData + 1;
+    static const size_t Element_Max = __LINE__ - __element_line - 4;
     enum class type
     {
         Block_,
@@ -354,7 +356,7 @@ private:
             FrameWriter(FrameWriter_Source),
             DecodedFrameParser(nullptr),
             FlacInfo(nullptr),
-            Format(Format_None)
+            Format(format::None)
             {
             }
     };

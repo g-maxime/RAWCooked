@@ -81,7 +81,7 @@ int output::FFmpeg_Command(const char* FileName, global& Global)
     // Info
     bool Problem = false;
 
-    if (Streams.size() > 2 && !Global.License.IsSupported(Feature_MultipleTracks))
+    if (Streams.size() > 2 && !Global.License.IsSupported(feature::MultipleTracks))
     {
         if (!Global.Quiet)
             cerr << "*** More than 2 tracks is not supported by the current license key. ***" << endl;
@@ -226,7 +226,7 @@ int output::FFmpeg_Command(const char* FileName, global& Global)
             FileList_File->Errors = &Global.Errors;
             FileList_File->Mode = &Global.Mode;
             FileList_File->Ask_Callback = Global.Ask_Callback;
-            FileList_File->WriteToDisk((uint8_t*)Streams[i].FileList.c_str(), Streams[i].FileList.size());
+            FileList_File->WriteToDisk((const uint8_t*)Streams[i].FileList.c_str(), Streams[i].FileList.size());
             FileList_File->Close();
             FilesToRemove.push_back(FileList_File);
 

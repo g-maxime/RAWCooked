@@ -34,10 +34,9 @@ void transform_jpeg2000rct::From(size_t w, pixel_t* Y, pixel_t* U, pixel_t* V, p
 {
     switch (RawFrame->Flavor)
     {
-        case raw_frame::Flavor_FFmpeg: FFmpeg_From(w, Y, U, V, A); break;
-        case raw_frame::Flavor_DPX: DPX_From(w, Y, U, V, A); break;
-        case raw_frame::Flavor_TIFF: TIFF_From(w, Y, U, V, A); break;
-        default:;
+        case raw_frame::flavor::FFmpeg: FFmpeg_From(w, Y, U, V, A); break;
+        case raw_frame::flavor::DPX: DPX_From(w, Y, U, V, A); break;
+        case raw_frame::flavor::TIFF: TIFF_From(w, Y, U, V, A); break;
     }
 
     size_t FrameBuffer_Temp_Size = RawFrame->Planes().size();
@@ -88,6 +87,7 @@ void transform_jpeg2000rct::FFmpeg_From(size_t w, pixel_t* Y, pixel_t* U, pixel_
 //---------------------------------------------------------------------------
 void transform_jpeg2000rct::DPX_From(size_t w, pixel_t* Y, pixel_t* U, pixel_t* V, pixel_t* A)
 {
+    auto Flavor = (dpx::flavor)Flavor_Private;
     uint8_t*  FrameBuffer_Temp_8  = (uint8_t* )FrameBuffer_Temp[0];
     uint16_t* FrameBuffer_Temp_16 = (uint16_t*)FrameBuffer_Temp[0];
     uint32_t* FrameBuffer_Temp_32 = (uint32_t*)FrameBuffer_Temp[0];
@@ -105,27 +105,27 @@ void transform_jpeg2000rct::DPX_From(size_t w, pixel_t* Y, pixel_t* U, pixel_t* 
         b += g;
         r += g;
 
-        switch (Flavor_Private)
+        switch (Flavor)
         {
-            case dpx::Raw_RGB_8:
+            case dpx::flavor::Raw_RGB_8:
                                         {
                                         FrameBuffer_Temp_8[x*3]   = (uint8_t)r;
                                         FrameBuffer_Temp_8[x*3+1] = (uint8_t)g;
                                         FrameBuffer_Temp_8[x*3+2] = (uint8_t)b;
                                         }
                                         break;
-            case dpx::Raw_RGB_10_FilledA_LE:
+            case dpx::flavor::Raw_RGB_10_FilledA_LE:
                                         {
                                         FrameBuffer_Temp_32[x] = (r << 22) | (b << 12) | (g << 2); // Exception indicated in specs, g and b are inverted
                                         }
                                         break;
-            case dpx::Raw_RGB_10_FilledA_BE:
+            case dpx::flavor::Raw_RGB_10_FilledA_BE:
                                         {
                                         uint32_t c = (r << 22) | (b << 12) | (g << 2); // Exception indicated in specs, g and b are inverted
                                         FrameBuffer_Temp_32[x] = ((c & 0xFF000000) >> 24) | ((c & 0x00FF0000) >> 8) | ((c & 0x0000FF00) << 8) | ((c & 0x000000FF) << 24); // Swap bytes
                                         }
                                         break;
-            case dpx::Raw_RGB_12_Packed_BE:
+            case dpx::flavor::Raw_RGB_12_Packed_BE:
                                         {
                                         uint32_t c; // Exception indicated in specs, g and b are inverted
                                         swap(b, g);
@@ -179,35 +179,35 @@ void transform_jpeg2000rct::DPX_From(size_t w, pixel_t* Y, pixel_t* U, pixel_t* 
                                             s = 0;
                                         }
                                         break;
-            case dpx::Raw_RGB_12_FilledA_BE:
+            case dpx::flavor::Raw_RGB_12_FilledA_BE:
                                         {  // Exception indicated in specs, g and b are inverted
                                         FrameBuffer_Temp_16[x*3]   = ((r & 0xFF0) >> 4) | ((r & 0xF) << 12);  // Swap bytes after shift by 4
                                         FrameBuffer_Temp_16[x*3+1] = ((b & 0xFF0) >> 4) | ((b & 0xF) << 12);  // Swap bytes after shift by 4
                                         FrameBuffer_Temp_16[x*3+2] = ((g & 0xFF0) >> 4) | ((g & 0xF) << 12);  // Swap bytes after shift by 4
                                         }
                                         break;
-            case dpx::Raw_RGB_12_FilledA_LE:
+            case dpx::flavor::Raw_RGB_12_FilledA_LE:
                                         {  // Exception indicated in specs, g and b are inverted
                                         FrameBuffer_Temp_16[x*3]   = r << 4;
                                         FrameBuffer_Temp_16[x*3+1] = b << 4;
                                         FrameBuffer_Temp_16[x*3+2] = g << 4;
                                         }
                                         break;
-            case dpx::Raw_RGB_16_BE:
+            case dpx::flavor::Raw_RGB_16_BE:
                                         { 
                                         FrameBuffer_Temp_16[x*3]   = ((r & 0xFF00) >> 8) | ((r & 0xFF) << 8);  // Swap bytes
                                         FrameBuffer_Temp_16[x*3+1] = ((g & 0xFF00) >> 8) | ((g & 0xFF) << 8);  // Swap bytes
                                         FrameBuffer_Temp_16[x*3+2] = ((b & 0xFF00) >> 8) | ((b & 0xFF) << 8);  // Swap bytes
                                         }
                                         break;
-            case dpx::Raw_RGB_16_LE:
+            case dpx::flavor::Raw_RGB_16_LE:
                                         { 
                                         FrameBuffer_Temp_16[x*3]   = r;
                                         FrameBuffer_Temp_16[x*3+1] = g;
                                         FrameBuffer_Temp_16[x*3+2] = b;
                                         }
                                         break;
-            case dpx::Raw_RGBA_8:
+            case dpx::flavor::Raw_RGBA_8:
                                         {
                                         pixel_t a = A[x];
                                         FrameBuffer_Temp_8[x*4]   = (uint8_t)r;
@@ -216,7 +216,7 @@ void transform_jpeg2000rct::DPX_From(size_t w, pixel_t* Y, pixel_t* U, pixel_t* 
                                         FrameBuffer_Temp_8[x*4+3] = (uint8_t)a;
                                         }
                                         break;
-            case dpx::Raw_RGBA_10_FilledA_BE:
+            case dpx::flavor::Raw_RGBA_10_FilledA_BE:
                                         {
                                         pixel_t a = A[x];
                                         uint32_t c;
@@ -245,7 +245,7 @@ void transform_jpeg2000rct::DPX_From(size_t w, pixel_t* Y, pixel_t* U, pixel_t* 
                                             s = 0;
                                         }
                                         break;
-            case dpx::Raw_RGBA_10_FilledA_LE:
+            case dpx::flavor::Raw_RGBA_10_FilledA_LE:
                                         {
                                         pixel_t a = A[x];
                                         switch (s)
@@ -269,7 +269,7 @@ void transform_jpeg2000rct::DPX_From(size_t w, pixel_t* Y, pixel_t* U, pixel_t* 
                                             s = 0;
                                         }
                                         break;
-            case dpx::Raw_RGBA_12_Packed_BE:
+            case dpx::flavor::Raw_RGBA_12_Packed_BE:
                                         {
                                         pixel_t a = A[x];
                                         uint32_t c;
@@ -293,7 +293,7 @@ void transform_jpeg2000rct::DPX_From(size_t w, pixel_t* Y, pixel_t* U, pixel_t* 
                                             s = 0;
                                         }
                                         break;
-            case dpx::Raw_RGBA_12_FilledA_BE:
+            case dpx::flavor::Raw_RGBA_12_FilledA_BE:
                                         {
                                         pixel_t a = A[x];
                                         FrameBuffer_Temp_16[x*4]   = (uint16_t)((r & 0xFF0) >> 4) | ((r & 0xF) << 12);  // Swap bytes after shift by 4
@@ -302,7 +302,7 @@ void transform_jpeg2000rct::DPX_From(size_t w, pixel_t* Y, pixel_t* U, pixel_t* 
                                         FrameBuffer_Temp_16[x*4+3] = (uint16_t)((a & 0xFF0) >> 4) | ((a & 0xF) << 12);  // Swap bytes after shift by 4
                                         }
                                         break;
-            case dpx::Raw_RGBA_12_FilledA_LE:
+            case dpx::flavor::Raw_RGBA_12_FilledA_LE:
                                         {
                                         pixel_t a = A[x];
                                         FrameBuffer_Temp_16[x*4]   = r << 4;
@@ -311,7 +311,7 @@ void transform_jpeg2000rct::DPX_From(size_t w, pixel_t* Y, pixel_t* U, pixel_t* 
                                         FrameBuffer_Temp_16[x*4+3] = a << 4;
                                         }
                                         break;
-            case dpx::Raw_RGBA_16_BE:
+            case dpx::flavor::Raw_RGBA_16_BE:
                                         {
                                         pixel_t a = A[x];
                                         FrameBuffer_Temp_16[x*4]   = (uint16_t)((r & 0xFF00) >> 8) | ((r & 0xFF) << 8);  // Swap bytes
@@ -320,7 +320,7 @@ void transform_jpeg2000rct::DPX_From(size_t w, pixel_t* Y, pixel_t* U, pixel_t* 
                                         FrameBuffer_Temp_16[x*4+3] = (uint16_t)((a & 0xFF00) >> 8) | ((a & 0xFF) << 8);  // Swap bytes
                                         }
                                         break;
-            case dpx::Raw_RGBA_16_LE:
+            case dpx::flavor::Raw_RGBA_16_LE:
                                         {
                                         pixel_t a = A[x];
                                         FrameBuffer_Temp_16[x*4]   = r;
@@ -337,6 +337,7 @@ void transform_jpeg2000rct::DPX_From(size_t w, pixel_t* Y, pixel_t* U, pixel_t* 
 //---------------------------------------------------------------------------
 void transform_jpeg2000rct::TIFF_From(size_t w, pixel_t* Y, pixel_t* U, pixel_t* V, pixel_t* A)
 {
+    auto Flavor = (tiff::flavor)Flavor_Private;
     uint8_t*  FrameBuffer_Temp_8  = (uint8_t* )FrameBuffer_Temp[0];
     uint16_t* FrameBuffer_Temp_16 = (uint16_t*)FrameBuffer_Temp[0];
 
@@ -352,30 +353,30 @@ void transform_jpeg2000rct::TIFF_From(size_t w, pixel_t* Y, pixel_t* U, pixel_t*
         b += g;
         r += g;
 
-        switch (Flavor_Private)
+        switch (Flavor)
         {
-            case tiff::Raw_RGB_8_U:
+            case tiff::flavor::Raw_RGB_8_U:
                                         {
                                         FrameBuffer_Temp_8[x*3]   = (uint8_t)r;
                                         FrameBuffer_Temp_8[x*3+1] = (uint8_t)g;
                                         FrameBuffer_Temp_8[x*3+2] = (uint8_t)b;
                                         }
                                         break;
-            case tiff::Raw_RGB_16_U_BE:
+            case tiff::flavor::Raw_RGB_16_U_BE:
                                         { 
                                         FrameBuffer_Temp_16[x*3]   = ((r & 0xFF00) >> 8) | ((r & 0xFF) << 8);  // Swap bytes
                                         FrameBuffer_Temp_16[x*3+1] = ((g & 0xFF00) >> 8) | ((g & 0xFF) << 8);  // Swap bytes
                                         FrameBuffer_Temp_16[x*3+2] = ((b & 0xFF00) >> 8) | ((b & 0xFF) << 8);  // Swap bytes
                                         }
                                         break;
-            case tiff::Raw_RGB_16_U_LE:
+            case tiff::flavor::Raw_RGB_16_U_LE:
                                         { 
                                         FrameBuffer_Temp_16[x*3]   = r;
                                         FrameBuffer_Temp_16[x*3+1] = g;
                                         FrameBuffer_Temp_16[x*3+2] = b;
                                         }
                                         break;
-            case tiff::Raw_RGBA_8_U:
+            case tiff::flavor::Raw_RGBA_8_U:
                                         {
                                         pixel_t a = A[x];
                                         FrameBuffer_Temp_8[x*4]   = (uint8_t)r;
@@ -384,7 +385,7 @@ void transform_jpeg2000rct::TIFF_From(size_t w, pixel_t* Y, pixel_t* U, pixel_t*
                                         FrameBuffer_Temp_8[x*4+3] = (uint8_t)a;
                                         }
                                         break;
-            case tiff::Raw_RGBA_16_U_LE:
+            case tiff::flavor::Raw_RGBA_16_U_LE:
                                         { 
                                         pixel_t a = A[x];
                                         FrameBuffer_Temp_16[x*4]   = r;

@@ -485,18 +485,19 @@ public:
         return Planes_[p];
     }
 
-    enum flavor
+    static const size_t __flavor_line = __LINE__;
+    enum class flavor
     {
-        Flavor_FFmpeg,
-        Flavor_DPX,
-        Flavor_TIFF,
-        Flavor_Max,
+        FFmpeg,
+        DPX,
+        TIFF,
     };
+    static const size_t Flavor_Max = __LINE__ - __flavor_line - 4;
     flavor                       Flavor;
 
     raw_frame() :
         Flavor_Private(0),
-        Flavor(Flavor_Max)
+        Flavor(flavor::FFmpeg)
     {
     }
 

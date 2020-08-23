@@ -138,12 +138,12 @@ public:
     virtual ~uncompressed();
 
     // Info
-    flavor                      Flavor;
+    flavor                      Flavor = (flavor)-1;
     virtual string              Flavor_String() = 0;
 
     // Common info
     bool                        IsSequence;
-    rawcooked*                  RAWcooked;
+    rawcooked*                  RAWcooked = nullptr;
 };
 
 class input_base_uncompressed : public input_base, public uncompressed

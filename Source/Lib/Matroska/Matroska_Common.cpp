@@ -1316,8 +1316,8 @@ void matroska::Segment_Cluster()
             bool InitResult;
             switch (TrackInfo_Current->Format)
             {
-                case Format_FFV1: InitResult = InitOutput_FFV1(TrackInfo_Current); break;
-                case Format_FLAC: InitResult = InitOutput_FLAC(TrackInfo_Current, RawFrame->Pre()); break;
+                case format::FFV1: InitResult = InitOutput_FFV1(TrackInfo_Current); break;
+                case format::FLAC: InitResult = InitOutput_FLAC(TrackInfo_Current, RawFrame->Pre()); break;
                 default: InitResult = false;
             }
             if (InitResult)
@@ -1377,15 +1377,15 @@ void matroska::Segment_Cluster_SimpleBlock()
         auto CurrentBufferSize = Levels[Level].Offset_End - CurrentBufferOffset;
         switch (TrackInfo_Current->Format)
         {
-            case Format_FFV1:
+            case format::FFV1:
                             TrackInfo_Current->Frame.Read_Buffer_Continue(CurrentBufferData, CurrentBufferSize);
                             RawFrame->Process();
                             break;
-            case Format_FLAC:
+            case format::FLAC:
                             TrackInfo_Current->FlacInfo->Buffer_Offset_Temp = CurrentBufferOffset;
                             ProcessFrame_FLAC();
                             break;
-            case Format_PCM:
+            case format::PCM:
                             RawFrame->AssignBufferView(CurrentBufferData, CurrentBufferSize);
                             RawFrame->Process();
                             break;
@@ -1443,11 +1443,11 @@ void matroska::Segment_Tracks_TrackEntry_CodecID()
 
     string FileSize((const char*)Buffer.Data() + Buffer_Offset, Levels[Level].Offset_End - Buffer_Offset);
     if (FileSize == "V_MS/VFW/FOURCC")
-        TrackInfo_Current->Format = Format_FFV1; // TODO: check CodecPrivate
+        TrackInfo_Current->Format = format::FFV1; // TODO: check CodecPrivate
     if (FileSize == "A_FLAC")
-        TrackInfo_Current->Format = Format_FLAC;
+        TrackInfo_Current->Format = format::FLAC;
     if (FileSize == "A_PCM/INT/LIT")
-        TrackInfo_Current->Format = Format_PCM;
+        TrackInfo_Current->Format = format::PCM;
 }
 
 //---------------------------------------------------------------------------
@@ -1457,8 +1457,8 @@ void matroska::Segment_Tracks_TrackEntry_CodecPrivate()
 
     switch (TrackInfo_Current->Format)
     {
-        case Format_FFV1: return ProcessCodecPrivate_FFV1();
-        case Format_FLAC: return ProcessCodecPrivate_FLAC();
+        case format::FFV1: return ProcessCodecPrivate_FFV1();
+        case format::FLAC: return ProcessCodecPrivate_FLAC();
         default: return;
     }
 }
@@ -1783,8 +1783,8 @@ void matroska::ProcessCodecPrivate_FLAC()
 //---------------------------------------------------------------------------
 bool matroska::InitOutput_FFV1(trackinfo* TrackInfo_Current)
 {
-    if (GetFormatAndFlavor(TrackInfo_Current, new dpx(Errors), raw_frame::Flavor_DPX))
-        if (GetFormatAndFlavor(TrackInfo_Current, new tiff(Errors), raw_frame::Flavor_TIFF))
+    if (GetFormatAndFlavor(TrackInfo_Current, new dpx(Errors), raw_frame::flavor::DPX))
+        if (GetFormatAndFlavor(TrackInfo_Current, new tiff(Errors), raw_frame::flavor::TIFF))
             return true;
     return false;
 }

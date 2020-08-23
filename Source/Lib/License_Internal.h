@@ -26,14 +26,14 @@ struct default_license_values
 };
 static default_license_values DefaultLicense_Parsers[] =
 {
-    { 1                 , Muxer_Matroska                },
-    { 2                 , Encoder_FFV1                  },
-    { 2                 , Encoder_FLAC                  },
-    { 3 + Parser_DPX    , dpx::Raw_RGB_8                },
-    { 3 + Parser_DPX    , dpx::Raw_RGB_10_FilledA_LE    },
-    { 3 + Parser_DPX    , dpx::Raw_RGB_10_FilledA_BE    },
-    { 3 + Parser_WAV    , wav::PCM_48000_16_2_LE        },
-    { (uint8_t)-1       , (uint8_t)-1                   },
+    { 1                 , (uint8_t)muxer::Matroska                          },
+    { 2                 , (uint8_t)encoder::FFV1                            },
+    { 2                 , (uint8_t)encoder::FLAC                            },
+    { 3 + Parser_DPX    , (uint8_t)dpx::flavor::Raw_RGB_8                   },
+    { 3 + Parser_DPX    , (uint8_t)dpx::flavor::Raw_RGB_10_FilledA_LE       },
+    { 3 + Parser_DPX    , (uint8_t)dpx::flavor::Raw_RGB_10_FilledA_BE       },
+    { 3 + Parser_WAV    , (uint8_t)wav::flavor::PCM_48000_16_2_LE           },
+    { (uint8_t)-1       , (uint8_t)-1                                       },
 };
 
 //---------------------------------------------------------------------------

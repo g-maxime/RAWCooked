@@ -253,9 +253,7 @@ void input_base::Error(error::type Type, error::generic::code Code)
 
 //---------------------------------------------------------------------------
 uncompressed::uncompressed(bool IsSequence_) :
-    RAWcooked(NULL),
-    IsSequence(IsSequence_),
-    Flavor((flavor)-1)
+    IsSequence(IsSequence_)
 {
 }
 

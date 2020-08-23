@@ -238,9 +238,9 @@ license::~license()
 }
 
 //---------------------------------------------------------------------------
-void license::Feature(feature Value) { license_internal* License = (license_internal*)Internal; License->Input_Flags[0] |= ((uint64_t)1 << Value); }
-void license::Muxer(muxer Value) { license_internal* License = (license_internal*)Internal; License->Input_Flags[1] |= ((uint64_t)1 << Value); }
-void license::Encoder(encoder Value) { license_internal* License = (license_internal*)Internal; License->Input_Flags[2] |= ((uint64_t)1 << Value); }
+void license::Feature(feature Value) { license_internal* License = (license_internal*)Internal; License->Input_Flags[0] |= ((uint64_t)1 << (int)Value); }
+void license::Muxer(muxer Value) { license_internal* License = (license_internal*)Internal; License->Input_Flags[1] |= ((uint64_t)1 << (int)Value); }
+void license::Encoder(encoder Value) { license_internal* License = (license_internal*)Internal; License->Input_Flags[2] |= ((uint64_t)1 << (int)Value); }
 
 //---------------------------------------------------------------------------
 bool license::LoadLicense(string LicenseKey, bool StoreLicenseKey)
@@ -393,7 +393,7 @@ bool license::IsSupported(feature Feature)
 {
     license_internal* License = (license_internal*)Internal;
 
-    const char* Supported = License->SupportedFlavor(License->License_Flags[0], Feature);
+    const char* Supported = License->SupportedFlavor(License->License_Flags[0], (uint8_t)Feature);
     return Supported[0] == 'Y';
 }
 

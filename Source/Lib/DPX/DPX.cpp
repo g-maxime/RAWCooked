@@ -134,32 +134,32 @@ struct dpx_tested
 
 struct dpx_tested DPX_Tested[] =
 {
-    { dpx::Raw  , dpx::RGB      ,  8, dpx::Packed , dpx::BE, dpx::Raw_RGB_8                 },
-    { dpx::Raw  , dpx::RGB      ,  8, dpx::Packed , dpx::LE, dpx::Raw_RGB_8                 },
-    { dpx::Raw  , dpx::RGB      ,  8, dpx::MethodA, dpx::BE, dpx::Raw_RGB_8                 },
-    { dpx::Raw  , dpx::RGB      ,  8, dpx::MethodA, dpx::LE, dpx::Raw_RGB_8                 },
-    { dpx::Raw  , dpx::RGB      , 10, dpx::MethodA, dpx::LE, dpx::Raw_RGB_10_FilledA_LE     },
-    { dpx::Raw  , dpx::RGB      , 10, dpx::MethodA, dpx::BE, dpx::Raw_RGB_10_FilledA_BE     },
-    { dpx::Raw  , dpx::RGB      , 12, dpx::Packed , dpx::BE, dpx::Raw_RGB_12_Packed_BE      },
-    { dpx::Raw  , dpx::RGB      , 12, dpx::MethodA, dpx::BE, dpx::Raw_RGB_12_FilledA_BE     },
-    { dpx::Raw  , dpx::RGB      , 12, dpx::MethodA, dpx::LE, dpx::Raw_RGB_12_FilledA_LE     },
-    { dpx::Raw  , dpx::RGB      , 16, dpx::Packed , dpx::BE, dpx::Raw_RGB_16_BE             },
-    { dpx::Raw  , dpx::RGB      , 16, dpx::Packed , dpx::LE, dpx::Raw_RGB_16_LE             },
-    { dpx::Raw  , dpx::RGB      , 16, dpx::MethodA, dpx::BE, dpx::Raw_RGB_16_BE             },
-    { dpx::Raw  , dpx::RGB      , 16, dpx::MethodA, dpx::LE, dpx::Raw_RGB_16_LE             },
-    { dpx::Raw  , dpx::RGBA     ,  8, dpx::Packed , dpx::BE, dpx::Raw_RGBA_8                },
-    { dpx::Raw  , dpx::RGBA     ,  8, dpx::Packed , dpx::LE, dpx::Raw_RGBA_8                },
-    { dpx::Raw  , dpx::RGBA     ,  8, dpx::MethodA, dpx::BE, dpx::Raw_RGBA_8                },
-    { dpx::Raw  , dpx::RGBA     ,  8, dpx::MethodA, dpx::LE, dpx::Raw_RGBA_8                },
-    { dpx::Raw  , dpx::RGBA     , 10, dpx::MethodA, dpx::LE, dpx::Raw_RGBA_10_FilledA_LE    },
-    { dpx::Raw  , dpx::RGBA     , 10, dpx::MethodA, dpx::BE, dpx::Raw_RGBA_10_FilledA_BE    },
-    { dpx::Raw  , dpx::RGBA     , 12, dpx::Packed , dpx::BE, dpx::Raw_RGBA_12_Packed_BE     },
-    { dpx::Raw  , dpx::RGBA     , 12, dpx::MethodA, dpx::BE, dpx::Raw_RGBA_12_FilledA_BE    },
-    { dpx::Raw  , dpx::RGBA     , 12, dpx::MethodA, dpx::LE, dpx::Raw_RGBA_12_FilledA_LE    },
-    { dpx::Raw  , dpx::RGBA     , 16, dpx::Packed , dpx::BE, dpx::Raw_RGBA_16_BE            },
-    { dpx::Raw  , dpx::RGBA     , 16, dpx::Packed , dpx::LE, dpx::Raw_RGBA_16_LE            },
-    { dpx::Raw  , dpx::RGBA     , 16, dpx::MethodA, dpx::BE, dpx::Raw_RGBA_16_BE            },
-    { dpx::Raw  , dpx::RGBA     , 16, dpx::MethodA, dpx::LE, dpx::Raw_RGBA_16_LE            },
+    { dpx::encoding::Raw  , dpx::RGB      ,  8, dpx::Packed , dpx::BE, dpx::flavor::Raw_RGB_8                 },
+    { dpx::encoding::Raw  , dpx::RGB      ,  8, dpx::Packed , dpx::LE, dpx::flavor::Raw_RGB_8                 },
+    { dpx::encoding::Raw  , dpx::RGB      ,  8, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGB_8                 },
+    { dpx::encoding::Raw  , dpx::RGB      ,  8, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGB_8                 },
+    { dpx::encoding::Raw  , dpx::RGB      , 10, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGB_10_FilledA_LE     },
+    { dpx::encoding::Raw  , dpx::RGB      , 10, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGB_10_FilledA_BE     },
+    { dpx::encoding::Raw  , dpx::RGB      , 12, dpx::Packed , dpx::BE, dpx::flavor::Raw_RGB_12_Packed_BE      },
+    { dpx::encoding::Raw  , dpx::RGB      , 12, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGB_12_FilledA_BE     },
+    { dpx::encoding::Raw  , dpx::RGB      , 12, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGB_12_FilledA_LE     },
+    { dpx::encoding::Raw  , dpx::RGB      , 16, dpx::Packed , dpx::BE, dpx::flavor::Raw_RGB_16_BE             },
+    { dpx::encoding::Raw  , dpx::RGB      , 16, dpx::Packed , dpx::LE, dpx::flavor::Raw_RGB_16_LE             },
+    { dpx::encoding::Raw  , dpx::RGB      , 16, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGB_16_BE             },
+    { dpx::encoding::Raw  , dpx::RGB      , 16, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGB_16_LE             },
+    { dpx::encoding::Raw  , dpx::RGBA     ,  8, dpx::Packed , dpx::BE, dpx::flavor::Raw_RGBA_8                },
+    { dpx::encoding::Raw  , dpx::RGBA     ,  8, dpx::Packed , dpx::LE, dpx::flavor::Raw_RGBA_8                },
+    { dpx::encoding::Raw  , dpx::RGBA     ,  8, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGBA_8                },
+    { dpx::encoding::Raw  , dpx::RGBA     ,  8, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGBA_8                },
+    { dpx::encoding::Raw  , dpx::RGBA     , 10, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGBA_10_FilledA_LE    },
+    { dpx::encoding::Raw  , dpx::RGBA     , 10, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGBA_10_FilledA_BE    },
+    { dpx::encoding::Raw  , dpx::RGBA     , 12, dpx::Packed , dpx::BE, dpx::flavor::Raw_RGBA_12_Packed_BE     },
+    { dpx::encoding::Raw  , dpx::RGBA     , 12, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGBA_12_FilledA_BE    },
+    { dpx::encoding::Raw  , dpx::RGBA     , 12, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGBA_12_FilledA_LE    },
+    { dpx::encoding::Raw  , dpx::RGBA     , 16, dpx::Packed , dpx::BE, dpx::flavor::Raw_RGBA_16_BE            },
+    { dpx::encoding::Raw  , dpx::RGBA     , 16, dpx::Packed , dpx::LE, dpx::flavor::Raw_RGBA_16_LE            },
+    { dpx::encoding::Raw  , dpx::RGBA     , 16, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGBA_16_BE            },
+    { dpx::encoding::Raw  , dpx::RGBA     , 16, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGBA_16_LE            },
 };
 const size_t DPX_Tested_Size = sizeof(DPX_Tested) / sizeof(dpx_tested);
 
@@ -306,7 +306,7 @@ void dpx::ParseBuffer()
         Unsupported(unsupported::Flavor);
         return;
     }
-    Flavor = DPX_Tested[Tested].Flavor;
+    Flavor = (decltype(Flavor))DPX_Tested[Tested].Flavor;
 
     // Slices count
     // Computing optimal count of slices. TODO: agree with everyone about the goal and/or permit multiple formulas
@@ -430,32 +430,31 @@ size_t dpx::BitsPerBlock(dpx::flavor Flavor)
 {
     switch (Flavor)
     {
-        case dpx::Raw_RGB_8:                // 3x8-bit content
+        case flavor::Raw_RGB_8:                // 3x8-bit content
                                         return 24;
-        case dpx::Raw_RGB_10_FilledA_BE:    // 3x10-bit content + 2-bit zero-padding in 32-bit
-        case dpx::Raw_RGB_10_FilledA_LE:    // 3x10-bit content + 2-bit zero-padding in 32-bit
-        case dpx::Raw_RGBA_8:               // 4x8-bit content
+        case flavor::Raw_RGB_10_FilledA_BE:    // 3x10-bit content + 2-bit zero-padding in 32-bit
+        case flavor::Raw_RGB_10_FilledA_LE:    // 3x10-bit content + 2-bit zero-padding in 32-bit
+        case flavor::Raw_RGBA_8:               // 4x8-bit content
                                         return 32;
-        case dpx::Raw_RGB_12_FilledA_BE:    // 3x(12-bit content + 4-bit zero-padding)
-        case dpx::Raw_RGB_12_FilledA_LE:    // 3x(12-bit content + 4-bit zero-padding)
-        case dpx::Raw_RGB_16_BE:            // 3x16-bit content
-        case dpx::Raw_RGB_16_LE:            // 3x16-bit content
+        case flavor::Raw_RGB_12_FilledA_BE:    // 3x(12-bit content + 4-bit zero-padding)
+        case flavor::Raw_RGB_12_FilledA_LE:    // 3x(12-bit content + 4-bit zero-padding)
+        case flavor::Raw_RGB_16_BE:            // 3x16-bit content
+        case flavor::Raw_RGB_16_LE:            // 3x16-bit content
                                         return 48; 
-        case dpx::Raw_RGBA_12_FilledA_BE:   // 4x(12-bit content + 4-bit zero-padding)
-        case dpx::Raw_RGBA_12_FilledA_LE:   // 4x(12-bit content + 4-bit zero-padding)
-        case dpx::Raw_RGBA_16_BE:           // 4x16-bit content
-        case dpx::Raw_RGBA_16_LE:           // 4x16-bit content
+        case flavor::Raw_RGBA_12_FilledA_BE:   // 4x(12-bit content + 4-bit zero-padding)
+        case flavor::Raw_RGBA_12_FilledA_LE:   // 4x(12-bit content + 4-bit zero-padding)
+        case flavor::Raw_RGBA_16_BE:           // 4x16-bit content
+        case flavor::Raw_RGBA_16_LE:           // 4x16-bit content
                                         return 64; 
-        case dpx::Raw_RGBA_12_Packed_BE:    // 4x12-bit content, multiplied by 2 pixels in a supported block
+        case flavor::Raw_RGBA_12_Packed_BE:    // 4x12-bit content, multiplied by 2 pixels in a supported block
                                         return 96; 
-        case dpx::Raw_RGBA_10_FilledA_BE:   // 4x10-bit content, 2-bit padding every 30-bit, multiplied by 3 pixels in a supported block
-        case dpx::Raw_RGBA_10_FilledA_LE:   // 4x10-bit content, 2-bit padding every 30-bit, multiplied by 3 pixels in a supported block
+        case flavor::Raw_RGBA_10_FilledA_BE:   // 4x10-bit content, 2-bit padding every 30-bit, multiplied by 3 pixels in a supported block
+        case flavor::Raw_RGBA_10_FilledA_LE:   // 4x10-bit content, 2-bit padding every 30-bit, multiplied by 3 pixels in a supported block
                                         return 128; 
-        case dpx::Raw_RGB_12_Packed_BE:     // 3x12-bit content, multiplied by 8 pixels in a supported block
+        case flavor::Raw_RGB_12_Packed_BE:     // 3x12-bit content, multiplied by 8 pixels in a supported block
                                         return 288;
-        default:
-                                        return 0;
     }
+    return 24;
 }
 
 //---------------------------------------------------------------------------
@@ -463,29 +462,28 @@ size_t dpx::PixelsPerBlock(dpx::flavor Flavor)
 {
     switch (Flavor)
     {
-        case dpx::Raw_RGB_8:
-        case dpx::Raw_RGBA_8:
-        case dpx::Raw_RGB_10_FilledA_BE:
-        case dpx::Raw_RGB_10_FilledA_LE:
-        case dpx::Raw_RGB_12_FilledA_BE:
-        case dpx::Raw_RGB_12_FilledA_LE:
-        case dpx::Raw_RGB_16_BE:
-        case dpx::Raw_RGB_16_LE:
-        case dpx::Raw_RGBA_12_FilledA_BE:
-        case dpx::Raw_RGBA_12_FilledA_LE:
-        case dpx::Raw_RGBA_16_BE:
-        case dpx::Raw_RGBA_16_LE:
+        case flavor::Raw_RGB_8:
+        case flavor::Raw_RGBA_8:
+        case flavor::Raw_RGB_10_FilledA_BE:
+        case flavor::Raw_RGB_10_FilledA_LE:
+        case flavor::Raw_RGB_12_FilledA_BE:
+        case flavor::Raw_RGB_12_FilledA_LE:
+        case flavor::Raw_RGB_16_BE:
+        case flavor::Raw_RGB_16_LE:
+        case flavor::Raw_RGBA_12_FilledA_BE:
+        case flavor::Raw_RGBA_12_FilledA_LE:
+        case flavor::Raw_RGBA_16_BE:
+        case flavor::Raw_RGBA_16_LE:
                                         return 1;
-        case dpx::Raw_RGBA_12_Packed_BE:    // 2x4x12-bit in 3x32-bit
+        case flavor::Raw_RGBA_12_Packed_BE:    // 2x4x12-bit in 3x32-bit
                                         return 2;
-        case dpx::Raw_RGBA_10_FilledA_BE:   // 3x4x10-bit in 3x32-bit
-        case dpx::Raw_RGBA_10_FilledA_LE:   // 3x4x10-bit in 3x32-bit
+        case flavor::Raw_RGBA_10_FilledA_BE:   // 3x4x10-bit in 3x32-bit
+        case flavor::Raw_RGBA_10_FilledA_LE:   // 3x4x10-bit in 3x32-bit
                                         return 3;
-        case dpx::Raw_RGB_12_Packed_BE:     // 8x3x12-bit in 9x32-bit
+        case flavor::Raw_RGB_12_Packed_BE:     // 8x3x12-bit in 9x32-bit
                                         return 8;
-        default:
-                                        return 0;
     }
+    return 1;
 }
 
 //---------------------------------------------------------------------------
@@ -493,27 +491,26 @@ dpx::descriptor dpx::ColorSpace(dpx::flavor Flavor)
 {
     switch (Flavor)
     {
-        case Raw_RGB_8:
-        case Raw_RGB_10_FilledA_BE:
-        case Raw_RGB_10_FilledA_LE:
-        case Raw_RGB_12_FilledA_BE:
-        case Raw_RGB_12_FilledA_LE:
-        case Raw_RGB_12_Packed_BE:
-        case Raw_RGB_16_BE:
-        case Raw_RGB_16_LE:
+        case flavor::Raw_RGB_8:
+        case flavor::Raw_RGB_10_FilledA_BE:
+        case flavor::Raw_RGB_10_FilledA_LE:
+        case flavor::Raw_RGB_12_FilledA_BE:
+        case flavor::Raw_RGB_12_FilledA_LE:
+        case flavor::Raw_RGB_12_Packed_BE:
+        case flavor::Raw_RGB_16_BE:
+        case flavor::Raw_RGB_16_LE:
                                         return RGB;
-        case Raw_RGBA_8:
-        case Raw_RGBA_10_FilledA_BE:
-        case Raw_RGBA_10_FilledA_LE:
-        case Raw_RGBA_12_FilledA_BE:
-        case Raw_RGBA_12_FilledA_LE:
-        case Raw_RGBA_16_BE:
-        case Raw_RGBA_16_LE:
-        case Raw_RGBA_12_Packed_BE:
+        case flavor::Raw_RGBA_8:
+        case flavor::Raw_RGBA_10_FilledA_BE:
+        case flavor::Raw_RGBA_10_FilledA_LE:
+        case flavor::Raw_RGBA_12_FilledA_BE:
+        case flavor::Raw_RGBA_12_FilledA_LE:
+        case flavor::Raw_RGBA_16_BE:
+        case flavor::Raw_RGBA_16_LE:
+        case flavor::Raw_RGBA_12_Packed_BE:
                                         return RGBA;
-        default:
-                                        return (dpx::descriptor)-1;
     }
+    return RGB;
 }
 const char* dpx::ColorSpace_String(dpx::flavor Flavor)
 {
@@ -525,9 +522,8 @@ const char* dpx::ColorSpace_String(dpx::flavor Flavor)
                                         return "RGB";
         case RGBA:
                                         return "RGBA";
-        default:
-                                        return "";
     }
+    return "RGB";
 }
 
 //---------------------------------------------------------------------------
@@ -535,29 +531,28 @@ uint8_t dpx::BitDepth(dpx::flavor Flavor)
 {
     switch (Flavor)
     {
-        case Raw_RGB_8:
-        case Raw_RGBA_8:
+        case flavor::Raw_RGB_8:
+        case flavor::Raw_RGBA_8:
                                         return 8;
-        case Raw_RGB_10_FilledA_BE:
-        case Raw_RGB_10_FilledA_LE:
-        case Raw_RGBA_10_FilledA_BE:
-        case Raw_RGBA_10_FilledA_LE:
+        case flavor::Raw_RGB_10_FilledA_BE:
+        case flavor::Raw_RGB_10_FilledA_LE:
+        case flavor::Raw_RGBA_10_FilledA_BE:
+        case flavor::Raw_RGBA_10_FilledA_LE:
                                         return 10;
-        case Raw_RGB_12_FilledA_BE:
-        case Raw_RGB_12_FilledA_LE:
-        case Raw_RGB_12_Packed_BE:
-        case Raw_RGBA_12_FilledA_BE:
-        case Raw_RGBA_12_FilledA_LE:
-        case Raw_RGBA_12_Packed_BE:
+        case flavor::Raw_RGB_12_FilledA_BE:
+        case flavor::Raw_RGB_12_FilledA_LE:
+        case flavor::Raw_RGB_12_Packed_BE:
+        case flavor::Raw_RGBA_12_FilledA_BE:
+        case flavor::Raw_RGBA_12_FilledA_LE:
+        case flavor::Raw_RGBA_12_Packed_BE:
                                         return 12;
-        case Raw_RGB_16_BE:
-        case Raw_RGB_16_LE:
-        case Raw_RGBA_16_BE:
-        case Raw_RGBA_16_LE:
+        case flavor::Raw_RGB_16_BE:
+        case flavor::Raw_RGB_16_LE:
+        case flavor::Raw_RGBA_16_BE:
+        case flavor::Raw_RGBA_16_LE:
                                         return 16;
-        default:
-                                        return 0;
     }
+    return 8;
 }
 const char* dpx::BitDepth_String(dpx::flavor Flavor)
 {
@@ -573,9 +568,8 @@ const char* dpx::BitDepth_String(dpx::flavor Flavor)
                                         return "12";
         case 16:
                                         return "16";
-        default:
-                                        return "";
     }
+    return "8";
 }
 
 //---------------------------------------------------------------------------
@@ -583,21 +577,20 @@ dpx::packing dpx::Packing(dpx::flavor Flavor)
 {
     switch (Flavor)
     {
-        case Raw_RGB_10_FilledA_BE:
-        case Raw_RGB_10_FilledA_LE:
-        case Raw_RGBA_10_FilledA_BE:
-        case Raw_RGBA_10_FilledA_LE:
-        case Raw_RGB_12_FilledA_BE:
-        case Raw_RGB_12_FilledA_LE:
-        case Raw_RGBA_12_FilledA_BE:
-        case Raw_RGBA_12_FilledA_LE:
-                                        return MethodA;
-        case Raw_RGB_12_Packed_BE:
-        case Raw_RGBA_12_Packed_BE:
+        case flavor::Raw_RGB_12_Packed_BE:
+        case flavor::Raw_RGBA_12_Packed_BE:
                                         return Packed;
-        default:
-                                        return (packing)-1;
+        case flavor::Raw_RGB_10_FilledA_BE:
+        case flavor::Raw_RGB_10_FilledA_LE:
+        case flavor::Raw_RGBA_10_FilledA_BE:
+        case flavor::Raw_RGBA_10_FilledA_LE:
+        case flavor::Raw_RGB_12_FilledA_BE:
+        case flavor::Raw_RGB_12_FilledA_LE:
+        case flavor::Raw_RGBA_12_FilledA_BE:
+        case flavor::Raw_RGBA_12_FilledA_LE:
+                                        return MethodA;
     }
+    return Packed;
 }
 const char* dpx::Packing_String(dpx::flavor Flavor)
 {
@@ -609,9 +602,8 @@ const char* dpx::Packing_String(dpx::flavor Flavor)
                                         return "Packed";
         case MethodA:
                                         return "FilledA";
-        default:
-                                        return "";
     }
+    return "Packed";
 }
 
 //---------------------------------------------------------------------------
@@ -619,25 +611,24 @@ dpx::endianness dpx::Endianness(dpx::flavor Flavor)
 {
     switch (Flavor)
     {
-        case Raw_RGB_10_FilledA_LE:
-        case Raw_RGB_12_FilledA_LE:
-        case Raw_RGB_16_LE:
-        case Raw_RGBA_10_FilledA_LE:
-        case Raw_RGBA_12_FilledA_LE:
-        case Raw_RGBA_16_LE:
+        case flavor::Raw_RGB_10_FilledA_LE:
+        case flavor::Raw_RGB_12_FilledA_LE:
+        case flavor::Raw_RGB_16_LE:
+        case flavor::Raw_RGBA_10_FilledA_LE:
+        case flavor::Raw_RGBA_12_FilledA_LE:
+        case flavor::Raw_RGBA_16_LE:
                                         return LE;
-        case Raw_RGB_10_FilledA_BE:
-        case Raw_RGB_12_Packed_BE:
-        case Raw_RGB_12_FilledA_BE:
-        case Raw_RGB_16_BE:
-        case Raw_RGBA_10_FilledA_BE:
-        case Raw_RGBA_12_Packed_BE:
-        case Raw_RGBA_12_FilledA_BE:
-        case Raw_RGBA_16_BE:
+        case flavor::Raw_RGB_10_FilledA_BE:
+        case flavor::Raw_RGB_12_Packed_BE:
+        case flavor::Raw_RGB_12_FilledA_BE:
+        case flavor::Raw_RGB_16_BE:
+        case flavor::Raw_RGBA_10_FilledA_BE:
+        case flavor::Raw_RGBA_12_Packed_BE:
+        case flavor::Raw_RGBA_12_FilledA_BE:
+        case flavor::Raw_RGBA_16_BE:
                                         return BE;
-        default:
-                                        return (dpx::endianness)-1;
     }
+    return LE;
 }
 const char* dpx::Endianess_String(dpx::flavor Flavor)
 {
@@ -649,9 +640,8 @@ const char* dpx::Endianess_String(dpx::flavor Flavor)
                                         return "LE";
         case BE:
                                         return "BE";
-        default:
-                                        return "";
     }
+    return "LE";
 }
 
 //---------------------------------------------------------------------------

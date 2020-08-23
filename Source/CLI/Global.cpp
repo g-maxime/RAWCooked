@@ -195,13 +195,13 @@ int global::SetOption(const char* argv[], int& i, int argc)
         if (strcmp(argv[i], "copy") == 0)
         {
             OutputOptions["c:a"] = argv[i];
-            License.Encoder(Encoder_PCM);
+            License.Encoder(encoder::PCM);
             return 0;
         }
         if (strcmp(argv[i], "flac") == 0)
         {
             OutputOptions["c:a"] = argv[i];
-            License.Encoder(Encoder_FLAC);
+            License.Encoder(encoder::FLAC);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -213,7 +213,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
         if (!strcmp(argv[i], "ffv1"))
         {
             OutputOptions["c:v"] = argv[i];
-            License.Encoder(Encoder_FFV1);
+            License.Encoder(encoder::FFV1);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -227,7 +227,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
          || !strcmp(argv[i], "2"))
         {
             OutputOptions["coder"] = argv[i];
-            License.Feature(Feature_EncodingOptions);
+            License.Feature(feature::EncodingOptions);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -240,7 +240,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
          || !strcmp(argv[i], "1"))
         {
             OutputOptions["context"] = argv[i];
-            License.Feature(Feature_EncodingOptions);
+            License.Feature(feature::EncodingOptions);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -263,7 +263,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
         if (atof(argv[i]))
         {
             VideoInputOptions["framerate"] = argv[i];
-            License.Feature(Feature_InputOptions);
+            License.Feature(feature::InputOptions);
             return 0;
         }
         return 0;
@@ -275,7 +275,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
         if (atoi(argv[i]))
         {
             OutputOptions["g"] = argv[i];
-            License.Feature(Feature_EncodingOptions);
+            License.Feature(feature::EncodingOptions);
             return 0;
         }
         cerr << "Invalid \"" << argv[i - 1] << " " << argv[i] << "\" value, it must be a number\n";
@@ -290,7 +290,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
          || !strcmp(argv[i], "3"))
         {
             OutputOptions["level"] = argv[i];
-            License.Feature(Feature_EncodingOptions);
+            License.Feature(feature::EncodingOptions);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -303,7 +303,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
          || !strcmp(argv[i], "warning"))
         {
             OutputOptions["loglevel"] = argv[i];
-            License.Feature(Feature_GeneralOptions);
+            License.Feature(feature::GeneralOptions);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -312,7 +312,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
     {
         OutputOptions["n"] = string();
         Mode = AlwaysNo; // Also RAWcooked itself
-        License.Feature(Feature_GeneralOptions);
+        License.Feature(feature::GeneralOptions);
         return 0;
     }
     if (!strcmp(argv[i], "-slicecrc"))
@@ -323,7 +323,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
          || !strcmp(argv[i], "1"))
         {
             OutputOptions["slicecrc"] = argv[i];
-            License.Feature(Feature_EncodingOptions);
+            License.Feature(feature::EncodingOptions);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -336,7 +336,7 @@ int global::SetOption(const char* argv[], int& i, int argc)
         if (SliceCount) //TODO: not all slice counts are accepted by FFmpeg, we should filter
         {
             OutputOptions["slices"] = argv[i];
-            License.Feature(Feature_EncodingOptions);
+            License.Feature(feature::EncodingOptions);
             return 0;
         }
         return Error_NotTested(argv[i - 1], argv[i]);
@@ -346,14 +346,14 @@ int global::SetOption(const char* argv[], int& i, int argc)
         if (++i >= argc)
             return Error_NotTested(argv[i - 1]);
         OutputOptions["threads"] = argv[i];
-        License.Feature(Feature_GeneralOptions);
+        License.Feature(feature::GeneralOptions);
         return 0;
     }
     if (strcmp(argv[i], "-y") == 0)
     {
         OutputOptions["y"] = string();
         Mode = AlwaysYes; // Also RAWcooked itself
-        License.Feature(Feature_GeneralOptions);
+        License.Feature(feature::GeneralOptions);
         return 0;
     }
 
@@ -412,7 +412,7 @@ int global::ManageCommandLine(const char* argv[], int argc)
             if (i + 1 == argc)
                 return Error_Missing(argv[i]);
             AttachmentMaxSize = atoi(argv[++i]);
-            License.Feature(Feature_GeneralOptions);
+            License.Feature(feature::GeneralOptions);
         }
         else if ((strcmp(argv[i], "--bin-name") == 0 || strcmp(argv[i], "-b") == 0))
         {
@@ -434,7 +434,7 @@ int global::ManageCommandLine(const char* argv[], int argc)
             else
             {
                 int Value = SetCheck(true);
-                License.Feature(Feature_GeneralOptions);
+                License.Feature(feature::GeneralOptions);
                 if (Value)
                     return Value;
             }
@@ -468,7 +468,7 @@ int global::ManageCommandLine(const char* argv[], int argc)
             int Value = SetDisplayCommand();
             if (Value)
                 return Value;
-            License.Feature(Feature_GeneralOptions);
+            License.Feature(feature::GeneralOptions);
         }
         else if (strcmp(argv[i], "--encode") == 0)
         {
@@ -575,7 +575,7 @@ int global::ManageCommandLine(const char* argv[], int argc)
         else if (strcmp(argv[i], "--quiet") == 0)
         {
             Quiet = true;
-            License.Feature(Feature_GeneralOptions);
+            License.Feature(feature::GeneralOptions);
         }
         else if ((strcmp(argv[i], "--rawcooked-file-name") == 0 || strcmp(argv[i], "-r") == 0))
         {
