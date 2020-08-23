@@ -579,6 +579,10 @@ void tiff::ParseBuffer()
         slice_x <<= 1;
     if (Info.BitsPerSample > 10)
         slice_x = slice_x * 3 / 2; // 1.5x more slices if 16-bit
+    if (slice_x > Width)
+        slice_x = Width;
+    if (slice_x > Height)
+        slice_x = Height;
 
     // Computing which slice count is suitable // TODO: smarter algo, currently only computing in order to have pixels not accross 2 32-bit words
     size_t Slice_Multiplier = PixelsPerBlock((flavor)Flavor);
