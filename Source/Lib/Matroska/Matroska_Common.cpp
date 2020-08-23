@@ -1407,7 +1407,11 @@ void matroska::Segment_Cluster_SimpleBlock()
         if (!TrackInfo_Current->ReversibilityData.Unique)
         {
             if (Actions[Action_Conch] || Actions[Action_Coherency])
+            {
+                RawFrame->SetPre(ReversibilityData.GetDataContent(element::BeforeData));
+                RawFrame->SetPost(ReversibilityData.GetDataContent(element::AfterData));
                 ParseDecodedFrame(TrackInfo_Current);
+            }
         }
         TrackInfo_Current->ReversibilityData.NextFrame();
     }
