@@ -1327,12 +1327,13 @@ void matroska::Segment_Cluster()
 
             if (ReversibilityData.Unique)
             {
+                TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = true;
+
                 TrackInfo_Current->FrameWriter.OutputFileName = ReversibilityData.Data[(size_t)element::FileName].Content[0].ToString();
                 FormatPath(TrackInfo_Current->FrameWriter.OutputFileName);
                 RawFrame->Process();
 
                 TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotBegin] = true;
-                TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = true;
             }
 
         }
@@ -1653,7 +1654,7 @@ bool matroska::ParseDecodedFrame(trackinfo* TrackInfo_Current, input_base_uncomp
         Frame_Buffer.Create(FileSize); // TODO: more optimal method without allocation of the full file size and without new/delete
         Frame_Buffer.CopyLimit(RawFrame->Pre());
         Frame_Buffer.SetZero(Pre_Size, Post_Offset - Pre_Size);
-        Frame_Buffer.CopyLimit(FileSize - Post_Offset, RawFrame->Post());
+        Frame_Buffer.CopyLimit(Post_Offset, RawFrame->Post());
         ParseResult = FrameParser->Parse(Frame_Buffer);
     }
     else
