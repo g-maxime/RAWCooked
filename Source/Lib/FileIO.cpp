@@ -5,7 +5,9 @@
  */
 
 //---------------------------------------------------------------------------
-#define _GNU_SOURCE // Needed for ftruncate on GNU compiler
+#ifndef _GNU_SOURCE
+    #define _GNU_SOURCE // Needed for ftruncate on GNU compiler
+#endif
 #include "Lib/FileIO.h"
 #include <iostream>
 #include <sstream>
@@ -47,14 +49,14 @@ int filemap::Open_ReadMode(const char* FileName)
                 auto NewMapping = CreateFileMapping(NewFile, 0, PAGE_READONLY, 0, 0, 0);
                 if (NewMapping)
                 {
-                    Private = NewFile;
-                    Private2 = NewMapping;
+                    Private = (void*)NewFile;
+                    Private2 = (void*)NewMapping;
                 }
                 else
                     CloseHandle(NewFile);
             }
             else
-                Private = NewFile; // CreateFileMapping does not support 0-byte files, so we map manually to NULL
+                Private = (void*)NewFile; // CreateFileMapping does not support 0-byte files, so we map manually to NULL
         }
         else
         {
@@ -69,7 +71,7 @@ int filemap::Open_ReadMode(const char* FileName)
         if (!stat(FileName, &Fstat))
         {
             NewSize = Fstat.st_size;
-            Private = fd;
+            Private = (void*)fd;
         }
         else
             close(fd);
@@ -96,7 +98,7 @@ int filemap::Remap()
 #if defined(_WIN32) || defined(_WINDOWS)
         UnmapViewOfFile(Data());
 #else
-        munmap(Data(), Size());
+        munmap((void*)Data(), Size());
 #endif
         ClearKeepSizeBase(); // Intermediate, size is needed later
     }
@@ -108,7 +110,7 @@ int filemap::Remap()
     const decltype(NewData) NewData_Fail = 0;
 #else
     auto fd = (int&)Private;
-    auto NewData = mmap(NULL, Size(), PROT_READ, MAP_FILE | MAP_PRIVATE, fd, 0);
+    auto NewData = mmap(nullptr, Size(), PROT_READ, MAP_FILE | MAP_PRIVATE, fd, 0);
     const decltype(NewData) NewData_Fail = MAP_FAILED;
 #endif
 
@@ -131,7 +133,7 @@ int filemap::Close()
         #if defined(_WIN32) || defined(_WINDOWS)
             UnmapViewOfFile(Data());
         #else
-            munmap(Data(), Size());
+            munmap((void*)Data(), Size());
         #endif
         ClearBase();
     }
