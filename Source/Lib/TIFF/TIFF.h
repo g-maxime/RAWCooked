@@ -48,7 +48,7 @@ public:
     };
     static const size_t Flavor_Max = __LINE__ - __flavor_line - 4;
 
-    enum descriptor : uint32_t
+    enum class descriptor : uint32_t
     {
         Y_Invereted =   0,
         Y           =   1,
@@ -61,7 +61,7 @@ public:
         RGBA        =   2 + 0x10000, // Homemade for RGB + 1-component
         Descriptor_Max = (uint32_t)-1,
     };
-    enum compression : uint16_t
+    enum class compression : uint16_t
     {
         Raw             =     1,
         CCITT_1D        =     2,
@@ -89,13 +89,13 @@ public:
         JPEG2000        = 34712,
         Compression_Max = (uint16_t)-1,
     };
-    enum sampleformat : uint8_t
+    enum class sampleformat : uint8_t
     {
         U       = 1,        // Unsigned
         S       = 2,        // Signed
         F       = 3,        // IEEE floating point
         Und     = 4,        // Undefined, to be handled as unsigned
-        SampleFormat_Max,
+        SampleFormat_Max = (uint8_t)-1,
     };
 
     // Info about formats

@@ -145,11 +145,11 @@ struct tiff_tested
 
 struct tiff_tested TIFF_Tested[] =
 {
-    { { tiff::compression::Raw   , tiff::RGB     ,  3,  8, tiff::U   , endianness::LE}, tiff::flavor::Raw_RGB_8_U              },
-    { { tiff::compression::Raw   , tiff::RGB     ,  3, 16, tiff::U   , endianness::BE}, tiff::flavor::Raw_RGB_16_U_BE          },
-    { { tiff::compression::Raw   , tiff::RGB     ,  3, 16, tiff::U   , endianness::LE}, tiff::flavor::Raw_RGB_16_U_LE          },
-    { { tiff::compression::Raw   , tiff::RGB     ,  4,  8, tiff::U   , endianness::LE}, tiff::flavor::Raw_RGBA_8_U             },
-    { { tiff::compression::Raw   , tiff::RGB     ,  4, 16, tiff::U   , endianness::LE}, tiff::flavor::Raw_RGBA_16_U_LE         },
+    { { tiff::compression::Raw   , tiff::descriptor::RGB     ,  3,  8, tiff::sampleformat::U   , endianness::LE}, tiff::flavor::Raw_RGB_8_U              },
+    { { tiff::compression::Raw   , tiff::descriptor::RGB     ,  3, 16, tiff::sampleformat::U   , endianness::BE}, tiff::flavor::Raw_RGB_16_U_BE          },
+    { { tiff::compression::Raw   , tiff::descriptor::RGB     ,  3, 16, tiff::sampleformat::U   , endianness::LE}, tiff::flavor::Raw_RGB_16_U_LE          },
+    { { tiff::compression::Raw   , tiff::descriptor::RGB     ,  4,  8, tiff::sampleformat::U   , endianness::LE}, tiff::flavor::Raw_RGBA_8_U             },
+    { { tiff::compression::Raw   , tiff::descriptor::RGB     ,  4, 16, tiff::sampleformat::U   , endianness::LE}, tiff::flavor::Raw_RGBA_16_U_LE         },
 };
 const size_t TIFF_Tested_Size = sizeof(TIFF_Tested) / sizeof(tiff_tested);
 
@@ -365,7 +365,7 @@ void tiff::ParseBuffer()
     if (Buffer.Size() < 8)
         return;
 
-    tiff_info Info = { tiff::Compression_Max, tiff::Descriptor_Max, 1, 1, tiff::U, endianness::LE };
+    tiff_info Info = { tiff::compression::Compression_Max, tiff::descriptor::Descriptor_Max, 1, 1, tiff::sampleformat::U, endianness::LE };
 
     Buffer_Offset = 0;
     uint32_t Magic = Get_B4();
@@ -537,7 +537,7 @@ void tiff::ParseBuffer()
         Unsupported(unsupported::PlanarConfiguration);
     if (ExtraSamples != (uint32_t)-1 && ExtraSamples != 2)
         Unsupported(unsupported::ExtraSamples);
-    if (ExtraSamples != (uint32_t)-1 && (Info.Descriptor != RGB || Info.SamplesPerPixel != 4))
+    if (ExtraSamples != (uint32_t)-1 && (Info.Descriptor != descriptor::RGB || Info.SamplesPerPixel != 4))
         Unsupported(unsupported::ExtraSamples_SamplesPerPixel);
 
     // StripOffsets / StripBytesCounts / RowsPerStrip
@@ -698,13 +698,13 @@ tiff::descriptor tiff::Descriptor(tiff::flavor Flavor)
         case flavor::Raw_RGB_8_U:
         case flavor::Raw_RGB_16_U_BE:
         case flavor::Raw_RGB_16_U_LE:
-                                        return RGB;
+                                        return descriptor::RGB;
         case flavor::Raw_RGBA_8_U:
         case flavor::Raw_RGBA_16_U_LE:
-                                        return RGBA;
+                                        return descriptor::RGBA;
     }
 
-    return RGB;
+    return descriptor::RGB;
 }
 const char* tiff::Descriptor_String(tiff::flavor Flavor)
 {
@@ -712,9 +712,9 @@ const char* tiff::Descriptor_String(tiff::flavor Flavor)
 
     switch (Value)
     {
-        case RGB:
+        case descriptor::RGB:
                                         return "RGB";
-        case RGBA:
+        case descriptor::RGBA:
                                         return "RGBA";
         default :
                                         return "";
@@ -766,10 +766,10 @@ tiff::sampleformat tiff::SampleFormat(tiff::flavor Flavor)
         case flavor::Raw_RGB_16_U_BE:
         case flavor::Raw_RGB_16_U_LE:
         case flavor::Raw_RGBA_16_U_LE:
-                                        return U;
+                                        return sampleformat::U;
     }
 
-    return U;
+    return sampleformat::U;
 }
 const char* tiff::SampleFormat_String(tiff::flavor Flavor)
 {
@@ -777,12 +777,12 @@ const char* tiff::SampleFormat_String(tiff::flavor Flavor)
 
     switch (Value)
     {
-        case U:
-        case Und:
+        case sampleformat::U:
+        case sampleformat::Und:
                                         return "U";
-        case S:
+        case sampleformat::S:
                                         return "S";
-        case F:
+        case sampleformat::F:
                                         return "F";
         default:
                                         return "";

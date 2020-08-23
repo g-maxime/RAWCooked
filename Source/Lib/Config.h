@@ -54,7 +54,7 @@ inline void FormatPath(string& s)
 
 //---------------------------------------------------------------------------
 // Common types - Endianess info
-enum class endianness
+enum class endianness : bool
 {
     LE, // Or Unsigned for 8-bit
     BE, // Or Signed for 8-bit

@@ -59,12 +59,7 @@ public:
     };
     static const size_t Flavor_Max = __LINE__ - __flavor_line - 4;
 
-    enum endianness : uint8_t
-    {
-        LE,
-        BE,
-    };
-    enum descriptor : uint8_t
+    enum class descriptor : uint8_t
     {
         None        =   0,
         R           =   1,
@@ -83,12 +78,12 @@ public:
         CbYCr       = 102,
         CbYCrA      = 103,
     };
-    enum encoding : uint16_t
+    enum class encoding : uint16_t
     {
         Raw,
         RLE,
     };
-    enum packing : uint8_t
+    enum class packing : uint8_t
     {
         Packed,
         MethodA,
