@@ -113,7 +113,7 @@ void raw_frame::Process()
 void raw_frame::MergeIn()
 {
     auto Buffer_Size = Buffer_.Size();
-    if (Buffer_Size || Buffer_Size != In_.Size())
+    if (!Buffer_Size || Buffer_Size != In_.Size())
         return;
 
     auto Buffer_Data = Buffer_.DataForModification();

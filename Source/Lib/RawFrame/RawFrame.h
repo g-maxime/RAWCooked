@@ -302,7 +302,7 @@ struct buffer_or_view : buffer_base
 #endif
     uint8_t* DataForModification()
     {
-        if (!IsOwned_)
+        if (!IsOwned_ && Size())
         {
             auto NewBuffer = new uint8_t[Size()];
             memcpy(NewBuffer, Data(), Size());
