@@ -1320,6 +1320,8 @@ void matroska::Segment_Cluster()
         {
             auto& ReversibilityData = TrackInfo_Current->ReversibilityData;
             auto& RawFrame = TrackInfo_Current->Frame.RawFrame;
+            if (RawFrame)
+                continue;
             RawFrame = new raw_frame;
             RawFrame->FrameProcess = &TrackInfo_Current->FrameWriter;
 
