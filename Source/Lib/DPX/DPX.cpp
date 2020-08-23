@@ -339,10 +339,12 @@ void dpx::ParseBuffer()
         slice_x <<= 1;
     if (Info.BitDepth > 10)
         slice_x = slice_x * 3 / 2; // 1.5x more slices if 16-bit
-    if (slice_x > Width)
-        slice_x = Width;
-    if (slice_x > Height)
-        slice_x = Height;
+    if (slice_x > Width / 2)
+        slice_x = Width / 2;
+    if (slice_x > Height / 2)
+        slice_x = Height / 2;
+    if (!slice_x)
+        slice_x = 1;
 
     // Computing which slice count is suitable
     size_t Slice_Multiplier = PixelsPerBlock((flavor)Flavor);

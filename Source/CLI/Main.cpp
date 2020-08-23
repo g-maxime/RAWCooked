@@ -374,7 +374,7 @@ int ParseFile(size_t Files_Pos)
         cout << "Error: " << *ParseInfo.Name << " is not small, expected to be an attachment?\nPlease contact info@mediaarea.net if you want support of such file." << endl;
         return 1;
     }
-    if (ParseInfo.FileMap.Empty()) // Ignoring file with size of 0
+    if (!ParseInfo.FileMap.Empty()) // Ignoring file with size of 0
     {
         attachment Attachment;
         Attachment.FileName_In = *ParseInfo.Name;
