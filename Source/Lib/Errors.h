@@ -43,14 +43,15 @@ enum parser
 
 namespace error
 {
-    enum type : uint8_t
+    static const size_t __type_line = __LINE__;
+    enum class type : uint8_t
     {
         Undecodable,
         Unsupported,
         Incoherent,
         Invalid,
-        Type_Max
     };
+    static const size_t Type_Max = __LINE__ - __type_line - 4;
 
     namespace common
     {

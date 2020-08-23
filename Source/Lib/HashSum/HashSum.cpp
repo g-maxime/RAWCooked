@@ -140,7 +140,7 @@ void hashes::FromFile(string const& FileName, md5 const& MD5)
         if (find(HashFiles.begin(), HashFiles.end(), FileName) == HashFiles.end())
         {
             if (Errors)
-                Errors->Error(IO_Hashes, CheckFromFiles ? error::Undecodable : error::Invalid, CheckFromFiles ? (error::generic::code)hashes_issue::undecodable::FileMissing : (error::generic::code)hashes_issue::invalid::FileHashMissing, FileName);
+                Errors->Error(IO_Hashes, CheckFromFiles ? error::type::Undecodable : error::type::Invalid, CheckFromFiles ? (error::generic::code)hashes_issue::undecodable::FileMissing : (error::generic::code)hashes_issue::invalid::FileHashMissing, FileName);
         }
     }
     else
@@ -151,7 +151,7 @@ void hashes::FromFile(string const& FileName, md5 const& MD5)
             if (File->MD5 != MD5)
             {
                 if (Errors)
-                    Errors->Error(IO_Hashes, CheckFromFiles ? error::Undecodable : error::Invalid, CheckFromFiles ? (error::generic::code)hashes_issue::undecodable::FileComparison : (error::generic::code)hashes_issue::invalid::FileHashComparison, FileName);
+                    Errors->Error(IO_Hashes, CheckFromFiles ? error::type::Undecodable : error::type::Invalid, CheckFromFiles ? (error::generic::code)hashes_issue::undecodable::FileComparison : (error::generic::code)hashes_issue::invalid::FileHashComparison, FileName);
             }
         }
     }
@@ -189,7 +189,7 @@ void hashes::Finish()
         if (!HashItem.Flags[hashes::value::Flag_IsFound])
         {
             if (Errors)
-                Errors->Error(IO_Hashes, CheckFromFiles ? error::Undecodable : error::Invalid, CheckFromFiles ? (error::generic::code)hashes_issue::undecodable::FileExtra : (error::generic::code)hashes_issue::invalid::FileHashExtra, HashItem.Name);
+                Errors->Error(IO_Hashes, CheckFromFiles ? error::type::Undecodable : error::type::Invalid, CheckFromFiles ? (error::generic::code)hashes_issue::undecodable::FileExtra : (error::generic::code)hashes_issue::invalid::FileHashExtra, HashItem.Name);
         }
     }
 }

@@ -146,20 +146,20 @@ void errors::Error(parser Parser, error::type Type, error::generic::code Code)
 {
     if (Parser >= Parsers.size())
         Parsers.resize(Parser + 1);
-    std::vector<per_parser::info> & Codes = Parsers[Parser].Codes[Type];
+    std::vector<per_parser::info> & Codes = Parsers[Parser].Codes[(size_t)Type];
     if (Code >= Codes.size())
         Codes.resize(Code + 1);
 
     Codes[Code].Count++;
     switch (Type)
     {
-        case error::Undecodable:
-        case error::Unsupported:
+        case error::type::Undecodable:
+        case error::type::Unsupported:
             if (!HasErrors_Value)
                 HasErrors_Value = true;
             break;
-        case error::Incoherent:
-        case error::Invalid:
+        case error::type::Incoherent:
+        case error::type::Invalid:
             if (!HasWarnings_Value)
                 HasWarnings_Value = true;
             break;
@@ -171,7 +171,7 @@ void errors::Error(parser Parser, error::type Type, error::generic::code Code, c
 {
     if (Parser >= Parsers.size())
         Parsers.resize(Parser + 1);
-    std::vector<per_parser::info> & Codes = Parsers[Parser].Codes[Type];
+    std::vector<per_parser::info> & Codes = Parsers[Parser].Codes[(size_t)Type];
     if (Code >= Codes.size())
         Codes.resize(Code + 1);
 
@@ -188,18 +188,18 @@ void errors::Error(parser Parser, error::type Type, error::generic::code Code, c
     if (!List.empty() && List.back() == String)
         return;
     List.push_back(String);
-    if ((Type == error::Undecodable || Type == error::Unsupported) && !HasErrors_Value)
+    if ((Type == error::type::Undecodable || Type == error::type::Unsupported) && !HasErrors_Value)
         HasErrors_Value = true;
 
     switch (Type)
     {
-        case error::Undecodable:
-        case error::Unsupported:
+        case error::type::Undecodable:
+        case error::type::Unsupported:
             if (!HasErrors_Value)
                 HasErrors_Value = true;
             break;
-        case error::Incoherent:
-        case error::Invalid:
+        case error::type::Incoherent:
+        case error::type::Invalid:
             if (!HasWarnings_Value)
                 HasWarnings_Value = true;
             break;

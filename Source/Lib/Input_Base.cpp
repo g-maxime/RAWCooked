@@ -240,8 +240,8 @@ void input_base::Error(error::type Type, error::generic::code Code)
     {
         switch (Type)
         {
-            case error::Undecodable:
-            case error::Unsupported:
+            case error::type::Undecodable:
+            case error::type::Unsupported:
                 SetErrors();
                 break;
             default:;

@@ -163,9 +163,9 @@ void frame_writer::FrameCall(raw_frame* RawFrame)
                     if (Errors)
                         switch (Result)
                         {
-                            case file::Error_CreateDirectory:       Errors->Error(IO_FileWriter, error::Undecodable, (error::generic::code)filewriter_issue::undecodable::CreateDirectory, OutputFileName); break;
-                            case file::Error_FileCreate:            Errors->Error(IO_FileWriter, error::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileCreate, OutputFileName); break;
-                            default:                                Errors->Error(IO_FileWriter, error::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileWrite, OutputFileName); break;
+                            case file::Error_CreateDirectory:       Errors->Error(IO_FileWriter, error::type::Undecodable, (error::generic::code)filewriter_issue::undecodable::CreateDirectory, OutputFileName); break;
+                            case file::Error_FileCreate:            Errors->Error(IO_FileWriter, error::type::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileCreate, OutputFileName); break;
+                            default:                                Errors->Error(IO_FileWriter, error::type::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileWrite, OutputFileName); break;
                         }
                     return;
             }
@@ -179,7 +179,7 @@ void frame_writer::FrameCall(raw_frame* RawFrame)
                 Offset = (size_t)-1;
                 SizeOnDisk = (size_t)-1;
                 if (Errors)
-                    Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Source_Missing, OutputFileName);
+                    Errors->Error(IO_FileChecker, error::type::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Source_Missing, OutputFileName);
                 return;
             }
             SizeOnDisk = File_Read.Size();
@@ -251,9 +251,9 @@ void frame_writer::FrameCall(raw_frame* RawFrame)
                     if (Errors)
                         switch (Result)
                         {
-                        case file::Error_CreateDirectory:       Errors->Error(IO_FileWriter, error::Undecodable, (error::generic::code)filewriter_issue::undecodable::CreateDirectory, OutputFileName); break;
-                        case file::Error_FileCreate:            Errors->Error(IO_FileWriter, error::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileCreate, OutputFileName); break;
-                        default:                                Errors->Error(IO_FileWriter, error::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileWrite, OutputFileName); break;
+                        case file::Error_CreateDirectory:       Errors->Error(IO_FileWriter, error::type::Undecodable, (error::generic::code)filewriter_issue::undecodable::CreateDirectory, OutputFileName); break;
+                        case file::Error_FileCreate:            Errors->Error(IO_FileWriter, error::type::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileCreate, OutputFileName); break;
+                        default:                                Errors->Error(IO_FileWriter, error::type::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileWrite, OutputFileName); break;
                         }
                     Offset = (size_t)-1;
                     return;
@@ -263,7 +263,7 @@ void frame_writer::FrameCall(raw_frame* RawFrame)
                     if (File_Write.Seek(Offset))
                     {
                         if (Errors)
-                            Errors->Error(IO_FileWriter, error::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileSeek, OutputFileName);
+                            Errors->Error(IO_FileWriter, error::type::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileSeek, OutputFileName);
                         Offset = (size_t)-1;
                         return;
                     }
@@ -276,7 +276,7 @@ void frame_writer::FrameCall(raw_frame* RawFrame)
         if (!HasNoError)
         {
             if (Errors)
-                Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::FileComparison, OutputFileName);
+                Errors->Error(IO_FileChecker, error::type::Undecodable, (error::generic::code)filechecker_issue::undecodable::FileComparison, OutputFileName);
             Offset = (size_t)-1;
             return;
         }
@@ -293,7 +293,7 @@ void frame_writer::FrameCall(raw_frame* RawFrame)
             if (WriteFile(RawFrame))
             {
                 if (Errors)
-                    Errors->Error(IO_FileWriter, error::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileWrite, OutputFileName);
+                    Errors->Error(IO_FileWriter, error::type::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileWrite, OutputFileName);
                 Offset = (size_t)-1;
                 return;
             }
@@ -307,7 +307,7 @@ void frame_writer::FrameCall(raw_frame* RawFrame)
                 if (File_Write.SetEndOfFile())
                 {
                     if (Errors)
-                        Errors->Error(IO_FileWriter, error::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileWrite, OutputFileName);
+                        Errors->Error(IO_FileWriter, error::type::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileWrite, OutputFileName);
                     Offset = (size_t)-1;
                     return;
                 }
@@ -317,7 +317,7 @@ void frame_writer::FrameCall(raw_frame* RawFrame)
             if (File_Write.Close())
             {
                 if (Errors)
-                    Errors->Error(IO_FileWriter, error::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileWrite, OutputFileName);
+                    Errors->Error(IO_FileWriter, error::type::Undecodable, (error::generic::code)filewriter_issue::undecodable::FileWrite, OutputFileName);
                 Offset = (size_t)-1;
                 return;
             }
@@ -833,22 +833,22 @@ void matroska::Shutdown()
                     OutputInfo += " after ";
                     OutputInfo += OutputFileName;
                 }
-                Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Extra, OutputInfo);
+                Errors->Error(IO_FileChecker, error::type::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Extra, OutputInfo);
             }
             if (TrackInfo_Current->ReversibilityData.Pos < TrackInfo_Current->ReversibilityData.Count)
             {
                 string OutputFileName = TrackInfo_Current->ReversibilityData.Data[(size_t)element::FileName].Content[TrackInfo_Current->ReversibilityData.Pos].ToString();
                 FormatPath(OutputFileName);
-                Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, OutputFileName);
+                Errors->Error(IO_FileChecker, error::type::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, OutputFileName);
                 if (TrackInfo_Current->ReversibilityData.Count - TrackInfo_Current->ReversibilityData.Pos > 1)
                 {
                     if (TrackInfo_Current->ReversibilityData.Count - TrackInfo_Current->ReversibilityData.Pos > 2)
                     {
-                        Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, "...");
+                        Errors->Error(IO_FileChecker, error::type::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, "...");
                     }
                     string OutputFileName2 = string((const char*)TrackInfo_Current->ReversibilityData.Data[(size_t)element::FileName].Content[TrackInfo_Current->ReversibilityData.Count - 1].Data(), TrackInfo_Current->ReversibilityData.Data[(size_t)element::FileName].Content[TrackInfo_Current->ReversibilityData.Count - 1].Size());
                     FormatPath(OutputFileName2);
-                    Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, OutputFileName2);
+                    Errors->Error(IO_FileChecker, error::type::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, OutputFileName2);
                 }
             }
         }
@@ -900,12 +900,12 @@ void matroska::Shutdown()
                 if (AttachedFile.second.Flags[IsInFromAttachments])
                 {
                     if (AttachedFile.second.Flags[ReversibilityFileHasSize] && AttachedFile.second.FileSizeFromReversibilityFile != AttachedFile.second.FileSizeFromAttachments)
-                        Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)(filechecker_issue::undecodable::FileComparison), AttachedFile.first);
+                        Errors->Error(IO_FileChecker, error::type::Undecodable, (error::generic::code)(filechecker_issue::undecodable::FileComparison), AttachedFile.first);
                 }
                 else
                 {
                     if (AttachedFile.second.Flags[ReversibilityFileHasSize] && AttachedFile.second.FileSizeFromReversibilityFile) // If no size info it is impossible to know if attachment should be present (size of 0) or not (size not of 0)
-                        Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)(filechecker_issue::undecodable::Attachment_Compressed_Missing), AttachedFile.first);
+                        Errors->Error(IO_FileChecker, error::type::Undecodable, (error::generic::code)(filechecker_issue::undecodable::Attachment_Compressed_Missing), AttachedFile.first);
                 }
             }
             else
@@ -913,13 +913,13 @@ void matroska::Shutdown()
                 if (AttachedFile.second.Flags[IsInFromAttachments])
                 {
                     if (ReversibilityFileHasNames)
-                        Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)(filechecker_issue::undecodable::Attachment_Compressed_Extra), AttachedFile.first);
+                        Errors->Error(IO_FileChecker, error::type::Undecodable, (error::generic::code)(filechecker_issue::undecodable::Attachment_Compressed_Extra), AttachedFile.first);
                 }
                 else
                 {
                     // Should never happen
-                    Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)(filechecker_issue::undecodable::Attachment_Compressed_Missing), AttachedFile.first);
-                    Errors->Error(IO_FileChecker, error::Undecodable, (error::generic::code)(filechecker_issue::undecodable::Attachment_Compressed_Extra), AttachedFile.first);
+                    Errors->Error(IO_FileChecker, error::type::Undecodable, (error::generic::code)(filechecker_issue::undecodable::Attachment_Compressed_Missing), AttachedFile.first);
+                    Errors->Error(IO_FileChecker, error::type::Undecodable, (error::generic::code)(filechecker_issue::undecodable::Attachment_Compressed_Extra), AttachedFile.first);
                 }
             }
         }

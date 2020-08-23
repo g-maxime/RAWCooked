@@ -522,8 +522,9 @@ const char* dpx::ColorSpace_String(dpx::flavor Flavor)
                                         return "RGB";
         case RGBA:
                                         return "RGBA";
+        default:
+                                        return "";
     }
-    return "RGB";
 }
 
 //---------------------------------------------------------------------------
@@ -577,8 +578,14 @@ dpx::packing dpx::Packing(dpx::flavor Flavor)
 {
     switch (Flavor)
     {
+        case flavor::Raw_RGB_8:
         case flavor::Raw_RGB_12_Packed_BE:
+        case flavor::Raw_RGB_16_BE:
+        case flavor::Raw_RGB_16_LE:
+        case flavor::Raw_RGBA_8:
         case flavor::Raw_RGBA_12_Packed_BE:
+        case flavor::Raw_RGBA_16_BE:
+        case flavor::Raw_RGBA_16_LE:
                                         return Packed;
         case flavor::Raw_RGB_10_FilledA_BE:
         case flavor::Raw_RGB_10_FilledA_LE:
@@ -602,6 +609,8 @@ const char* dpx::Packing_String(dpx::flavor Flavor)
                                         return "Packed";
         case MethodA:
                                         return "FilledA";
+        case MethodB:
+                                        return "FilledB";
     }
     return "Packed";
 }
@@ -611,9 +620,11 @@ dpx::endianness dpx::Endianness(dpx::flavor Flavor)
 {
     switch (Flavor)
     {
+        case flavor::Raw_RGB_8:
         case flavor::Raw_RGB_10_FilledA_LE:
         case flavor::Raw_RGB_12_FilledA_LE:
         case flavor::Raw_RGB_16_LE:
+        case flavor::Raw_RGBA_8:
         case flavor::Raw_RGBA_10_FilledA_LE:
         case flavor::Raw_RGBA_12_FilledA_LE:
         case flavor::Raw_RGBA_16_LE:

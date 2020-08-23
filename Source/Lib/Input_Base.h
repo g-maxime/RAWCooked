@@ -103,9 +103,9 @@ protected:
     uint64_t                    Get_EB();
 
     // Error message
-    void                        Undecodable(error::undecodable::code Code) { Error(error::Undecodable, (error::generic::code)Code); }
-    void                        Unsupported(error::unsupported::code Code) { if (!Actions[Action_Encode]) return;  Error(error::Unsupported, (error::generic::code)Code); }
-    void                        Invalid(error::invalid::code Code) { Error(error::Invalid, (error::generic::code)Code); }
+    void                        Undecodable(error::undecodable::code Code) { Error(error::type::Undecodable, (error::generic::code)Code); }
+    void                        Unsupported(error::unsupported::code Code) { if (!Actions[Action_Encode]) return;  Error(error::type::Unsupported, (error::generic::code)Code); }
+    void                        Invalid(error::invalid::code Code) { Error(error::type::Invalid, (error::generic::code)Code); }
 
     // Info
     void                        ClearInfo() { Info.reset(); }

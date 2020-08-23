@@ -83,7 +83,7 @@ bool intermediate_write::Delete()
     if (Result)
     {
         if (Errors)
-            Errors->Error(IO_IntermediateWriter, error::Undecodable, (error::generic::code)intermediatewrite_issue::undecodable::FileRemove, FileName);
+            Errors->Error(IO_IntermediateWriter, error::type::Undecodable, (error::generic::code)intermediatewrite_issue::undecodable::FileRemove, FileName);
         return true;
     }
 
@@ -110,10 +110,10 @@ void intermediate_write::WriteToDisk(const uint8_t* Buffer, size_t Buffer_Size)
                 if (Errors)
                     switch (Result)
                     {
-                        case file::Error_CreateDirectory:       Errors->Error(IO_IntermediateWriter, error::Undecodable, (error::generic::code)intermediatewrite_issue::undecodable::CreateDirectory, FileName); break;
-                        case file::Error_FileCreate:            Errors->Error(IO_IntermediateWriter, error::Undecodable, (error::generic::code)intermediatewrite_issue::undecodable::FileCreate, FileName); break;
-                        case file::Error_FileAlreadyExists:     Errors->Error(IO_IntermediateWriter, error::Undecodable, (error::generic::code)intermediatewrite_issue::undecodable::FileAlreadyExists, FileName); break;
-                        default:                                Errors->Error(IO_IntermediateWriter, error::Undecodable, (error::generic::code)intermediatewrite_issue::undecodable::FileWrite, FileName); break;
+                        case file::Error_CreateDirectory:       Errors->Error(IO_IntermediateWriter, error::type::Undecodable, (error::generic::code)intermediatewrite_issue::undecodable::CreateDirectory, FileName); break;
+                        case file::Error_FileCreate:            Errors->Error(IO_IntermediateWriter, error::type::Undecodable, (error::generic::code)intermediatewrite_issue::undecodable::FileCreate, FileName); break;
+                        case file::Error_FileAlreadyExists:     Errors->Error(IO_IntermediateWriter, error::type::Undecodable, (error::generic::code)intermediatewrite_issue::undecodable::FileAlreadyExists, FileName); break;
+                        default:                                Errors->Error(IO_IntermediateWriter, error::type::Undecodable, (error::generic::code)intermediatewrite_issue::undecodable::FileWrite, FileName); break;
                     }
                 return;
             }
