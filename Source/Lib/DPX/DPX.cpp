@@ -231,9 +231,11 @@ void dpx::ParseBuffer()
     switch (MagicNumber)
     {
         case 0x58504453: // XPDS
+            Info.Endianness = endianness::LE;
             IsBigEndian = false;
             break;
         case 0x53445058: // SDPX
+            Info.Endianness = endianness::BE;
             IsBigEndian = true;
             break;
         default:
