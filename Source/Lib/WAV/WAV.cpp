@@ -100,40 +100,40 @@ struct wav_tested
     uint32_t                    SamplesPerSec;
     uint8_t                     BitDepth;
     uint8_t                     Channels;
-    wav::endianness             Endianness;
+    endianness                  Endianness;
     wav::flavor                 Flavor;
 };
 
 const size_t WAV_Tested_Size = 27;
 struct wav_tested WAV_Tested[WAV_Tested_Size] =
 {
-    { 44100,  8, 1, wav::LE, wav::flavor::PCM_44100_8_1_U   },
-    { 44100,  8, 2, wav::LE, wav::flavor::PCM_44100_8_2_U   },
-    { 44100,  8, 6, wav::LE, wav::flavor::PCM_44100_8_6_U   },
-    { 44100, 16, 1, wav::LE, wav::flavor::PCM_44100_16_1_LE },
-    { 44100, 16, 2, wav::LE, wav::flavor::PCM_44100_16_2_LE },
-    { 44100, 16, 6, wav::LE, wav::flavor::PCM_44100_16_6_LE },
-    { 44100, 24, 1, wav::LE, wav::flavor::PCM_44100_24_1_LE },
-    { 44100, 24, 2, wav::LE, wav::flavor::PCM_44100_24_2_LE },
-    { 44100, 24, 6, wav::LE, wav::flavor::PCM_44100_24_6_LE },
-    { 48000,  8, 1, wav::LE, wav::flavor::PCM_48000_8_1_U   },
-    { 48000,  8, 2, wav::LE, wav::flavor::PCM_48000_8_2_U   },
-    { 48000,  8, 6, wav::LE, wav::flavor::PCM_48000_8_6_U   },
-    { 48000, 16, 1, wav::LE, wav::flavor::PCM_48000_16_1_LE },
-    { 48000, 16, 2, wav::LE, wav::flavor::PCM_48000_16_2_LE },
-    { 48000, 16, 6, wav::LE, wav::flavor::PCM_48000_16_6_LE },
-    { 48000, 24, 1, wav::LE, wav::flavor::PCM_48000_24_1_LE },
-    { 48000, 24, 2, wav::LE, wav::flavor::PCM_48000_24_2_LE },
-    { 48000, 24, 6, wav::LE, wav::flavor::PCM_48000_24_6_LE },
-    { 96000,  8, 1, wav::LE, wav::flavor::PCM_96000_8_1_U   },
-    { 96000,  8, 2, wav::LE, wav::flavor::PCM_96000_8_2_U   },
-    { 96000,  8, 6, wav::LE, wav::flavor::PCM_96000_8_6_U   },
-    { 96000, 16, 1, wav::LE, wav::flavor::PCM_96000_16_1_LE },
-    { 96000, 16, 2, wav::LE, wav::flavor::PCM_96000_16_2_LE },
-    { 96000, 16, 6, wav::LE, wav::flavor::PCM_96000_16_6_LE },
-    { 96000, 24, 1, wav::LE, wav::flavor::PCM_96000_24_1_LE },
-    { 96000, 24, 2, wav::LE, wav::flavor::PCM_96000_24_2_LE },
-    { 96000, 24, 6, wav::LE, wav::flavor::PCM_96000_24_6_LE },
+    { 44100,  8, 1, endianness::LE, wav::flavor::PCM_44100_8_1_U   },
+    { 44100,  8, 2, endianness::LE, wav::flavor::PCM_44100_8_2_U   },
+    { 44100,  8, 6, endianness::LE, wav::flavor::PCM_44100_8_6_U   },
+    { 44100, 16, 1, endianness::LE, wav::flavor::PCM_44100_16_1_LE },
+    { 44100, 16, 2, endianness::LE, wav::flavor::PCM_44100_16_2_LE },
+    { 44100, 16, 6, endianness::LE, wav::flavor::PCM_44100_16_6_LE },
+    { 44100, 24, 1, endianness::LE, wav::flavor::PCM_44100_24_1_LE },
+    { 44100, 24, 2, endianness::LE, wav::flavor::PCM_44100_24_2_LE },
+    { 44100, 24, 6, endianness::LE, wav::flavor::PCM_44100_24_6_LE },
+    { 48000,  8, 1, endianness::LE, wav::flavor::PCM_48000_8_1_U   },
+    { 48000,  8, 2, endianness::LE, wav::flavor::PCM_48000_8_2_U   },
+    { 48000,  8, 6, endianness::LE, wav::flavor::PCM_48000_8_6_U   },
+    { 48000, 16, 1, endianness::LE, wav::flavor::PCM_48000_16_1_LE },
+    { 48000, 16, 2, endianness::LE, wav::flavor::PCM_48000_16_2_LE },
+    { 48000, 16, 6, endianness::LE, wav::flavor::PCM_48000_16_6_LE },
+    { 48000, 24, 1, endianness::LE, wav::flavor::PCM_48000_24_1_LE },
+    { 48000, 24, 2, endianness::LE, wav::flavor::PCM_48000_24_2_LE },
+    { 48000, 24, 6, endianness::LE, wav::flavor::PCM_48000_24_6_LE },
+    { 96000,  8, 1, endianness::LE, wav::flavor::PCM_96000_8_1_U   },
+    { 96000,  8, 2, endianness::LE, wav::flavor::PCM_96000_8_2_U   },
+    { 96000,  8, 6, endianness::LE, wav::flavor::PCM_96000_8_6_U   },
+    { 96000, 16, 1, endianness::LE, wav::flavor::PCM_96000_16_1_LE },
+    { 96000, 16, 2, endianness::LE, wav::flavor::PCM_96000_16_2_LE },
+    { 96000, 16, 6, endianness::LE, wav::flavor::PCM_96000_16_6_LE },
+    { 96000, 24, 1, endianness::LE, wav::flavor::PCM_96000_24_1_LE },
+    { 96000, 24, 2, endianness::LE, wav::flavor::PCM_96000_24_2_LE },
+    { 96000, 24, 6, endianness::LE, wav::flavor::PCM_96000_24_6_LE },
 };
 
 //---------------------------------------------------------------------------
@@ -288,7 +288,7 @@ uint8_t wav::BitDepth()
 }
 
 //---------------------------------------------------------------------------
-wav::endianness wav::Endianness()
+endianness wav::Endianness()
 {
     return WAV_Tested[Flavor].Endianness;
 }
@@ -361,11 +361,11 @@ void wav::WAVE_fmt_()
     endianness Endianness;
     uint16_t FormatTag = Get_L2();
     if (FormatTag == 1 || FormatTag == 0xFFFE)
-        Endianness = LE;
+        Endianness = endianness::LE;
     else
     {
         Unsupported(unsupported::fmt__FormatTag);
-        Endianness = BE;
+        Endianness = endianness::BE;
     }
 
     uint16_t Channels = Get_L2();
@@ -623,20 +623,20 @@ const char* wav::Channels_String(wav::flavor Flavor)
 }
 
 //---------------------------------------------------------------------------
-wav::endianness wav::Endianness(wav::flavor /*Flavor*/)
+endianness wav::Endianness(wav::flavor /*Flavor*/)
 {
-    return LE; //For the moment all is LE or Unsigned
+    return endianness::LE; //For the moment all is LE or Unsigned
 }
 const char* wav::Endianess_String(wav::flavor Flavor)
 {
-    wav::endianness Value = wav::Endianness(Flavor);
+    endianness Value = wav::Endianness(Flavor);
     uint8_t BitDepth = wav::BitDepth(Flavor);
 
     switch (Value)
     {
-        case LE:
+        case endianness::LE:
                                         return BitDepth==8?"U":"LE";
-        case BE:
+        case endianness::BE:
                                         return BitDepth==8?"S":"BE";
         default:
                                         return "";

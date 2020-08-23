@@ -66,6 +66,7 @@ public:
     };
     enum descriptor : uint8_t
     {
+        None        =   0,
         R           =   1,
         G           =   2,
         B           =   3,
@@ -82,7 +83,7 @@ public:
         CbYCr       = 102,
         CbYCrA      = 103,
     };
-    enum encoding : uint8_t
+    enum encoding : uint16_t
     {
         Raw,
         RLE,

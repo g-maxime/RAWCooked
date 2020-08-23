@@ -61,11 +61,6 @@ public:
         PCM_96000_24_6_LE,
     };
     static const size_t Flavor_Max = __LINE__ - __flavor_line - 4;
-    enum endianness
-    {
-        LE, // Or Unsigned for 8-bit
-        BE, // Or Signed for 8-bit
-    };
 
     // Info about formats
     uint8_t BitDepth();

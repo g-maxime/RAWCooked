@@ -51,3 +51,11 @@ inline void FormatPath(string& s)
 #else
     static const char PathSeparator = '/';
 #endif
+
+//---------------------------------------------------------------------------
+// Common types - Endianess info
+enum class endianness
+{
+    LE, // Or Unsigned for 8-bit
+    BE, // Or Signed for 8-bit
+};

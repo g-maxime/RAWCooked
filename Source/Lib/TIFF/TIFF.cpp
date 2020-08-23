@@ -125,9 +125,9 @@ struct tiff_info
     uint8_t                     SamplesPerPixel;
     uint8_t                     BitsPerSample;
     tiff::sampleformat          SampleFormat;
-    tiff::endianness            Endianness;
+    endianness                  Endianness;
 
-    bool operator == (tiff_info const &Value) const
+    bool operator == (const tiff_info &Value) const
     {
         return Compression == Value.Compression
             && Descriptor == Value.Descriptor
@@ -145,11 +145,11 @@ struct tiff_tested
 
 struct tiff_tested TIFF_Tested[] =
 {
-    { { tiff::compression::Raw   , tiff::RGB     ,  3,  8, tiff::U   , tiff::LE}, tiff::flavor::Raw_RGB_8_U              },
-    { { tiff::compression::Raw   , tiff::RGB     ,  3, 16, tiff::U   , tiff::BE}, tiff::flavor::Raw_RGB_16_U_BE          },
-    { { tiff::compression::Raw   , tiff::RGB     ,  3, 16, tiff::U   , tiff::LE}, tiff::flavor::Raw_RGB_16_U_LE          },
-    { { tiff::compression::Raw   , tiff::RGB     ,  4,  8, tiff::U   , tiff::LE}, tiff::flavor::Raw_RGBA_8_U             },
-    { { tiff::compression::Raw   , tiff::RGB     ,  4, 16, tiff::U   , tiff::LE}, tiff::flavor::Raw_RGBA_16_U_LE         },
+    { { tiff::compression::Raw   , tiff::RGB     ,  3,  8, tiff::U   , endianness::LE}, tiff::flavor::Raw_RGB_8_U              },
+    { { tiff::compression::Raw   , tiff::RGB     ,  3, 16, tiff::U   , endianness::BE}, tiff::flavor::Raw_RGB_16_U_BE          },
+    { { tiff::compression::Raw   , tiff::RGB     ,  3, 16, tiff::U   , endianness::LE}, tiff::flavor::Raw_RGB_16_U_LE          },
+    { { tiff::compression::Raw   , tiff::RGB     ,  4,  8, tiff::U   , endianness::LE}, tiff::flavor::Raw_RGBA_8_U             },
+    { { tiff::compression::Raw   , tiff::RGB     ,  4, 16, tiff::U   , endianness::LE}, tiff::flavor::Raw_RGBA_16_U_LE         },
 };
 const size_t TIFF_Tested_Size = sizeof(TIFF_Tested) / sizeof(tiff_tested);
 
@@ -365,15 +365,19 @@ void tiff::ParseBuffer()
     if (Buffer.Size() < 8)
         return;
 
+    tiff_info Info = { tiff::Compression_Max, tiff::Descriptor_Max, 1, 1, tiff::U, endianness::LE };
+
     Buffer_Offset = 0;
     uint32_t Magic = Get_B4();
     switch (Magic)
     {
         case 0x49492A00: // "II" + 42 in 16-bit hex
             IsBigEndian = false;
+            Info.Endianness = endianness::LE;
             break;
         case 0x4D4D002A: // "MM" + 42 in 16-bit hex
             IsBigEndian = true;
+            Info.Endianness = endianness::BE;
             break;
         default:
             return;
@@ -398,13 +402,6 @@ void tiff::ParseBuffer()
     uint32_t ExtraSamples = (uint32_t)-1;
     vector<uint32_t> StripOffsets;
     vector<uint32_t> StripBytesCounts;
-    tiff_info Info;
-    Info.Compression = Compression_Max;
-    Info.Descriptor = Descriptor_Max;
-    Info.SamplesPerPixel = 1;
-    Info.BitsPerSample = 1;
-    Info.SampleFormat = U;
-    Info.Endianness = IsBigEndian?BE:LE;
 
     #define CASE_2(_ELEMENT, _VALUE) \
         case _ELEMENT: _VALUE = Get_Element(); break;
@@ -793,7 +790,7 @@ const char* tiff::SampleFormat_String(tiff::flavor Flavor)
 }
 
 //---------------------------------------------------------------------------
-tiff::endianness tiff::Endianness(tiff::flavor Flavor)
+endianness tiff::Endianness(tiff::flavor Flavor)
 {
     switch (Flavor)
     {
@@ -801,22 +798,22 @@ tiff::endianness tiff::Endianness(tiff::flavor Flavor)
         case flavor::Raw_RGB_16_U_LE:
         case flavor::Raw_RGBA_8_U:
         case flavor::Raw_RGBA_16_U_LE:
-                                        return LE;
+                                        return endianness::LE;
         case flavor::Raw_RGB_16_U_BE:
-                                        return BE;
+                                        return endianness::BE;
     }
 
-    return LE;
+    return endianness::LE;
 }
 const char* tiff::Endianess_String(tiff::flavor Flavor)
 {
-    tiff::endianness Value = Endianness(Flavor);
+    endianness Value = Endianness(Flavor);
 
     switch (Value)
     {
-        case LE:
+        case endianness::LE:
                                         return "LE";
-        case BE:
+        case endianness::BE:
                                         return "BE";
     }
 

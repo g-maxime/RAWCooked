@@ -122,44 +122,57 @@ using namespace dpx_issue;
 
 //---------------------------------------------------------------------------
 // Tested cases
-struct dpx_tested
+struct dpx_info
 {
     dpx::encoding               Encoding;
     dpx::descriptor             Descriptor;
     uint8_t                     BitDepth;
     dpx::packing                Packing;
-    dpx::endianness             Endianness;
+    endianness                  Endianness;
+
+    bool operator == (const dpx_info &Value) const
+    {
+        return Encoding == Value.Encoding
+            && Descriptor == Value.Descriptor
+            && BitDepth == Value.BitDepth
+            && Packing == Value.Packing
+            && Endianness == Value.Endianness;
+    }
+};
+struct dpx_tested
+{
+    dpx_info                    Info;
     dpx::flavor                 Flavor;
 };
 
 struct dpx_tested DPX_Tested[] =
 {
-    { dpx::encoding::Raw  , dpx::RGB      ,  8, dpx::Packed , dpx::BE, dpx::flavor::Raw_RGB_8                 },
-    { dpx::encoding::Raw  , dpx::RGB      ,  8, dpx::Packed , dpx::LE, dpx::flavor::Raw_RGB_8                 },
-    { dpx::encoding::Raw  , dpx::RGB      ,  8, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGB_8                 },
-    { dpx::encoding::Raw  , dpx::RGB      ,  8, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGB_8                 },
-    { dpx::encoding::Raw  , dpx::RGB      , 10, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGB_10_FilledA_LE     },
-    { dpx::encoding::Raw  , dpx::RGB      , 10, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGB_10_FilledA_BE     },
-    { dpx::encoding::Raw  , dpx::RGB      , 12, dpx::Packed , dpx::BE, dpx::flavor::Raw_RGB_12_Packed_BE      },
-    { dpx::encoding::Raw  , dpx::RGB      , 12, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGB_12_FilledA_BE     },
-    { dpx::encoding::Raw  , dpx::RGB      , 12, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGB_12_FilledA_LE     },
-    { dpx::encoding::Raw  , dpx::RGB      , 16, dpx::Packed , dpx::BE, dpx::flavor::Raw_RGB_16_BE             },
-    { dpx::encoding::Raw  , dpx::RGB      , 16, dpx::Packed , dpx::LE, dpx::flavor::Raw_RGB_16_LE             },
-    { dpx::encoding::Raw  , dpx::RGB      , 16, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGB_16_BE             },
-    { dpx::encoding::Raw  , dpx::RGB      , 16, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGB_16_LE             },
-    { dpx::encoding::Raw  , dpx::RGBA     ,  8, dpx::Packed , dpx::BE, dpx::flavor::Raw_RGBA_8                },
-    { dpx::encoding::Raw  , dpx::RGBA     ,  8, dpx::Packed , dpx::LE, dpx::flavor::Raw_RGBA_8                },
-    { dpx::encoding::Raw  , dpx::RGBA     ,  8, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGBA_8                },
-    { dpx::encoding::Raw  , dpx::RGBA     ,  8, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGBA_8                },
-    { dpx::encoding::Raw  , dpx::RGBA     , 10, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGBA_10_FilledA_LE    },
-    { dpx::encoding::Raw  , dpx::RGBA     , 10, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGBA_10_FilledA_BE    },
-    { dpx::encoding::Raw  , dpx::RGBA     , 12, dpx::Packed , dpx::BE, dpx::flavor::Raw_RGBA_12_Packed_BE     },
-    { dpx::encoding::Raw  , dpx::RGBA     , 12, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGBA_12_FilledA_BE    },
-    { dpx::encoding::Raw  , dpx::RGBA     , 12, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGBA_12_FilledA_LE    },
-    { dpx::encoding::Raw  , dpx::RGBA     , 16, dpx::Packed , dpx::BE, dpx::flavor::Raw_RGBA_16_BE            },
-    { dpx::encoding::Raw  , dpx::RGBA     , 16, dpx::Packed , dpx::LE, dpx::flavor::Raw_RGBA_16_LE            },
-    { dpx::encoding::Raw  , dpx::RGBA     , 16, dpx::MethodA, dpx::BE, dpx::flavor::Raw_RGBA_16_BE            },
-    { dpx::encoding::Raw  , dpx::RGBA     , 16, dpx::MethodA, dpx::LE, dpx::flavor::Raw_RGBA_16_LE            },
+    { { dpx::encoding::Raw  , dpx::RGB      ,  8, dpx::Packed , endianness::BE}, dpx::flavor::Raw_RGB_8                 },
+    { { dpx::encoding::Raw  , dpx::RGB      ,  8, dpx::Packed , endianness::LE}, dpx::flavor::Raw_RGB_8                 },
+    { { dpx::encoding::Raw  , dpx::RGB      ,  8, dpx::MethodA, endianness::BE}, dpx::flavor::Raw_RGB_8                 },
+    { { dpx::encoding::Raw  , dpx::RGB      ,  8, dpx::MethodA, endianness::LE}, dpx::flavor::Raw_RGB_8                 },
+    { { dpx::encoding::Raw  , dpx::RGB      , 10, dpx::MethodA, endianness::LE}, dpx::flavor::Raw_RGB_10_FilledA_LE     },
+    { { dpx::encoding::Raw  , dpx::RGB      , 10, dpx::MethodA, endianness::BE}, dpx::flavor::Raw_RGB_10_FilledA_BE     },
+    { { dpx::encoding::Raw  , dpx::RGB      , 12, dpx::Packed , endianness::BE}, dpx::flavor::Raw_RGB_12_Packed_BE      },
+    { { dpx::encoding::Raw  , dpx::RGB      , 12, dpx::MethodA, endianness::BE}, dpx::flavor::Raw_RGB_12_FilledA_BE     },
+    { { dpx::encoding::Raw  , dpx::RGB      , 12, dpx::MethodA, endianness::LE}, dpx::flavor::Raw_RGB_12_FilledA_LE     },
+    { { dpx::encoding::Raw  , dpx::RGB      , 16, dpx::Packed , endianness::BE}, dpx::flavor::Raw_RGB_16_BE             },
+    { { dpx::encoding::Raw  , dpx::RGB      , 16, dpx::Packed , endianness::LE}, dpx::flavor::Raw_RGB_16_LE             },
+    { { dpx::encoding::Raw  , dpx::RGB      , 16, dpx::MethodA, endianness::BE}, dpx::flavor::Raw_RGB_16_BE             },
+    { { dpx::encoding::Raw  , dpx::RGB      , 16, dpx::MethodA, endianness::LE}, dpx::flavor::Raw_RGB_16_LE             },
+    { { dpx::encoding::Raw  , dpx::RGBA     ,  8, dpx::Packed , endianness::BE}, dpx::flavor::Raw_RGBA_8                },
+    { { dpx::encoding::Raw  , dpx::RGBA     ,  8, dpx::Packed , endianness::LE}, dpx::flavor::Raw_RGBA_8                },
+    { { dpx::encoding::Raw  , dpx::RGBA     ,  8, dpx::MethodA, endianness::BE}, dpx::flavor::Raw_RGBA_8                },
+    { { dpx::encoding::Raw  , dpx::RGBA     ,  8, dpx::MethodA, endianness::LE}, dpx::flavor::Raw_RGBA_8                },
+    { { dpx::encoding::Raw  , dpx::RGBA     , 10, dpx::MethodA, endianness::LE}, dpx::flavor::Raw_RGBA_10_FilledA_LE    },
+    { { dpx::encoding::Raw  , dpx::RGBA     , 10, dpx::MethodA, endianness::BE}, dpx::flavor::Raw_RGBA_10_FilledA_BE    },
+    { { dpx::encoding::Raw  , dpx::RGBA     , 12, dpx::Packed , endianness::BE}, dpx::flavor::Raw_RGBA_12_Packed_BE     },
+    { { dpx::encoding::Raw  , dpx::RGBA     , 12, dpx::MethodA, endianness::BE}, dpx::flavor::Raw_RGBA_12_FilledA_BE    },
+    { { dpx::encoding::Raw  , dpx::RGBA     , 12, dpx::MethodA, endianness::LE}, dpx::flavor::Raw_RGBA_12_FilledA_LE    },
+    { { dpx::encoding::Raw  , dpx::RGBA     , 16, dpx::Packed , endianness::BE}, dpx::flavor::Raw_RGBA_16_BE            },
+    { { dpx::encoding::Raw  , dpx::RGBA     , 16, dpx::Packed , endianness::LE}, dpx::flavor::Raw_RGBA_16_LE            },
+    { { dpx::encoding::Raw  , dpx::RGBA     , 16, dpx::MethodA, endianness::BE}, dpx::flavor::Raw_RGBA_16_BE            },
+    { { dpx::encoding::Raw  , dpx::RGBA     , 16, dpx::MethodA, endianness::LE}, dpx::flavor::Raw_RGBA_16_LE            },
 };
 const size_t DPX_Tested_Size = sizeof(DPX_Tested) / sizeof(dpx_tested);
 
@@ -210,6 +223,9 @@ void dpx::ParseBuffer()
     // Test that it is a DPX
     if (Buffer.Size() < 4)
         return;
+
+    dpx_info Info;
+
     Buffer_Offset = 0;
     uint32_t MagicNumber = Get_B4();
     switch (MagicNumber)
@@ -252,11 +268,11 @@ void dpx::ParseBuffer()
     if (Get_X4() != 0)
         Unsupported(unsupported::DataSign);
     Buffer_Offset = 800;
-    uint8_t Descriptor = Get_X1();
+    Info.Descriptor = (descriptor)Get_X1();
     Buffer_Offset = 803;
-    uint8_t BitDepth = Get_X1();
-    uint16_t Packing = Get_X2();
-    uint16_t Encoding = Get_X2();
+    Info.BitDepth = Get_X1();
+    Info.Packing = (packing)Get_X2();
+    Info.Encoding = (encoding)Get_X2();
     uint32_t OffsetToData = Get_X4();
     if (OffsetToData)
     {
@@ -290,23 +306,19 @@ void dpx::ParseBuffer()
     }
 
     // Supported?
-    size_t Tested = 0;
-    for (; Tested < DPX_Tested_Size; Tested++)
+    for (auto& DPX_Tested_Item : DPX_Tested)
     {
-        dpx_tested& DPX_Tested_Item = DPX_Tested[Tested];
-        if (DPX_Tested_Item.Descriptor == Descriptor
-            && DPX_Tested_Item.Encoding == Encoding
-            && DPX_Tested_Item.BitDepth == BitDepth
-            && DPX_Tested_Item.Packing == Packing
-            && DPX_Tested_Item.Endianness == (IsBigEndian ? BE : LE))
+        if (DPX_Tested_Item.Info == Info)
+        {
+            Flavor = (decltype(Flavor))DPX_Tested_Item.Flavor;
             break;
+        }
     }
-    if (Tested >= DPX_Tested_Size)
+    if (Flavor == (decltype(Flavor))-1)
     {
         Unsupported(unsupported::Flavor);
         return;
     }
-    Flavor = (decltype(Flavor))DPX_Tested[Tested].Flavor;
 
     // Slices count
     // Computing optimal count of slices. TODO: agree with everyone about the goal and/or permit multiple formulas
@@ -323,7 +335,7 @@ void dpx::ParseBuffer()
         slice_x <<= 1;
     if (Width >= 2880) // more than 3/2 of 1920, oversampled HD is not included
         slice_x <<= 1;
-    if (BitDepth > 10)
+    if (Info.BitDepth > 10)
         slice_x = slice_x * 3 / 2; // 1.5x more slices if 16-bit
 
     // Computing which slice count is suitable
@@ -369,9 +381,9 @@ void dpx::ParseBuffer()
     size_t In_Size = 0;
     if (IsSupported() && !Actions[Action_AcceptTruncated] && Actions[Action_CheckPadding])
     {
-        if (Encoding == Raw && (BitDepth == 10 || BitDepth == 12) && Packing == MethodA)
+        if (Info.Encoding == Raw && (Info.BitDepth == 10 || Info.BitDepth == 12) && Info.Packing == MethodA)
         {
-            size_t Step = BitDepth == 10 ? 4 : 2;
+            size_t Step = Info.BitDepth == 10 ? 4 : 2;
             bool IsNOK = false;
             for (size_t i = OffsetToData + (IsBigEndian ? (Step - 1) : 0); i < OffsetAfterData; i += Step)
                 if (Buffer[i] & 0x3)

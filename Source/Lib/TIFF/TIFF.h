@@ -48,11 +48,6 @@ public:
     };
     static const size_t Flavor_Max = __LINE__ - __flavor_line - 4;
 
-    enum endianness : uint8_t
-    {
-        LE,
-        BE,
-    };
     enum descriptor : uint32_t
     {
         Y_Invereted =   0,

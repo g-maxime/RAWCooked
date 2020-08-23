@@ -82,57 +82,57 @@ struct aiff_tested
     long double                 sampleRate;
     uint16_t                    sampleSize;
     uint16_t                    numChannels;
-    aiff::endianness            Endianness;
+    endianness                  Endianness;
 };
 
 const size_t AIFF_Tested_Size = 45;
 struct aiff_tested AIFF_Tested[AIFF_Tested_Size] =
 {
-    { 44100,  8, 1, aiff::BE },
-    { 44100,  8, 1, aiff::LE },
-    { 44100,  8, 2, aiff::BE },
-    { 44100,  8, 2, aiff::LE },
-    { 44100,  8, 6, aiff::BE },
-    { 44100,  8, 6, aiff::LE },
-    { 44100, 16, 1, aiff::BE },
-    { 44100, 16, 1, aiff::LE },
-    { 44100, 16, 2, aiff::BE },
-    { 44100, 16, 2, aiff::LE },
-    { 44100, 16, 6, aiff::BE },
-    { 44100, 16, 6, aiff::LE },
-    { 44100, 24, 1, aiff::BE },
-    { 44100, 24, 2, aiff::BE },
-    { 44100, 24, 6, aiff::BE },
-    { 48000,  8, 1, aiff::BE },
-    { 48000,  8, 1, aiff::LE },
-    { 48000,  8, 2, aiff::BE },
-    { 48000,  8, 2, aiff::LE },
-    { 48000,  8, 6, aiff::BE },
-    { 48000,  8, 6, aiff::LE },
-    { 48000, 16, 1, aiff::BE },
-    { 48000, 16, 1, aiff::LE },
-    { 48000, 16, 2, aiff::BE },
-    { 48000, 16, 2, aiff::LE },
-    { 48000, 16, 6, aiff::BE },
-    { 48000, 16, 6, aiff::LE },
-    { 48000, 24, 1, aiff::BE },
-    { 48000, 24, 2, aiff::BE },
-    { 48000, 24, 6, aiff::BE },
-    { 96000,  8, 1, aiff::BE },
-    { 96000,  8, 1, aiff::LE },
-    { 96000,  8, 2, aiff::BE },
-    { 96000,  8, 2, aiff::LE },
-    { 96000,  8, 6, aiff::BE },
-    { 96000,  8, 6, aiff::LE },
-    { 96000, 16, 1, aiff::BE },
-    { 96000, 16, 1, aiff::LE },
-    { 96000, 16, 2, aiff::BE },
-    { 96000, 16, 2, aiff::LE },
-    { 96000, 16, 6, aiff::BE },
-    { 96000, 16, 6, aiff::LE },
-    { 96000, 24, 1, aiff::BE },
-    { 96000, 24, 2, aiff::BE },
-    { 96000, 24, 6, aiff::BE },
+    { 44100,  8, 1, endianness::BE },
+    { 44100,  8, 1, endianness::LE },
+    { 44100,  8, 2, endianness::BE },
+    { 44100,  8, 2, endianness::LE },
+    { 44100,  8, 6, endianness::BE },
+    { 44100,  8, 6, endianness::LE },
+    { 44100, 16, 1, endianness::BE },
+    { 44100, 16, 1, endianness::LE },
+    { 44100, 16, 2, endianness::BE },
+    { 44100, 16, 2, endianness::LE },
+    { 44100, 16, 6, endianness::BE },
+    { 44100, 16, 6, endianness::LE },
+    { 44100, 24, 1, endianness::BE },
+    { 44100, 24, 2, endianness::BE },
+    { 44100, 24, 6, endianness::BE },
+    { 48000,  8, 1, endianness::BE },
+    { 48000,  8, 1, endianness::LE },
+    { 48000,  8, 2, endianness::BE },
+    { 48000,  8, 2, endianness::LE },
+    { 48000,  8, 6, endianness::BE },
+    { 48000,  8, 6, endianness::LE },
+    { 48000, 16, 1, endianness::BE },
+    { 48000, 16, 1, endianness::LE },
+    { 48000, 16, 2, endianness::BE },
+    { 48000, 16, 2, endianness::LE },
+    { 48000, 16, 6, endianness::BE },
+    { 48000, 16, 6, endianness::LE },
+    { 48000, 24, 1, endianness::BE },
+    { 48000, 24, 2, endianness::BE },
+    { 48000, 24, 6, endianness::BE },
+    { 96000,  8, 1, endianness::BE },
+    { 96000,  8, 1, endianness::LE },
+    { 96000,  8, 2, endianness::BE },
+    { 96000,  8, 2, endianness::LE },
+    { 96000,  8, 6, endianness::BE },
+    { 96000,  8, 6, endianness::LE },
+    { 96000, 16, 1, endianness::BE },
+    { 96000, 16, 1, endianness::LE },
+    { 96000, 16, 2, endianness::BE },
+    { 96000, 16, 2, endianness::LE },
+    { 96000, 16, 6, endianness::BE },
+    { 96000, 16, 6, endianness::LE },
+    { 96000, 24, 1, endianness::BE },
+    { 96000, 24, 2, endianness::BE },
+    { 96000, 24, 6, endianness::BE },
 };
 
 //---------------------------------------------------------------------------
@@ -288,7 +288,7 @@ uint16_t aiff::sampleSize()
 }
 
 //---------------------------------------------------------------------------
-aiff::endianness aiff::Endianness()
+endianness aiff::Endianness()
 {
     return AIFF_Tested[Flavor].Endianness;
 }
@@ -323,7 +323,7 @@ void aiff::AIFF_COMM()
     Get_B4(); // numSamplesFrames
     uint16_t sampleSize = Get_B2();
     long double sampleRate = Get_BF10();
-    endianness Endianness = BE;
+    endianness Endianness = endianness::BE;
     bool compressionType_NotPcm = false; // PCM by default
 
     if (Levels[Level].Offset_End - Buffer_Offset)
@@ -336,7 +336,7 @@ void aiff::AIFF_COMM()
                                 break;
             case 0x72617720 : // raw
             case 0x736F7774 : // sowt
-                                Endianness = LE;
+                                Endianness = endianness::LE;
                                 break;
             default: 
                                 Unsupported(unsupported::COMM_compressionType_NotPcm);
@@ -623,10 +623,29 @@ const char* aiff::numChannels_String(aiff::flavor Flavor)
 }
 
 //---------------------------------------------------------------------------
-aiff::endianness aiff::Endianness(aiff::flavor Flavor)
+endianness aiff::Endianness(aiff::flavor Flavor)
 {
     switch (Flavor)
     {
+        case flavor::PCM_44100_8_1_U:
+        case flavor::PCM_44100_8_2_U:
+        case flavor::PCM_44100_8_6_U:
+        case flavor::PCM_48000_8_1_U:
+        case flavor::PCM_48000_8_2_U:
+        case flavor::PCM_48000_8_6_U:
+        case flavor::PCM_96000_8_1_U:
+        case flavor::PCM_96000_8_2_U:
+        case flavor::PCM_96000_8_6_U:
+        case flavor::PCM_44100_16_1_LE:
+        case flavor::PCM_44100_16_2_LE:
+        case flavor::PCM_44100_16_6_LE:
+        case flavor::PCM_48000_16_1_LE:
+        case flavor::PCM_48000_16_2_LE:
+        case flavor::PCM_48000_16_6_LE:
+        case flavor::PCM_96000_16_1_LE:
+        case flavor::PCM_96000_16_2_LE:
+        case flavor::PCM_96000_16_6_LE:
+                                        return endianness::LE; // Or Unsigned
         case flavor::PCM_44100_8_1_S:
         case flavor::PCM_44100_8_2_S:
         case flavor::PCM_44100_8_6_S:
@@ -654,40 +673,21 @@ aiff::endianness aiff::Endianness(aiff::flavor Flavor)
         case flavor::PCM_96000_24_1_BE:
         case flavor::PCM_96000_24_2_BE:
         case flavor::PCM_96000_24_6_BE:
-                                        return BE; // Or Signed
-        case flavor::PCM_44100_8_1_U:
-        case flavor::PCM_44100_8_2_U:
-        case flavor::PCM_44100_8_6_U:
-        case flavor::PCM_48000_8_1_U:
-        case flavor::PCM_48000_8_2_U:
-        case flavor::PCM_48000_8_6_U:
-        case flavor::PCM_96000_8_1_U:
-        case flavor::PCM_96000_8_2_U:
-        case flavor::PCM_96000_8_6_U:
-        case flavor::PCM_44100_16_1_LE:
-        case flavor::PCM_44100_16_2_LE:
-        case flavor::PCM_44100_16_6_LE:
-        case flavor::PCM_48000_16_1_LE:
-        case flavor::PCM_48000_16_2_LE:
-        case flavor::PCM_48000_16_6_LE:
-        case flavor::PCM_96000_16_1_LE:
-        case flavor::PCM_96000_16_2_LE:
-        case flavor::PCM_96000_16_6_LE:
-                                        return LE; // Or Unsigned
+                                        return endianness::BE; // Or Signed
     }
 
-    return LE;
+    return endianness::LE;
 }
 const char* aiff::Endianess_String(aiff::flavor Flavor)
 {
-    aiff::endianness Value = aiff::Endianness(Flavor);
+    endianness Value = aiff::Endianness(Flavor);
     uint16_t sampleSize = aiff::sampleSize(Flavor);
 
     switch (Value)
     {
-        case LE:
+        case endianness::LE:
                                         return sampleSize==8?"U":"LE";
-        case BE:
+        case endianness::BE:
                                         return sampleSize==8?"S":"BE";
         default:
                                         return "";

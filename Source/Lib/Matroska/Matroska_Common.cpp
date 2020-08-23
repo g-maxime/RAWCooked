@@ -452,7 +452,7 @@ public:
     uint8_t channels;
     uint8_t bits_per_sample;
     uint8_t bits_per_sample_Input;
-    uint8_t Endianness;
+    endianness Endianness;
 };
 void matroska::FLAC_Read(uint8_t buffer[], size_t *bytes)
 {
@@ -496,14 +496,14 @@ void matroska::FLAC_Write(const uint32_t* const buffer[], size_t blocksize)
                     case 8:
                         switch (TrackInfo_Current->FlacInfo->Endianness)
                         {
-                            case 0:
+                            case endianness::BE:
                                 for (size_t i = 0; i < blocksize; i++)
                                     for (size_t j = 0; j < channels; j++)
                                     {
                                         *(Data++) = (uint8_t)(buffer[j][i]);
                                     }
                                 break;
-                            case 1:
+                            case endianness::LE:
                                 for (size_t i = 0; i < blocksize; i++)
                                     for (size_t j = 0; j < channels; j++)
                                     {
@@ -515,14 +515,14 @@ void matroska::FLAC_Write(const uint32_t* const buffer[], size_t blocksize)
                     case 16:
                         switch (TrackInfo_Current->FlacInfo->Endianness)
                         {
-                            case 0:
+                            case endianness::BE:
                                 for (size_t i = 0; i < blocksize; i++)
                                     for (size_t j = 0; j < channels; j++)
                                     {
                                         *(Data++) = (uint8_t)(buffer[j][i] >> 8);
                                     }
                                 break;
-                            case 1:
+                            case endianness::LE:
                                 for (size_t i = 0; i < blocksize; i++)
                                     for (size_t j = 0; j < channels; j++)
                                     {
@@ -536,7 +536,7 @@ void matroska::FLAC_Write(const uint32_t* const buffer[], size_t blocksize)
         case 16:
             switch (TrackInfo_Current->FlacInfo->Endianness)
             {
-                case 0:
+                case endianness::BE:
                         for (size_t i = 0; i < blocksize; i++)
                             for (size_t j = 0; j < channels; j++)
                             {
@@ -544,7 +544,7 @@ void matroska::FLAC_Write(const uint32_t* const buffer[], size_t blocksize)
                                 *(Data++) = (uint8_t)(buffer[j][i]);
                             }
                         break;
-                case 1:
+                case endianness::LE:
                         for (size_t i = 0; i < blocksize; i++)
                             for (size_t j = 0; j < channels; j++)
                             {
@@ -557,7 +557,7 @@ void matroska::FLAC_Write(const uint32_t* const buffer[], size_t blocksize)
         case 24:
             switch (TrackInfo_Current->FlacInfo->Endianness)
             {
-                case 0:
+                case endianness::BE:
                         for (size_t i = 0; i < blocksize; i++)
                             for (size_t j = 0; j < channels; j++)
                             {
@@ -566,7 +566,7 @@ void matroska::FLAC_Write(const uint32_t* const buffer[], size_t blocksize)
                                 *(Data++) = (uint8_t)(buffer[j][i]);
                             }
                         break;
-                case 1:
+                case endianness::LE:
                         for (size_t i = 0; i < blocksize; i++)
                             for (size_t j = 0; j < channels; j++)
                             {
