@@ -225,10 +225,7 @@ void frame_writer::FrameCall(raw_frame* RawFrame)
         if (!CheckFile(RawFrame))
         {
             if (Mode[IsNotEnd] || Offset == File_Read.Size())
-            {
-                File_Read.Close();
                 return; // All is OK
-            }
             DataIsCheckedAndOk = true;
         }
         else
