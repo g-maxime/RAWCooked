@@ -49,14 +49,14 @@ int filemap::Open_ReadMode(const char* FileName)
                 auto NewMapping = CreateFileMapping(NewFile, 0, PAGE_READONLY, 0, 0, 0);
                 if (NewMapping)
                 {
-                    Private = (intptr_t)NewFile;
-                    Private2 = (intptr_t)NewMapping;
+                    Private = NewFile;
+                    Private2 = NewMapping;
                 }
                 else
                     CloseHandle(NewFile);
             }
             else
-                Private = (intptr_t)NewFile; // CreateFileMapping does not support 0-byte files, so we will map manually to nullptr
+                Private = NewFile; // CreateFileMapping does not support 0-byte files, so we will map manually to nullptr
         }
         else
         {
@@ -71,15 +71,14 @@ int filemap::Open_ReadMode(const char* FileName)
         if (!stat(FileName, &Fstat))
         {
             NewSize = Fstat.st_size;
-            Private = (intptr_t)fd;
+            Private = fd;
         }
         else
             close(fd);
     }
-
 #endif
 
-    if (!Private)
+    if (Private == (decltype(Private))-1)
         return 1;
     AssignKeepDataBase(NewSize); // Intermediate, Remap() will set the data pointer
     return Remap();
@@ -119,12 +118,10 @@ int filemap::Remap()
 
     // New map
 #if defined(_WIN32) || defined(_WINDOWS)
-    auto Mapping = (HANDLE&)Private2;
-    auto NewData = MapViewOfFile(Mapping, FILE_MAP_READ, 0, 0, 0);
-    const decltype(NewData) NewData_Fail = 0;
+    auto NewData = MapViewOfFile(Private2, FILE_MAP_READ, 0, 0, 0);
+    const decltype(NewData) NewData_Fail = NULL;
 #else
-    auto fd = (int&)Private;
-    auto NewData = mmap(nullptr, Size(), PROT_READ, MAP_FILE | MAP_PRIVATE, fd, 0);
+    auto NewData = mmap(nullptr, Size(), PROT_READ, MAP_FILE | MAP_PRIVATE, Private, 0);
     const decltype(NewData) NewData_Fail = MAP_FAILED;
 #endif
 
@@ -154,33 +151,30 @@ int filemap::Close()
 
     // Close intermediate
 #if defined(_WIN32) || defined(_WINDOWS)
-    auto Mapping = (HANDLE&)Private2;
-    if (Mapping)
+    if (Private2 != (decltype(Private2))-1)
     {
-        CloseHandle(Mapping);
-        Private2 = 0;
+        CloseHandle(Private2);
+        Private2 = (decltype(Private))-1;
     }
 #endif
 
     // Close file
-    if (Private)
+    if (Private != (decltype(Private))-1)
     {
 #if defined(_WIN32) || defined(_WINDOWS)
-            auto File = (HANDLE&)Private;
-            if (!CloseHandle(File))
+            if (CloseHandle(Private) == NULL)
             {
-                Private = 0;
+                Private = (decltype(Private))-1;
                 return 1;
             }
 #else
-            int& fd = (int&)Private;
-            if (close(fd))
+            if (close(Private))
             {
-                Private = 0;
+                Private = (decltype(Private))-1;
                 return 1;
             }
 #endif
-        Private = 0;
+        Private = (decltype(Private))-1;;
     }
 
     return 0;

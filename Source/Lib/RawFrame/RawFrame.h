@@ -39,7 +39,7 @@ public:
         return !Size_;
     }
 
-    string ToString()
+    operator string() const
     {
         return move(string((const char*)Data(), Size()));
     }

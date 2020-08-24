@@ -27,14 +27,16 @@ public:
     // Actions
     int                         Open_ReadMode(const char* FileName);
     int                         Open_ReadMode(const string& FileName) { return Open_ReadMode(FileName.c_str()); }
-    bool                        IsOpen() { return Private ? true : false; }
+    bool                        IsOpen() { return Private == (decltype(Private))-1 ? false : true; }
     int                         Remap();
     int                         Close();
 
 private:
-    intptr_t                    Private = 0;
     #if defined(_WIN32) || defined(_WINDOWS)
-    intptr_t                    Private2 = 0;
+    void*                       Private = (void*)-1;
+    void*                       Private2 = (void*)-1;
+    #else //defined(_WIN32) || defined(_WINDOWS)
+    int                         Private = (int)-1;
     #endif //defined(_WIN32) || defined(_WINDOWS)
 };
 
