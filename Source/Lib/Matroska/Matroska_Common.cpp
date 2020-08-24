@@ -820,13 +820,17 @@ void matroska::Shutdown()
         trackinfo* TrackInfo_Current = TrackInfo[i];
 
         // Write end of the file if the file is unique per track
-        if (TrackInfo_Current->ReversibilityData.Unique && TrackInfo_Current->ReversibilityData.Data[(size_t)element::AfterData].Content && !TrackInfo_Current->ReversibilityData.Data[(size_t)element::AfterData].Content[0].Empty())
+        if (TrackInfo_Current->ReversibilityData.Unique)
         {
             TrackInfo_Current->Frame.RawFrame->AssignBufferView(nullptr, 0);
-            TrackInfo_Current->Frame.RawFrame->SetPost(TrackInfo_Current->ReversibilityData.Data[(size_t)element::AfterData].Content[0]);
-            TrackInfo_Current->Frame.RawFrame->Process();
-
+            TrackInfo_Current->Frame.RawFrame->SetPre(buffer_or_view());
+            if (TrackInfo_Current->ReversibilityData.Data[(size_t)element::AfterData].Content && !TrackInfo_Current->ReversibilityData.Data[(size_t)element::AfterData].Content[0].Empty())
+                TrackInfo_Current->Frame.RawFrame->SetPost(TrackInfo_Current->ReversibilityData.Data[(size_t)element::AfterData].Content[0]);
+            else
+                TrackInfo_Current->Frame.RawFrame->SetPost(buffer_or_view());
+            TrackInfo_Current->Frame.RawFrame->SetIn(buffer_or_view());
             TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = false;
+            TrackInfo_Current->Frame.RawFrame->Process();
         }
 
         // Checks

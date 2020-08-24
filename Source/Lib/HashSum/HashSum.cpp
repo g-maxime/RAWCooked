@@ -39,7 +39,7 @@ namespace invalid
 
 static const char* MessageText[] =
 {
-    "Computed hashes are not same as hashes in hash files",
+    "computed hashes are not same as hashes in hash files",
     "files present but not listed in hash file",
     "file names listed in hash file but not present",
 };
