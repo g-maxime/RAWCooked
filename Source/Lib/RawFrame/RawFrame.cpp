@@ -113,23 +113,23 @@ void raw_frame::Process()
 void raw_frame::MergeIn()
 {
     auto Buffer_Size = Buffer_.Size();
-    if (!Buffer_Size || Buffer_Size != In_.Size())
-        return;
-
-    auto Buffer_Data = Buffer_.DataForModification();
-    auto In_Data = In_.Data();
-    for (size_t i = 0; i < Buffer_Size; i++)
-        Buffer_Data[i] ^= In_Data[i];
+    if (Buffer_Size && Buffer_Size == In_.Size())
+    {
+        auto Buffer_Data = Buffer_.DataForModification();
+        auto In_Data = In_.Data();
+        for (size_t i = 0; i < Buffer_Size; i++)
+            Buffer_Data[i] ^= In_Data[i];
+    }
 
     if (Planes_.size() == 1 && Planes_[0])
     {
         auto Buffer_Size = Planes_[0]->Buffer().Size();
-        if (Buffer_Size || Buffer_Size != In_.Size())
-            return;
-
-        auto Buffer_Data = Planes_[0]->Buffer().Data();
-        auto In_Data = In_.Data();
-        for (size_t i = 0; i < Buffer_Size; i++)
-            Buffer_Data[i] ^= In_Data[i];
+        if (Buffer_Size && Buffer_Size == In_.Size())
+        {
+            auto Buffer_Data = Planes_[0]->Buffer().Data();
+            auto In_Data = In_.Data();
+            for (size_t i = 0; i < Buffer_Size; i++)
+                Buffer_Data[i] ^= In_Data[i];
+        }
     }
 }
