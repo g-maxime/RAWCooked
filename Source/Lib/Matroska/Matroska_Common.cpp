@@ -824,38 +824,37 @@ void matroska::Shutdown()
         {
             TrackInfo_Current->Frame.RawFrame->AssignBufferView(nullptr, 0);
             TrackInfo_Current->Frame.RawFrame->SetPre(buffer_or_view());
-            TrackInfo_Current->Frame.RawFrame->SetPost(TrackInfo_Current->ReversibilityData.GetDataContent(element::AfterData, 0));
+            TrackInfo_Current->Frame.RawFrame->SetPost(TrackInfo_Current->ReversibilityData.GetDataContent(element::AfterData));
             TrackInfo_Current->Frame.RawFrame->SetIn(buffer_or_view());
             TrackInfo_Current->FrameWriter.Mode[frame_writer::IsNotEnd] = false;
             TrackInfo_Current->Frame.RawFrame->Process();
         }
 
         // Checks
-        if (Errors)
+        if (!TrackInfo_Current->ReversibilityData.Unique() && Errors)
         {
-            if (!TrackInfo_Current->ReversibilityData.Unique() && TrackInfo_Current->ReversibilityData.ExtraCount())
+            if (auto ExtraCount = TrackInfo_Current->ReversibilityData.ExtraCount())
             {
-                string OutputInfo = "Track " + to_string(i) + ", " + to_string(TrackInfo_Current->ReversibilityData.ExtraCount()) + " frames";
-                if (TrackInfo_Current->ReversibilityData.Count())
+                string OutputInfo = "Track " + to_string(i) + ", " + to_string(ExtraCount) + " frames";
+                string OutputFileName = TrackInfo_Current->ReversibilityData.GetDataContent(element::FileName, TrackInfo_Current->ReversibilityData.Count() - 1).ToString();
+                FormatPath(OutputFileName);
+                if (!OutputFileName.empty())
                 {
-                    string OutputFileName = TrackInfo_Current->ReversibilityData.GetDataContent(element::FileName, TrackInfo_Current->ReversibilityData.Count() - 1).ToString();
-                    FormatPath(OutputFileName);
                     OutputInfo += " after ";
                     OutputInfo += OutputFileName;
                 }
                 Errors->Error(IO_FileChecker, error::type::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Extra, OutputInfo);
             }
-            if (TrackInfo_Current->ReversibilityData.RemainingCount())
+
+            if (auto RemainingCount = TrackInfo_Current->ReversibilityData.RemainingCount())
             {
-                string OutputFileName = TrackInfo_Current->ReversibilityData.GetDataContent(element::FileName, TrackInfo_Current->ReversibilityData.Pos()).ToString();
+                string OutputFileName = TrackInfo_Current->ReversibilityData.GetDataContent(element::FileName).ToString();
                 FormatPath(OutputFileName);
                 Errors->Error(IO_FileChecker, error::type::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, OutputFileName);
-                if (TrackInfo_Current->ReversibilityData.RemainingCount() > 1)
+                if (RemainingCount > 1)
                 {
-                    if (TrackInfo_Current->ReversibilityData.RemainingCount() > 2)
-                    {
+                    if (RemainingCount > 2)
                         Errors->Error(IO_FileChecker, error::type::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, "...");
-                    }
                     string OutputFileName2 = TrackInfo_Current->ReversibilityData.GetDataContent(element::FileName, TrackInfo_Current->ReversibilityData.Count() - 1).ToString();
                     FormatPath(OutputFileName2);
                     Errors->Error(IO_FileChecker, error::type::Undecodable, (error::generic::code)filechecker_issue::undecodable::Frame_Compressed_Missing, OutputFileName2);
@@ -1272,7 +1271,7 @@ void matroska::Segment_Attachments_AttachedFile_FileData_RawCookedTrack_FileHash
 
     array<uint8_t, 16> Hash;
     memcpy(Hash.data(), Buffer.Data() + Buffer_Offset, Hash.size());
-    Hashes_FromRAWcooked->FromHashFile(TrackInfo_Current->ReversibilityData.GetDataContent(element::FileName, 0), Hash);
+    Hashes_FromRAWcooked->FromHashFile(TrackInfo_Current->ReversibilityData.GetDataContent(element::FileName), Hash);
 }
 
 //---------------------------------------------------------------------------
@@ -1376,17 +1375,10 @@ void matroska::Segment_Cluster_SimpleBlock()
             RawFrame->SetPre(ReversibilityData.GetDataContent(element::BeforeData));
             RawFrame->SetPost(ReversibilityData.GetDataContent(element::AfterData));
             RawFrame->SetIn(ReversibilityData.GetDataContent(element::InData));
-            if (ReversibilityData.Pos() < ReversibilityData.Count())
-            {
-                TrackInfo_Current->FrameWriter.OutputFileName = ReversibilityData.GetDataContent(element::FileName).ToString();
-                FormatPath(TrackInfo_Current->FrameWriter.OutputFileName);
-            }
-            else
-            {
-                TrackInfo_Current->FrameWriter.OutputFileName.clear();
-                if (ReversibilityData.Count())
-                    Undecodable(undecodable::ReversibilityData_FrameCount);
-            }
+            TrackInfo_Current->FrameWriter.OutputFileName = ReversibilityData.GetDataContent(element::FileName).ToString();
+            FormatPath(TrackInfo_Current->FrameWriter.OutputFileName);
+            if (TrackInfo_Current->FrameWriter.OutputFileName.empty() && ReversibilityData.Count())
+                Undecodable(undecodable::ReversibilityData_FrameCount);
         }
         auto CurrentBufferOffset = Buffer_Offset + 4;
         auto CurrentBufferData = Buffer.Data() + CurrentBufferOffset;
@@ -1415,8 +1407,8 @@ void matroska::Segment_Cluster_SimpleBlock()
                 RawFrame->SetPost(ReversibilityData.GetDataContent(element::AfterData));
                 ParseDecodedFrame(TrackInfo_Current);
             }
+            TrackInfo_Current->ReversibilityData.NextFrame();
         }
-        TrackInfo_Current->ReversibilityData.NextFrame();
     }
 }
 
