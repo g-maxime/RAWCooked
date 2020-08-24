@@ -310,11 +310,11 @@ private:
             }
         }
 
-        buffer_view GetDataContent(element Element)
+        buffer_view GetDataContent(element Element) const
         {
             return move(GetDataContent(Element, Pos_));
         }
-        buffer_view GetDataContent(element Element, size_t Pos)
+        buffer_view GetDataContent(element Element, size_t Pos) const
         {
             const auto ElementS = (size_t)Element;
             if (ElementS >= Element_Max || Pos >= Count_ || !Data_[ElementS].Content || !Data_[ElementS].Content[Pos].Size())
@@ -328,7 +328,7 @@ private:
             FileSize_.Value[Pos_] = Value;
         }
 
-        uint64_t GetFileSize()
+        uint64_t GetFileSize() const
         {
             if (!FileSize_.Value)
                 return (uint64_t)-1;
