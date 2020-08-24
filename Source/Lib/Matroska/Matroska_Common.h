@@ -224,10 +224,122 @@ private:
     };
     struct reversibility_data
     {
+        void AddFrame()
+        {
+            Pos_ = Count_;
+            Count_++;
+        }
+
+        void StartParsing()
+        {
+            Pos_ = 0;
+            if (!Count_ && Unique_)
+                Count_++;
+        }
+
+        void NextFrame()
+        {
+            Pos_++;
+        }
+
+        bool Unique() const
+        {
+            return Unique_;
+        }
+
+        void SetUnique()
+        {
+            if (Unique_)
+                return;
+            Unique_ = true;
+        }
+
+        size_t Pos() const
+        {
+            return Pos_;
+        }
+
+        size_t Count() const
+        {
+            return Count_;
+        }
+
+        size_t RemainingCount()
+        {
+            if (Pos_ >= Count_)
+                return 0;
+            return (Count_ - Pos_);
+        }
+
+        size_t ExtraCount()
+        {
+            if (Pos_ <= Count_)
+                return 0;
+            return (Pos_ - Count_);
+        }
+
+        void MoveToDataMask(element Element, buffer& Buffer)
+        {
+            Data_[(size_t)Element].Mask = move(Buffer);
+        }
+
+        void MoveToDataContent(element Element, buffer& Buffer, bool AddMask)
+        {
+            Data_[(size_t)Element].Check(Unique_ ? 1 : 1000000);
+            Data_[(size_t)Element].Content[Pos_] = move(Buffer);
+
+            if (AddMask)
+            {
+                auto& Mask = Data_[(size_t)Element].Mask;
+                auto Mask_Size = Mask.Size();
+                auto Mask_Data = Mask.Data();
+                if (!Mask_Size)
+                    return;
+
+                auto& Content = Data_[(size_t)Element].Content[Pos_];
+                auto Content_Size = Content.Size();
+                auto Content_Data = Content.Data();
+                for (size_t i = 0; i < Content_Size && i < Mask_Size; i++)
+                    Content_Data[i] += Mask_Data[i];
+            }
+
+            if (Element == element::FileName)
+            {
+                auto& Content = Data_[(size_t)element::FileName].Content[Pos_];
+                ::SanitizeFileName(Content);
+            }
+        }
+
+        buffer_view GetDataContent(element Element)
+        {
+            return move(GetDataContent(Element, Pos_));
+        }
+        buffer_view GetDataContent(element Element, size_t Pos)
+        {
+            const auto ElementS = (size_t)Element;
+            if (ElementS >= Element_Max || Pos >= Count_ || !Data_[ElementS].Content || !Data_[ElementS].Content[Pos].Size())
+                return buffer_view();
+            return buffer_view(Data_[ElementS].Content[Pos]);
+        }
+
+        void SetFileSize(uint64_t Value)
+        {
+            FileSize_.Check(Unique_ ? 1 : 1000000);
+            FileSize_.Value[Pos_] = Value;
+        }
+
+        uint64_t GetFileSize()
+        {
+            if (!FileSize_.Value)
+                return (uint64_t)-1;
+            return FileSize_.Value[Pos_];
+        }
+
+    private:
         struct content_per_element
         {
             buffer              Mask;
-            buffer*             Content = nullptr;
+            buffer* Content = nullptr;
 
             void Check(size_t Size = 1000000)
             {
@@ -243,7 +355,7 @@ private:
         };
         struct filesize_per_element
         {
-            uint64_t*           Value = nullptr;
+            uint64_t* Value = nullptr;
 
             void Check(size_t Size)
             {
@@ -259,89 +371,11 @@ private:
             }
         };
 
-        void AddFrame()
-        {
-            Pos = Count;
-            Count++;
-        }
-
-        void StartParsing()
-        {
-            Pos = 0;
-            if (!Count && Unique)
-                Count++;
-        }
-
-        void NextFrame()
-        {
-            Pos++;
-        }
-
-        void SetUnique()
-        {
-            if (Unique)
-                return;
-            Unique = true;
-        }
-
-        void MoveToDataMask(element Element, buffer& Buffer)
-        {
-            Data[(size_t)Element].Mask = move(Buffer);
-        }
-
-        void MoveToDataContent(element Element, buffer& Buffer, bool AddMask)
-        {
-            Data[(size_t)Element].Check(Unique ? 1 : 1000000);
-            Data[(size_t)Element].Content[Pos] = move(Buffer);
-
-            if (AddMask)
-            {
-                auto& Mask = Data[(size_t)Element].Mask;
-                auto Mask_Size = Mask.Size();
-                auto Mask_Data = Mask.Data();
-                if (!Mask_Size)
-                    return;
-
-                auto& Content = Data[(size_t)Element].Content[Pos];
-                auto Content_Size = Content.Size();
-                auto Content_Data = Content.Data();
-                for (size_t i = 0; i < Content_Size && i < Mask_Size; i++)
-                    Content_Data[i] += Mask_Data[i];
-            }
-
-            if (Element == element::FileName)
-            {
-                auto& Content = Data[(size_t)element::FileName].Content[Pos];
-                ::SanitizeFileName(Content);
-            }
-        }
-
-        buffer_view GetDataContent(element Element)
-        {
-            if (Pos >= Count || !Data[(size_t)Element].Content || !Data[(size_t)Element].Content[Pos].Size())
-                return buffer_view();
-            return buffer_view(Data[(size_t)Element].Content[Pos]);
-        }
-
-        void SetFileSize(uint64_t Value)
-        {
-            FileSize.Check(Unique ? 1 : 1000000);
-            FileSize.Value[Pos] = Value;
-        }
-
-        uint64_t GetFileSize()
-        {
-            if (!FileSize.Value)
-                return (uint64_t)-1;
-            return FileSize.Value[Pos];
-        }
-
-        size_t                  Pos = 0;
-        size_t                  Count = 0;
-        bool                    Unique = false;
-        content_per_element     Data[Element_Max];
-    private:
-        filesize_per_element    FileSize;
+        size_t                  Pos_ = 0;
+        size_t                  Count_ = 0;
+        bool                    Unique_ = false;
+        content_per_element     Data_[Element_Max];
+        filesize_per_element    FileSize_;
     };
     struct trackinfo
     {
