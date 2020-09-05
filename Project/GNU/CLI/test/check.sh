@@ -62,7 +62,7 @@ pushd "${files_path}" >/dev/null 2>&1
     ffmpeg -nostdin -f lavfi -i testsrc=size=16x16 -t 1 -start_number 0 "${directory}/%03d.dpx" >/dev/null 2>&1|| fatal "internal" "ffmpeg command failed"
     echo "a" > "${directory}/attachment"
 
-    run_rawcooked -y "${directory}"
+    run_rawcooked -y --no-check-padding "${directory}"
     check_success "failed to generate mkv" "mkv generated"
 
     cp -f "${file}" "${file}.orig" || fatal "internal" "cp command failed"

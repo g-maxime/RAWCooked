@@ -96,6 +96,7 @@ int global::SetCheck(const char* Value, int& i)
 int global::SetCheckPadding(bool Value)
 {
     Actions.set(Action_CheckPadding, Value);
+    Actions.set(Action_CheckPaddingOptionIsSet, true);
     return 0;
 }
 
@@ -152,8 +153,6 @@ int global::SetHash(bool Value)
 int global::SetAll(bool Value)
 {
     if (int ReturnValue = SetCheck(Value))
-        return ReturnValue;
-    if (int ReturnValue = SetCheckPadding(Value))
         return ReturnValue;
     if (int ReturnValue = SetAcceptGaps(Value))
         return ReturnValue;
