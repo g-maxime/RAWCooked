@@ -73,8 +73,8 @@ int output::FFmpeg_Command(const char* FileName, global& Global)
             Global.VideoInputOptions["framerate"] = FrameRate;
         else
             Global.VideoInputOptions["framerate"] = "24"; // Forcing framerate to 24 in case nothing is available in the input files and command line. TODO: find some autodetect of frame rate based on audio duration
-        Global.VideoInputOptions["r"] = Global.VideoInputOptions["framerate"];
     }
+    Global.VideoInputOptions["r"] = Global.VideoInputOptions["framerate"];
 
     string Command;
     if (Global.BinName.empty())
