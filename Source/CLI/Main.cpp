@@ -17,6 +17,7 @@
 #include "Lib/Utils/RawFrame/RawFrame.h"
 #include "Lib/Compressed/RAWcooked/RAWcooked.h"
 #include "Lib/ThirdParty/alphanum/alphanum.hpp"
+#include "Lib/ThirdParty/thread-pool/include/ThreadPool.h"
 #include <map>
 #include <sstream>
 #include <cstdio>
@@ -364,7 +365,26 @@ int ParseFile_Compressed(parse_info& ParseInfo)
     bool NoOutputCheck = Global.Check && !Global.OutputFileName_IsProvided;
     if (!ParseInfo.IsDetected)
     {
-        matroska M(OutputDirectoryName, &Global.Mode, Ask_Callback, &Global.Errors);
+        // Threads
+        unsigned threads;
+        auto OutputOptions_Threads = Global.OutputOptions.find("threads");
+        if (OutputOptions_Threads != Global.OutputOptions.end())
+            threads = stoul(OutputOptions_Threads->second);
+        else
+            threads = 0;
+        if (!threads)
+            threads = thread::hardware_concurrency();
+        ThreadPool* Pool;
+        if (threads > 1)
+        {
+            Pool = new ThreadPool(threads);
+            Pool->init();
+        }
+        else
+            Pool = nullptr;
+
+        matroska M(OutputDirectoryName, &Global.Mode, Ask_Callback, Pool, &Global.Errors);
+        delete Pool;
         M.Quiet = Global.Quiet;
         M.NoWrite = Global.Check;
         M.NoOutputCheck = NoOutputCheck;
