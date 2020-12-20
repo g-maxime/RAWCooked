@@ -178,7 +178,7 @@ run_rawcooked() {
         cmd_stdout="$(<${temp}/stdout)"
         cmd_stderr="$(<${temp}/stderr)"
     else
-        rawcooked ${@////\\} >"${temp}/stdout" 2>"${temp}/stderr"
+        rawcooked -threads 1 ${@////\\} >"${temp}/stdout" 2>"${temp}/stderr"
         cmd_status="${?}"
         cmd_stdout="$(tr -d '\r' <${temp}/stdout)"
         cmd_stderr="$(tr -d '\r' <${temp}/stderr)"
