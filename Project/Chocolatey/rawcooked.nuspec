@@ -23,6 +23,7 @@ RAWcooked encodes audio-visual RAW data into the Matroska container (MKV), using
 ## Notes
 * 64 bits only package.
 ]]></description>
+    <releaseNotes>https://github.com/MediaArea/RAWcooked/blob/master/History_CLI.txt</releaseNotes>
     <language>en-US</language>
     <dependencies>
       <dependency id="ffmpeg" version="4.1.0" />
