@@ -10,6 +10,7 @@ while read line ; do
     test=$(basename "${path}")
 
     pushd "${files_path}/${path}" >/dev/null 2>&1
+        echo "TESTING: ${test}/${file}" >&${fd}
         run_rawcooked --file -d "${file}"
 
         # check expected result
