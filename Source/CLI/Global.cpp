@@ -20,6 +20,13 @@
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
+global::~global()
+{
+    // Ensure the progress indicator thread is stopped and joined before exit()
+    ProgressIndicator_Stop();
+}
+
+//---------------------------------------------------------------------------
 // Glue
 void global_ProgressIndicator_Show(global* G)
 {

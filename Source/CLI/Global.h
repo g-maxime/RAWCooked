@@ -27,6 +27,8 @@ using namespace std;
 class global
 {
 public:
+    ~global();
+
     // Options
     map<string, string>         VideoInputOptions;
     map<string, string>         OutputOptions;
