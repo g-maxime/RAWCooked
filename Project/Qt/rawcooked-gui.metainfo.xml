@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2026 MediaArea.net <info@mediaarea.net> -->
+<component type="desktop-application">
+  <id>net.mediaarea.rawcooked</id>
+  <launchable type="desktop-id">rawcooked-gui.desktop</launchable>
+  <metadata_license>CC-BY-3.0</metadata_license>
+  <project_license>BSD-2-Clause</project_license>
+  <name>RAWcooked</name>
+  <summary>Encode and decode audio-visual RAW data with Matroska, FFV1 and FLAC</summary>
+  <description>
+    <p>RAWcooked losslessly encodes audio-visual RAW data in Matroska with FFV1 and FLAC while retaining the information needed for bit-by-bit reconstruction.</p>
+  </description>
+  <keywords>
+    <keyword>audio</keyword>
+    <keyword>video</keyword>
+    <keyword>raw</keyword>
+    <keyword>matroska</keyword>
+    <keyword>ffv1</keyword>
+  </keywords>
+  <url type="homepage">https://mediaarea.net/RAWcooked</url>
+  <url type="bugtracker">https://github.com/MediaArea/RAWcooked/issues</url>
+  <update_contact>info@mediaarea.net</update_contact>
+  <developer id="net.mediaarea">
+    <name>MediaArea.net SARL</name>
+  </developer>
+  <releases>
+    <release version="26.11" date="2026-11-19"/>
+  </releases>
+</component>

@@ -45,6 +45,11 @@ SetCompressor /FINAL /SOLID lzma
 !define MUI_ICON "..\..\Source\Resource\Image\Icon.ico"
 !define MUI_UNICON "..\..\Source\Resource\Image\Icon.ico"
 
+; Uninstaller signing
+!ifdef EXPORT_UNINST
+  !uninstfinalize 'copy /Y "%1" "../../Release/RAWcooked_GUI_${PRODUCT_VERSION}_Windows_x64-uninst.exe"'
+!endif
+
 ; Language Selection Dialog Settings
 !define MUI_LANGDLL_REGISTRY_ROOT "${PRODUCT_UNINST_ROOT_KEY}"
 !define MUI_LANGDLL_REGISTRY_KEY "${PRODUCT_UNINST_KEY}"
@@ -158,7 +163,11 @@ Section "SectionPrincipale" SEC01
 SectionEnd
 
 Section -Post
-  WriteUninstaller "$INSTDIR\uninst.exe"
+  !if /FileExists "..\..\Release\RAWcooked_GUI_${PRODUCT_VERSION}_Windows_x64-uninst.exe"
+    File "/oname=$INSTDIR\uninst.exe" "..\..\Release\RAWcooked_GUI_${PRODUCT_VERSION}_Windows_x64-uninst.exe"
+  !else
+    WriteUninstaller "$INSTDIR\uninst.exe"
+  !endif
   WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\RAWcooked-GUI.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName"          "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher"            "${PRODUCT_PUBLISHER}"

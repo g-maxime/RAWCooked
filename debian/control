@@ -1,15 +1,16 @@
 Source: rawcooked
+Section: utils
 Priority: optional
 Maintainer: Jerome Martinez <info@mediaarea.net>
-Build-Depends: debhelper (>= 5), pkg-config, automake, autoconf, libtool
-Standards-Version: 3.7.3
-Section: libs
-Homepage: https://mediaarea.net
+Rules-Requires-Root: no
+Build-Depends: debhelper (>= 12), tofrodos, pkg-config, automake, autoconf, libtool, qt6-base-dev | qtbase5-dev, qt6-base-dev-tools | qtbase5-dev-tools, qt6-svg-dev | libqt6svg6-dev | libqt5svg5-dev, libgl-dev
+Standards-Version: 4.6.2
+Homepage: https://mediaarea.net/RAWcooked
 
 Package: rawcooked
 Section: utils
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: RAWcooked provides:
  .
  Encodes RAW audio-visual data while permitting reversibility
@@ -24,3 +25,24 @@ Description: RAWcooked provides:
  Encodes RAW audio-visual data while permitting reversibility
  .
  This package contains the debugging symbols.
+
+Package: rawcooked-gui
+Section: utils
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: RAWcooked provides:
+ .
+ Encodes RAW audio-visual data while permitting reversibility
+ .
+ This package contains the graphical user interface.
+
+Package: rawcooked-gui-dbg
+Section: debug
+Architecture: any
+Priority: extra
+Depends: rawcooked-gui (= ${binary:Version})
+Description: RAWcooked provides:
+ .
+ Encodes RAW audio-visual data while permitting reversibility
+ .
+ This package contains the debugging symbols of the graphical user interface.
