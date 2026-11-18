@@ -1,0 +1,71 @@
+# $Id$
+# Maintainer: MediaArea.net SARL <info@mediaarea.net>
+
+pkgname=('rawcooked' 'rawcooked-gui')
+pkgver=25.12
+pkgrel=1
+pkgdesc="Encodes RAW audio-visual data while permitting reversibility"
+arch=('x86_64' 'aarch64')
+url="https://mediaarea.net/RAWcooked"
+license=('BSD-2-Clause')
+
+makedepends=('qt6-base' 'qt6-svg' 'automake' 'autoconf' 'libtool' 'pkgconf')
+source=("rawcooked_${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+prepare() {
+    cd "${srcdir}/rawcooked/Project/GNU/CLI"
+    sh ./autogen.sh
+    ./configure --prefix=/usr
+
+    cd "${srcdir}/rawcooked/Project/Qt"
+    qmake6 rawcooked-gui.pro
+}
+
+build() {
+    cd "${srcdir}/rawcooked/Project/GNU/CLI"
+    make
+
+    cd "${srcdir}/rawcooked/Project/Qt"
+    make
+}
+
+package_rawcooked() {
+    pkgdesc="${pkgdesc} (CLI)"
+
+    cd "${srcdir}/rawcooked/Project/GNU/CLI"
+    make DESTDIR="${pkgdir}" install
+
+    install -D -m 0644 "${srcdir}/rawcooked/License.html" \
+        "${pkgdir}/usr/share/licenses/${pkgname}/License.html"
+    install -D -m 0644 "${srcdir}/rawcooked/History_CLI.txt" \
+        "${pkgdir}/usr/share/doc/${pkgname}/History.txt"
+}
+
+package_rawcooked-gui() {
+    pkgdesc="${pkgdesc} (GUI)"
+    depends=('qt6-base' 'qt6-svg')
+
+    cd "${srcdir}/rawcooked/Project/Qt"
+    make INSTALL_ROOT="${pkgdir}" install
+
+    install -D -m 0644 "${srcdir}/rawcooked/License.html" \
+        "${pkgdir}/usr/share/licenses/${pkgname}/License.html"
+    install -D -m 0644 "${srcdir}/rawcooked/History_CLI.txt" \
+        "${pkgdir}/usr/share/doc/${pkgname}/History.txt"
+
+    install -D -m 0644 "${srcdir}/rawcooked/Source/Resource/Image/Icon.png" \
+        "${pkgdir}/usr/share/icons/hicolor/128x128/apps/rawcooked.png"
+    install -D -m 0644 "${srcdir}/rawcooked/Source/Resource/Image/Icon.png" \
+        "${pkgdir}/usr/share/pixmaps/rawcooked.png"
+    install -D -m 0644 "${srcdir}/rawcooked/Project/Qt/rawcooked-gui.desktop" \
+        "${pkgdir}/usr/share/applications/rawcooked-gui.desktop"
+    install -D -m 0644 "${srcdir}/rawcooked/Project/Qt/rawcooked-gui.metainfo.xml" \
+        "${pkgdir}/usr/share/metainfo/rawcooked-gui.metainfo.xml"
+    install -D -m 0644 "${srcdir}/rawcooked/Project/Qt/rawcooked-gui.kde3.desktop" \
+        "${pkgdir}/usr/share/apps/konqueror/servicemenus/rawcooked-gui.desktop"
+    install -D -m 0644 "${srcdir}/rawcooked/Project/Qt/rawcooked-gui.kde4.desktop" \
+        "${pkgdir}/usr/share/kde4/services/ServiceMenus/rawcooked-gui.desktop"
+    install -D -m 0644 "${srcdir}/rawcooked/Project/Qt/rawcooked-gui.kde4.desktop" \
+        "${pkgdir}/usr/share/kservices5/ServiceMenus/rawcooked-gui.desktop"
+}

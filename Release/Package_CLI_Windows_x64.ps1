@@ -38,7 +38,7 @@ Push-Location $release_directory
         Copy-Item (Join-Path (Split-Path $release_directory -Parent) "History_CLI.txt") -Force
         Copy-Item (Join-Path (Split-Path $release_directory -Parent) "License.html") -Force
 
-         & 7za.exe a -r -tzip "..\RAWcooked_CLI_${version}_Windows_x64.zip" *
+        & 7za.exe a -r -tzip "..\RAWcooked_CLI_${version}_Windows_x64.zip" *
     Pop-Location
 Pop-Location
 
